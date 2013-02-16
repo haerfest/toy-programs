@@ -4,12 +4,14 @@
 
    Example usage:
 
-   % ghc --make -O3 estimate-pi.hs
-   % ./estimate-pi 1000000
-   3.143564
+   % ghc --make -O3 -threaded estimate-pi.hs
+   % time ./estimate-pi 1000000 +RTS -N
+   3.14466
+   ./estimate-pi 1000000 +RTS -N  6,06s user 0,10s system 185% cpu 3,319 total
 -}
 
 import Control.Monad
+import Control.Monad.Parallel
 import System.Environment
 import System.Random
 
@@ -31,9 +33,9 @@ incIf x p = x + fromEnum p
 -- |The ($!) operator is only there to force eager evaluation of the
 -- |accumulator calculation, to prevent building up too many chunks for
 -- |large values of n (e.g. 1,000,000) and blowing the stack.
-countHits :: IO Bool -> Int -> Int -> IO Int
-countHits fn 0 acc = return acc
-countHits fn n acc = fn >>= ($!) (countHits fn (n - 1)) . incIf acc
+countHits :: Int -> Int -> IO Int
+countHits 0 acc = return acc
+countHits n acc = throwOne >>= ($!) (countHits (n - 1)) . incIf acc
 
 -- |Returns the estimate of pi based on the number of darts thrown at the
 -- |quarter circle and the number of darts that hit.
@@ -42,9 +44,20 @@ unratio throws hits = 4.0 * fromIntegral hits / fromIntegral throws
 
 -- |Returns the estimate of pi for a given number of dart throws.
 estimatePi :: Int -> IO Double
-estimatePi n = countHits throwOne n 0 >>= return . unratio n
+estimatePi n = countHits n 0 >>= return . unratio n
 
+-- |Dual-core version of estimatePi.
+estimatePiPar :: Int -> IO Double
+estimatePiPar :: Int -> IO Double
+estimatePiPar n = do
+  let n1 = quot n 2
+      n2 = n - n1
+  child <- forkExec $ countHits n2 0
+  h1 <- countHits n1 0
+  h2 <- child
+  return $ unratio n (h1 + h2)
+  
 -- |Prints an estimate of pi for the number of dart throws specified as
 -- |the single command-line argument.
 main :: IO ()
-main = getArgs >>= estimatePi . read . head >>= putStrLn . show
+main = getArgs >>= estimatePiPar . read . head >>= putStrLn . show
