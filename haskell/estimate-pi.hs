@@ -1,5 +1,5 @@
-{- Estimate the value of pi by imagining throwing darts at a square circle
-   with radius 1.  The ratio of the number of darts that hit the square circle
+{- Estimate the value of pi by imagining throwing darts at a quart circle
+   with radius 1.  The ratio of the number of darts that hit the quart circle
    and those that miss, gives us a rough indication of a quarter of pi.
 
    Example usage:
