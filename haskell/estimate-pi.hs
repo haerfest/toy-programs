@@ -11,6 +11,7 @@
 -}
 
 import Control.Monad.Parallel
+import Prelude hiding (sequence)
 import System.Environment
 import System.Random
 
@@ -50,7 +51,8 @@ estimatePiPar :: Int -> IO Double
 estimatePiPar n = do
   let n1 = quot n 2
       n2 = n - n1
-  liftM2 (\h1 h2 -> unratio n (h1 + h2)) (countHits n1 0) (countHits n2 0)
+  hits <- sequence [(countHits n1 0), (countHits n2 0)]
+  return $ unratio n $ sum hits
   
 -- |Prints an estimate of pi for the number of dart throws specified as
 -- |the single command-line argument.
