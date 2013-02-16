@@ -11,6 +11,7 @@
 -}
 
 import Control.Monad.Parallel
+import GHC.Conc (numCapabilities)
 import Prelude hiding (sequence)
 import System.Environment
 import System.Random
@@ -44,17 +45,9 @@ unratio throws hits = 4.0 * fromIntegral hits / fromIntegral throws
 
 -- |Returns the estimate of pi for a given number of dart throws.
 estimatePi :: Int -> IO Double
-estimatePi n = countHits n 0 >>= return . unratio n
-
--- |Dual-core version of estimatePi.
-estimatePiPar :: Int -> IO Double
-estimatePiPar n = do
-  let n1 = quot n 2
-      n2 = n - n1
-  hits <- sequence [(countHits n1 0), (countHits n2 0)]
-  return $ unratio n $ sum hits
+estimatePi n = (sequence $ replicate numCapabilities $ countHits (quot n numCapabilities) 0) >>= return . unratio n . sum
   
 -- |Prints an estimate of pi for the number of dart throws specified as
 -- |the single command-line argument.
 main :: IO ()
-main = getArgs >>= estimatePiPar . read . head >>= putStrLn . show
+main = getArgs >>= estimatePi . read . head >>= putStrLn . show
