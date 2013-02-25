@@ -37,4 +37,4 @@ join sep (x, y) = x ++ sep ++ y
 -- Returns a list of tuples for a list of strings, with each first element
 -- being one of the strings, and each second element the string "false".
 disable :: [String] -> [(String, String)]
-disable xs = map (\x -> (x, "false")) xs
+disable = map (\x -> (x, "false"))
