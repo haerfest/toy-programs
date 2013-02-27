@@ -30,4 +30,4 @@ buildURL = apiURL ++ "?" ++ optionsStr
 
 -- Given a list of strings, returns a list where each string has "=false" appended.
 disable :: [String] -> [String]
-disable = map (\x -> x ++ "=false")
+disable = map (++ "=false")
