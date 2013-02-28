@@ -1,7 +1,6 @@
 {- Retrieve and print the daily ESV verse. -}
 
 
-import Data.List
 import Network.HTTP
 
 
