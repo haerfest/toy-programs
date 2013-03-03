@@ -52,7 +52,7 @@ function estimatePiEvent () {
  *
  * @return {boolean} True when running in a browser.
  */
-function isRunningInBrowswer () {
+function isRunningInBrowser () {
     return typeof(document) != "undefined";
 }
 
@@ -62,7 +62,7 @@ function isRunningInBrowswer () {
  * the number of throws as the only parameter, and print an
  * estimation of pi.
  */
-if (!isRunningInBrowswer()) {
+if (!isRunningInBrowser()) {
     var throwCount = arguments[0] ? parseInt(arguments[0]) : 1000;
     var pi         = estimatePi(throwCount);
 
