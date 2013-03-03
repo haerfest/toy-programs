@@ -46,4 +46,25 @@ function estimatePiEvent () {
     document.getElementById('pi').value = pi;
 }
 
-    
+
+/**
+ * Returns whether the script is being run in a browser.
+ *
+ * @return {boolean} True when running in a browser.
+ */
+function isRunningInBrowswer () {
+    return typeof(document) != "undefined";
+}
+
+
+/**
+ * If we run from the command-line (jsc on Mac OS X), expect
+ * the number of throws as the only parameter, and print an
+ * estimation of pi.
+ */
+if (!isRunningInBrowswer()) {
+    var throwCount = arguments[0] ? parseInt(arguments[0]) : 1000;
+    var pi         = estimatePi(throwCount);
+
+    print('pi = ' + pi);
+}
