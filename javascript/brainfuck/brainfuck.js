@@ -101,7 +101,7 @@ function brainfuck (program, input) {
  * Executes a Brainfuck program that outputs "Hello World!\n", and returns
  * that output.
  *
- * @return {string} "Hello, World!\n"
+ * @return {string} "Hello World!\n"
  */
 function helloWorld () {
   var program = '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.';
