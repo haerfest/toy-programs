@@ -5,7 +5,7 @@
     <form>
       Throw count:
       <input type="text" id="throwCount" value="1000">
-      <input type="button" id="estimateButton" value="Estimate pi" onclick="estimatePiEvent()">
+      <input type="button" id="estimateButton" value="Estimate pi" onclick="document.getElementById('pi').value=estimatePi(document.getElementById('throwCount').value)">
       <br>
       Pi:
       <input type="" id="pi" readonly>
