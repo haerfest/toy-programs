@@ -1,11 +1,17 @@
 <html>
   <body>
     <script src="estimate-pi.js"></script>
+    <script language="javascript">
+      function onClickEstimatePi() {
+        var pi = document.getElementById('throwCount').value;
+        document.getElementById('pi').value = estimatePi(pi);
+      }
+    </script>
 
     <form>
       Throw count:
       <input type="text" id="throwCount" value="1000">
-      <input type="button" id="estimateButton" value="Estimate pi" onclick="document.getElementById('pi').value=estimatePi(document.getElementById('throwCount').value)">
+      <input type="button" id="estimateButton" value="Estimate pi" onclick="onClickEstimatePi()">
       <br>
       Pi:
       <input type="" id="pi" readonly>
