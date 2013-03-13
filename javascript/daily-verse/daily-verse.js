@@ -7,8 +7,9 @@
  *       Origin Resource Sharing) limitations (Firefox, Chrome) or because
  *       of a different AJAX API (older versions of Internet Explorer).
  */
-function fetchDailyVerse(callback)
-{
+function fetchDailyVerse(callback) {
+    'use strict';
+
     var url = 'http://www.esvapi.org/v2/rest/dailyVerse' + '?' +
               'key=IP'                                   + '&' +
               'output-format=plain-text'                 + '&' +
@@ -19,14 +20,13 @@ function fetchDailyVerse(callback)
               'include-passage-horizontal-lines=false'   + '&' +
               'include-heading-horizontal-lines=false'   + '&' +
               'include-headings=false'                   + '&' +
-              'include-subheadings=false';
-
-    var httpRequest;
+              'include-subheadings=false',
+        httpRequest;
 
     httpRequest = new XMLHttpRequest();
-    httpRequest.onreadystatechange = function() {
-        // Verify that the request is complete (4) and successful (200).
-        if (httpRequest.readyState === 4 && httpRequest.status === 200) {
+    httpRequest.onreadystatechange = function () {
+        if (httpRequest.readyState === XMLHttpRequest.DONE &&
+                  httpRequest.status === 200) {
             callback(httpRequest.responseText);
         }
     };
@@ -39,5 +39,7 @@ function fetchDailyVerse(callback)
 
 // Fetch the daily verse and update the DOM.
 fetchDailyVerse(function (text) {
+    'use strict';
+
     document.getElementById('verse').innerText = text;
 });
