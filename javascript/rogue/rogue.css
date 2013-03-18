@@ -1,0 +1,15 @@
+body {
+    color: gray;
+    background-color: black;
+}
+    
+table {
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td {
+    font-family: monospace;
+    font-size: x-large;
+}
