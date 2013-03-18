@@ -1,8 +1,8 @@
 var rogue = rogue || {};
 
 
-rogue.init_random = function () {
-    this.random = {
+rogue.random_init_locals = function () {
+    this.random_locals = {
         rntb: [
 	          3,
             0x9a319039, 0x32d9c024, 0x9b663182, 0x5da1f342, 
@@ -24,23 +24,42 @@ rogue.init_random = function () {
 };
 
 
+rogue. srrandom = function (x) {
+    var i;
+
+    this.random_locals.rntb[this.random_locals.state] = x;
+    if (this.random_locals.rand_type !== 0) {
+        for (i = 0; i < this.random_locals.rand_deg; i += 1) {
+            this.random_locals.rntb[this.random_locals.state + i] = 1103515245 * this.random_locals.rntb[this.random_locals.state + i - 1] + 12345;
+        }
+
+        this.random_locals.fptr = this.random_locals.rntb[this.random_locals.state + this.random_locals.rand_sep];
+        this.random_locals.rptr = this.random_locals.rntb[this.random_locals.state];
+
+        for (i = 0; i < 10 * this.random_locals.rand_deg; i += 1) {
+            this.rrandom();
+        }
+    }
+};
+
+
 rogue.rrandom = function () {
     var i;
 
-    if (this.random.rand_type === 0) {
-        i = (this.random.rntb[this.random.state] * 1103515245 + 12345) & 0x7fffffff;
-        this.random.rntb[this.random.state] = i;
+    if (this.random_locals.rand_type === 0) {
+        i = (this.random_locals.rntb[this.random_locals.state] * 1103515245 + 12345) & 0x7fffffff;
+        this.random_locals.rntb[this.random_locals.state] = i;
     } else {
-        this.random.rntb[this.random.fptr] += this.random.rntb[this.random.rptr];
-        i = (this.random.rntb[this.random.fptr] >> 1) & 0x7fffffff;
-        this.random.fptr += 1;
-        if (this.random.fptr >= this.random.end_ptr) {
-            this.random.fptr = this.random.state;
-            this.random.rptr += 1;
+        this.random_locals.rntb[this.random_locals.fptr] += this.random_locals.rntb[this.random_locals.rptr];
+        i = (this.random_locals.rntb[this.random_locals.fptr] >> 1) & 0x7fffffff;
+        this.random_locals.fptr += 1;
+        if (this.random_locals.fptr >= this.random_locals.end_ptr) {
+            this.random_locals.fptr = this.random_locals.state;
+            this.random_locals.rptr += 1;
         } else {
-            this.random.rptr += 1;
-            if (this.random.rptr >= this.random.end_ptr) {
-                this.random.rptr = this.random.state;
+            this.random_locals.rptr += 1;
+            if (this.random_locals.rptr >= this.random_locals.end_ptr) {
+                this.random_locals.rptr = this.random_locals.state;
             }
         }
     }
@@ -60,10 +79,15 @@ rogue.get_rand = function (x, y) {
         x = t;
     }
 
-    lr = rrandom();
+    lr = this.rrandom();
     lr = lr & 0x00003fff;
     r  = lr;
     r  = (r % ((y - x) + 1)) + x;
 
     return r;
 }
+
+
+rogue.rand_percent = function (percentage) {
+    return (this.get_rand(1, 100) <= percentage);
+};
