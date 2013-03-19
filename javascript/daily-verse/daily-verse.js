@@ -41,5 +41,20 @@ function fetchDailyVerse(callback) {
 fetchDailyVerse(function (text) {
     'use strict';
 
-    document.getElementById('verse').innerText = text;
+    var verse,
+        lines,
+        i;
+
+    // Remove all child nodes of the #verse element.
+    verse = document.getElementById('verse');
+    while (verse.hasChildNodes()) {
+        verse.removeChild(verse.lastChild);
+    }
+
+    // Separate each verse line by <br> tags.
+    lines = text.split('\n');
+    for (i in lines) {
+        verse.appendChild(document.createTextNode(lines[i]));
+        verse.appendChild(document.createElement('br'));
+    }
 });
