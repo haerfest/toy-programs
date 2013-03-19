@@ -6,17 +6,17 @@ rogue.init_curses_locals = function () {
 
     this.curses_locals = {};
     
-    this.curses_locals.terminal = new Array(this.DROWS);
+    this.curses_locals.terminal = [];
     for (i = 0; i < this.DROWS; i += 1) {
-        this.curses_locals.terminal[i] = new Array(this.DCOLS);
+        this.curses_locals.terminal[i] = [];
     }
 
-    this.curses_locals.buffer = new Array(this.DROWS);
+    this.curses_locals.buffer = [];
     for (i = 0; i < this.DROWS; i += 1) {
-        this.curses_locals.buffer[i] = new Array(this.DCOLS);
+        this.curses_locals.buffer[i] = [];
     }
 
-    this.curses_locals.lines_dirty = new Array(this.DROWS);
+    this.curses_locals.lines_dirty = [];
     
     this.curses_locals.curscr = {};
 

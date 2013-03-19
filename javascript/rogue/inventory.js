@@ -3,7 +3,7 @@ var rogue = rogue || {};
 
 rogue.init_inventory_locals = function () {
     this.inventory_locals = {
-        is_wood: new Array(this.WANDS),
+        is_wood: [],
         press_space: ' --press space to continue--',
         wand_materials: [
 	          'steel ',

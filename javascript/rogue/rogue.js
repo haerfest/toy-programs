@@ -18,9 +18,9 @@ rogue.header = function () {
     this.rogue = {};
     this.rooms = [];
     
-    this.dungeon = new Array(this.DROWS);
+    this.dungeon = [];
     for (i = 0; i < this.DCOLS; i += 1) {
-        this.dungeon[i] = new Array(this.DCOLS);
+        this.dungeon[i] = [];
     }
 };
 
