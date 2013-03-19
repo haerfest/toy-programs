@@ -3,6 +3,8 @@ var rogue = rogue || {};
 
 rogue.header = function () {
     var i;
+
+    this.POTIONS = 14;
     
     this.DROWS = 24;
     this.DCOLS = 80;
@@ -24,12 +26,12 @@ rogue.header = function () {
 
 
 rogue.init_locals = function () {
-    this.object_init_locals();
-    this.curses_init_locals();
-    this.random_init_locals();
-    this.inventory_init_locals();
+    this.init_object_locals();
+    this.init_curses_locals();
+    this.init_random_locals();
+    this.init_inventory_locals();
     this.init_init_locals();
-    this.level_init_locals();
+    this.init_level_locals();
 };
 
 

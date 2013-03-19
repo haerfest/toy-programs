@@ -1,7 +1,7 @@
 var rogue = rogue || {};
 
 
-rogue.inventory_init_locals = function () {
+rogue.init_inventory_locals = function () {
     this.inventory_locals = {
         is_wood: new Array(this.WANDS),
         press_space: ' --press space to continue--',
@@ -116,9 +116,9 @@ rogue.inventory_init_locals = function () {
 	          { com_char: 'b', com_desc: 'b       down & left' },
 	          { com_char: 'c', com_desc: 'c       call object' },
 	          { com_char: 'n', com_desc: 'n       down & right' },
-	          { com_char: NULL, com_desc: '<SHIFT><dir>: run that way' },
+	          { com_char: null, com_desc: '<SHIFT><dir>: run that way' },
 	          { com_char: ')', com_desc: ')       print current weapon' },
-	          { com_char: NULL, com_desc: '<CTRL><dir>: run till adjacent' },
+	          { com_char: null, com_desc: '<CTRL><dir>: run till adjacent' },
 	          { com_char: ']', com_desc: ']       print current armor' },
 	          { com_char: 'f', com_desc: 'f<dir>  fight till death or near death' },
 	          { com_char: '=', com_desc: '=       print current rings' },
@@ -129,7 +129,7 @@ rogue.inventory_init_locals = function () {
 	          { com_char: 'o', com_desc: 'o       examine/set options' },
 	          { com_char: '^', com_desc: '^<dir>  identify trap type' },
 	          { com_char: '\022', com_desc: '^R      redraw screen' },
-	          { com_char: '&', com_desc: '&       save screen into 'rogue.screen'' },
+	          { com_char: '&', com_desc: '&       save screen into \'rogue.screen\'' },
 	          { com_char: 's', com_desc: 's       search for trap/secret door' },
 	          { com_char: '\020', com_desc: '^P      repeat last message' },
 	          { com_char: '>', com_desc: '>       go down a staircase' },

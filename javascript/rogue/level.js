@@ -1,7 +1,7 @@
 var rogue = rogue || {};
 
 
-rogue.level_init_locals = function () {
+rogue.init_level_locals = function () {
     this.level_locals = {
         cur_level: 0,
         max_level: 1,
@@ -154,14 +154,21 @@ rogue.clear_level = function () {
         j;
 
     for (i = 0; i < this.MAXROOMS; i += 1) {
-        this.rooms[i].is_room = this.R_NOTHING;
-        for (j = 0; j < 4; j += 1) {
-            this.rooms[i].doors[j].oth_room = this.NO_ROOM;
-        }
+        this.rooms[i] = {
+            is_room: this.R_NOTHING,
+            doors: [
+                { oth_room: this.NO_ROOM },
+                { oth_room: this.NO_ROOM },
+                { oth_room: this.NO_ROOM },
+                { oth_room: this.NO_ROOM }
+            ]
+        };
     }
 
     for (i = 0; i < this.MAX_TRAPS; i += 1) {
-        this.traps[i].trap_type = this.NO_TRAP;
+        this.traps[i] = {
+            trap_type: this.NO_TRAP
+        };
     }
 
     for (i = 0; i < this.DROWS; i += 1) {

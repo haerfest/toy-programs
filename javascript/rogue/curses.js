@@ -1,7 +1,7 @@
 var rogue = rogue || {};
 
 
-rogue.curses_init_locals = function () {
+rogue.init_curses_locals = function () {
     var i;
 
     this.curses_locals = {};

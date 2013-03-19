@@ -1,7 +1,7 @@
 var rogue = rogue || {};
 
 
-rogue.object_init_locals = function () {
+rogue.init_object_locals = function () {
     this.object_locals = {
         id_potions: [
             { value: 100, title: 'blue \0                           ', real: 'of increase strength ', id_status: 0},

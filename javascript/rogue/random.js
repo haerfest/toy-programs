@@ -1,7 +1,7 @@
 var rogue = rogue || {};
 
 
-rogue.random_init_locals = function () {
+rogue.init_random_locals = function () {
     this.random_locals = {
         rntb: [
 	          3,
