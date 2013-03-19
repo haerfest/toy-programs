@@ -43,6 +43,7 @@ fetchDailyVerse(function (text) {
 
     var verse,
         lines,
+        line,
         i;
 
     // Remove all child nodes of the #verse element.
@@ -51,10 +52,11 @@ fetchDailyVerse(function (text) {
         verse.removeChild(verse.lastChild);
     }
 
-    // Separate each verse line by <br> tags.
+    // Separate each verse line by <br> tags, and use no-break spaces.
     lines = text.split('\n');
     for (i in lines) {
-        verse.appendChild(document.createTextNode(lines[i]));
+        line = lines[i].replace(' ', '\u00A0');
+        verse.appendChild(document.createTextNode(line));
         verse.appendChild(document.createElement('br'));
     }
 });
