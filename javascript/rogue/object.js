@@ -2,6 +2,25 @@ var rogue = rogue || {};
 
 
 rogue.init_object_locals = function () {
+    this.rogue = {
+        armor:       this.INIT_ARMOR,
+        weapon:      this.INIT_WEAPON,
+        left_ring:   this.INIT_LEFT_RING,
+        right_ring:  this.INIT_RIGHT_RING,
+        hp_current:  this.INIT_HP_CURR,
+        hp_max:      this.INIT_HP_MAX,
+        str_current: this.INIT_STR_CURR,
+        str_max:     this.INIT_STR_MAX,
+        pack:        this.INIT_PACK,
+        gold:        this.INIT_GOLD,
+        exp:         this.INIT_EXP,
+        exp_points:  this.INIT_EXP_POINTS,
+        row:         0,
+        col:         0,
+        fchar:       this.INIT_CHAR,
+        moves_left:  this.INIT_MOVES
+    };
+
     this.object_locals = {
         id_potions: [
             { value: 100, title: 'blue \0                           ', real: 'of increase strength ', id_status: 0},
