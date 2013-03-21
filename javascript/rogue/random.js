@@ -91,3 +91,8 @@ rogue.get_rand = function (x, y) {
 rogue.rand_percent = function (percentage) {
     return (this.get_rand(1, 100) <= percentage);
 };
+
+
+rogue.coin_toss = function () {
+    return (this.rrandom() & 01 ? 1 : 0);
+};

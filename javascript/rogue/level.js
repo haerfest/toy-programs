@@ -136,12 +136,12 @@ rogue.make_level = function () {
                 }
             }
 
-            if (this.is_all_connected()) { // FIXME
+            if (this.is_all_connected()) {
                 break;
             }
         }
 
-        this.fill_out_level(); // FIXME
+        this.fill_out_level();
     }
 
     if (!this.has_amulet() &&
@@ -509,6 +509,149 @@ rogue.add_mazes = function () {
 };
 
 
+rogue.fill_out_level = function () {
+    var i,
+        rn;
+
+    this.mix_random_rooms();
+
+    this.level_locals.r_de = this.NO_ROOM;
+
+    for (i = 0; i < this.MAXROOMS; i += 1) {
+        rn = this.level_locals.random_rooms[i];
+        if (this.rooms[rn].is_room & this.R_NOTHING ||
+            (this.rooms[rn].is_room & this.R_CROSS && this.coin_toss())) {
+            // FIXME
+            this.fill_it(rn, true);
+        }
+    }
+
+    if (this.level_locals.r_de != this.NO_ROOM) {
+        this.fill_it(this.level_locals.r_de, false);
+    }
+};
+
+
+rogue.fill_it = function (rn, do_rec_de) {
+    var i,
+        tunnel_dir,
+        door_dir,
+        drow,
+        dcol,
+        target_room,
+        rooms_found = 0,
+        srow,
+        scol,
+        offsets = [-1, 1, 3, -3],
+        did_this = false,
+        is_masked;
+
+    for (i = 0; i < 10; i += 1) {
+        srow = this.get_rand(0, 3);
+        scol = this.get_rand(0, 3);
+        [offsets[srow], offsets[scol]] = [offsets[scol], offsets[srow]];
+    }
+
+    for (i = 0; i < 4; i += 1) {
+        target_room = rn + offsets[i];
+
+        if ((target_room < 0 || target_room >= this.MAXROOMS) ||
+            (!(this.same_row(rn, target_room) || this.same_col(rn, target_room))) ||
+            (!(this.rooms[target_room].is_room & (this.R_ROOM | this.R_MAZE)))) {
+            continue;
+        }
+
+        if (this.same_row(rn, target_room)) {
+            tunnel_dir = (this.rooms[rn].left_col < this.rooms[target_room].left_col ? this.RIGHT : this.LEFT);
+        } else {
+            tunnel_dir = (this.rooms[rn].top_row < this.rooms[target_room].top_row ? this.DOWN : this.UPWARD);
+        }
+
+        door_dir = (tunnel_dir + 4) % this.DIRS;
+        if (this.rooms[target_room].doors[Math.floor(door_dir / 2)].oth_room != this.NO_ROOM) {
+            continue;
+        }
+
+        if ((!do_rec_de || did_this) ||
+            ([srow, scol, is_masked] = this.mask_room(rn, srow, scol, this.TUNNEL) && !is_masked)) {
+            srow = Math.floor((this.rooms[rn].top_row  + this.rooms[rn].bottom_row) / 2);
+            scol = Math.floor((this.rooms[rn].left_col + this.rooms[rn].right_col)  / 2);
+        }
+
+        [drow, dcol] = this.put_door(this.rooms[target_room], door_dir, drow, dcol);
+        rooms_found += 1;
+        this.draw_simple_passage(srow, scol, drow, dcol, tunnel_dir);
+        this.rooms[rn].is_room = this.R_DEADEND;
+        this.dungeon[srow][scol] = this.TUNNEL;
+
+        if (i < 3 && !did_this) {
+            did_this = true;
+            if (this.coin_toss()) {
+                continue;
+            }
+        }
+
+        if (rooms_found < 2 && do_rec_de) {
+            this.recursive_deadend(rn, offsets, srow, scol);
+        }
+        break;
+    }
+};
+
+
+rogue.recursive_deadend = function (rn, offsets, srow, scol) {
+    var i,
+        de,
+        drow,
+        dcol,
+        tunnel_dir;
+
+    this.rooms[rn].is_room   = this.R_DEADEND;
+    this.dungeon[srow][scol] = this.TUNNELl;
+
+    for (i = 0; i < 4; i += 1) {
+        de = rn + offsets[i];
+        if ((de < 0 || de >= this.MAXROOMS) ||
+            !(this.same_row(rn, de) || this.same_col(rn, de))) {
+            continue;
+        }
+
+        if (!(this.rooms[de].is_room & this.R_NOTHING)) {
+            continue;
+        }
+
+        drow = Math.floor((this.rooms[de].top_row  + this.rooms[de].bottom_row) / 2);
+        dcol = Math.floor((this.rooms[de].left_col + this.rooms[de].right_col)  / 2);
+
+        if (this.same_row(rn, de)) {
+            tunnel_dir = (this.rooms[rn].left_col < this.rooms[de].left_col ? this.RIGHT : this.LEFT);
+        } else {
+            tunnel_dir = (this.rooms[rn].top_row < this.rooms[de].top_row ? this.DOWN : this.UPWARD);
+        }
+
+        this.draw_simple_passage(srow, scol, drow, dcol, tunnel_dir);
+        this.level_locals.r_de = de;
+        this.recursive_deadend(de, offsets, drow, dcol);
+    }
+};
+
+
+rogue.mask_room = function (rn, row, col, mask) {
+    var i,
+        j;
+
+    for (i = this.rooms[rn].top_row; i <= this.rooms[rn].bottom_row; i += 1) {
+        for (j = this.rooms[rn].left_col; j <= this.rooms[rn].right_col; j += 1) {
+            if (this.dungeon[i][j] & mask) {
+                return [i, j, true];
+            }
+        }
+    }
+
+    return [row, col, false];
+};
+
+
 rogue.make_maze = function (r, c, tr, br, lc, rc) {
     var dirs = [this.UPWARD, this.DOWN, this.LEFT, this.RIGHT],
         i,
@@ -627,6 +770,6 @@ rogue.mix_random_rooms = function () {
             y = this.get_rand(0, this.MAXROOMS - 1);
         } while (x === y);
 
-        [this.level_locals.random_room[x], this.level_locals.random_rooms[y]] = [this.level_locals.random_rooms[y], this.level_locals.random_rooms[x]];
+        [this.level_locals.random_rooms[x], this.level_locals.random_rooms[y]] = [this.level_locals.random_rooms[y], this.level_locals.random_rooms[x]];
     }
 };

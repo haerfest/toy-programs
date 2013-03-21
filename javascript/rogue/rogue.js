@@ -4,17 +4,17 @@ var rogue = rogue || {};
 rogue.header = function () {
     var i;
 
-    this.NOTHING = 0;
-    this.OBJECT  = 01;
-    this.MONSTER = 02;
-    this.STAIRS  = 04;
-    this.HORWALL = 010;
+    this.NOTHING  = 0;
+    this.OBJECT   = 01;
+    this.MONSTER  = 02;
+    this.STAIRS   = 04;
+    this.HORWALL  = 010;
     this.VERTWALL = 020;
-    this.DOOR = 040;
-    this.FLOOR = 0100;
-    this.TUNNEL = 0200;
-    this.TRAP = 0400;
-    this.HIDDEN = 01000;
+    this.DOOR     = 040;
+    this.FLOOR    = 0100;
+    this.TUNNEL   = 0200;
+    this.TRAP     = 0400;
+    this.HIDDEN   = 01000;
 
     this.ARMOR       = 01;
     this.WEAPON      = 02;
@@ -147,6 +147,7 @@ rogue.init_locals = function () {
     this.init_random_locals();
     this.init_inventory_locals();
     this.init_init_locals();
+    this.init_room_locals();
     this.init_level_locals();
 };
 
