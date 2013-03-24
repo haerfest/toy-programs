@@ -1,51 +1,79 @@
-var sys   = require('sys'),
-    http  = require('http'),
-    fs    = require('fs'),
-    url   = require('url'),
-    port  = 8080,
-    ip    = '127.0.0.1';
+var sys      = require('sys'),
+    http     = require('http'),
+    fs       = require('fs'),
+    url      = require('url'),
+    sqlite3  = require('sqlite3').verbose(),
+    database = 'database.sqlite3',
+    port     = 8080,
+    ip       = '127.0.0.1';
 
 
 http.createServer(function (req, res) {
 
+    var returnError = function (statusCode, body) {
+        res.writeHead(statusCode, {'Content-type': 'text/html'});
+        if (body) {
+            res.write(body);
+        }
+        res.end();
+    };
+    
     var serveFile = function (page) {
         var filename = page.substr(1);
 
         fs.readFile(filename, function (err, data) {
-            var status = 200;
-            var body   = data;
-
             if (err) {
-                status = 404;
-                body   = '<h1>' + err.name + ': ' + err.message + '</h1>';
+                returnError(404, '<h1>' + err.name + ': ' + err.message + '</h1>');
+                return;
             }
             
-            res.writeHead(status, {'Content-type': 'text/html'});
-            res.write(body);
+            res.writeHead(200, {'Content-type': 'text/html'});
+            res.write(data);
             res.end();
         });
     };
 
     var getFileList = function () {
         fs.readdir('.', function (err, files) {
-            var status = 200;
-            var body   = files;
-
             if (err) {
-                status = 500;
-                body   = '';
+                returnError(500);
+                return;
             }
             
-            res.writeHead(status, {'Content-type': 'text/html'});
-            res.write(JSON.stringify(body));
+            res.writeHead(200, {'Content-type': 'text/html'});
+            res.write(JSON.stringify(files));
             res.end();
         });
     };
-    
+
+    var getNameList = function () {
+        var db = new sqlite3.Database(database, sqlite3.OPEN_READONLY, function (err) {
+            if (err) {
+                returnError(500);
+                return;
+            }
+            
+            db.all('SELECT name FROM names;', function (err, rows) {
+                var names = rows.map(
+                    function (row) {
+                        return row.name;
+                    }
+                );
+                res.writeHead(200, {'Content-type': 'text/html'});
+                res.write(JSON.stringify(names));
+                res.end();
+            });
+        });
+    };
+
     var serveApi = function (api) {
         switch (api.toLowerCase()) {
         case 'getfilelist':
             getFileList();
+            break;
+
+        case 'getnamelist':
+            getNameList();
             break;
 
         default:
