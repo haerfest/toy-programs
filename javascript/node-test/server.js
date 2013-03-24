@@ -77,8 +77,7 @@ http.createServer(function (req, res) {
             break;
 
         default:
-            res.writeHead(501, {'Content-type': 'text/html'});
-            res.end();
+            returnError(501);
             break;
         }
     };
