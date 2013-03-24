@@ -2,9 +2,13 @@ $(document).ready(function () {
     $.ajax({
         url: "api/getFileList",
         success: function (data) {
-            var list = JSON.parse(data);
-
-            $("#filelist").append(list.join('<br>'));
+            var files = JSON.parse(data);
+            $("#filelist").append(
+                files.map(
+                    function (file) {
+                        return $('<li></li>').append(file);
+                    })
+            );
         }
     });
 });
