@@ -26,7 +26,7 @@ http.createServer(function (req, res) {
         } else if (page.match(/\.css$/)) {
             mimeType = 'text/css';
         } else if (page.match(/\.js$/)) {
-            mimeType = 'text/javascript';
+            mimeType = 'application/javascript';
         };
 
         return mimeType;
