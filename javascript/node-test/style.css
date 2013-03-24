@@ -1,0 +1,12 @@
+body {
+    font-family: Helvetica, sans-serif;
+    font-size: large;
+}
+
+ul {
+    list-style-type:square;
+}
+
+ul.fixed {
+    font-family: monospace;
+}

@@ -11,11 +11,25 @@ var sys      = require('sys'),
 http.createServer(function (req, res) {
 
     var returnError = function (statusCode, body) {
-        res.writeHead(statusCode, {'Content-type': 'text/html'});
+        res.writeHead(statusCode, {'Content-type': 'text/plain'});
         if (body) {
             res.write(body);
         }
         res.end();
+    };
+
+    var getMimeType = function (page) {
+        var mimeType = 'text/plain';
+        
+        if (page.match(/\.html?$/)) {
+            mimeType = 'text/html';
+        } else if (page.match(/\.css$/)) {
+            mimeType = 'text/css';
+        } else if (page.match(/\.js$/)) {
+            mimeType = 'text/javascript';
+        };
+
+        return mimeType;
     };
     
     var serveFile = function (page) {
@@ -23,11 +37,11 @@ http.createServer(function (req, res) {
 
         fs.readFile(filename, function (err, data) {
             if (err) {
-                returnError(404, '<h1>' + err.name + ': ' + err.message + '</h1>');
+                returnError(404, err.message);
                 return;
             }
             
-            res.writeHead(200, {'Content-type': 'text/html'});
+            res.writeHead(200, {'Content-type': getMimeType(page)});
             res.write(data);
             res.end();
         });
@@ -40,7 +54,7 @@ http.createServer(function (req, res) {
                 return;
             }
             
-            res.writeHead(200, {'Content-type': 'text/html'});
+            res.writeHead(200, {'Content-type': 'application/json'});
             res.write(JSON.stringify(files));
             res.end();
         });
@@ -59,7 +73,7 @@ http.createServer(function (req, res) {
                         return row.name;
                     }
                 );
-                res.writeHead(200, {'Content-type': 'text/html'});
+                res.writeHead(200, {'Content-type': 'application/json'});
                 res.write(JSON.stringify(names));
                 res.end();
             });
