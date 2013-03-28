@@ -1,3 +1,12 @@
 *~
 .#*
+*.swp
 .DS_Store
+.bundle
+db/*.sqlite3
+db/*.sqlite3-journal
+log/*.log
+tmp/
+doc/
+.project
+.idea
