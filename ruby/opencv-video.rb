@@ -8,8 +8,8 @@ def escape_pressed?(wait_msec)
   OpenCV::GUI::wait_key(wait_msec) == 27
 end
 
-def play_video(video_file, fps = 3)
-  wait_delay = 100 / [1, fps].max
+def play_video(video_file, fps = 30)
+  wait_delay = 1000 / [1, fps].max
 
   window = OpenCV::GUI::Window.new('video')
   capture = OpenCV::CvCapture.open(video_file)
