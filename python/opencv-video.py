@@ -1,22 +1,24 @@
 #!/usr/bin/env python
 
 import sys
-import cv
+import cv2
 
 def play(video_file):
     WINDOW_TITLE  = 'video'
     ESCAPE_KEY    = 27
 
-    video  = cv.CaptureFromFile(video_file)
-    fps    = cv.GetCaptureProperty(video, cv.CV_CAP_PROP_FPS)
-    delay  = int(1000 / fps)
+    video = cv2.VideoCapture(video_file)
+    fps   = video.get(cv2.cv.CV_CAP_PROP_FPS)
+    delay = int(1000 / fps)
+
+    cv2.namedWindow(WINDOW_TITLE)
 
     while True:
-        frame = cv.QueryFrame(video)
+        _, frame = video.read()
         if frame is None:
             break
-        cv.ShowImage(WINDOW_TITLE, frame)
-        if cv.WaitKey(delay) == ESCAPE_KEY:
+        cv2.imshow(WINDOW_TITLE, frame)
+        if cv2.waitKey(delay) == ESCAPE_KEY:
             break
 
 if __name__ == "__main__":
