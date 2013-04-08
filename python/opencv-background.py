@@ -22,8 +22,7 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
         if frame is None:
             break
 
-        grayscale = cv2.cvtColor(frame, cv2.cv.CV_BGR2GRAY)
-        cv2.imshow('input', grayscale)
+        cv2.imshow('input', frame)
 
         cv2.accumulateWeighted(frame, average, 0.01)
         background = cv2.convertScaleAbs(average)
@@ -32,7 +31,8 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
         foreground = cv2.subtract(frame, background)
         cv2.imshow('foreground', foreground)
 
-        edges = cv2.Canny(foreground, lower_threshold, higher_threshold)
+        grayscale = cv2.cvtColor(foreground, cv2.cv.CV_BGR2GRAY)
+        edges = cv2.Canny(grayscale, lower_threshold, higher_threshold)
         cv2.imshow('canny', edges)
 
         if cv2.waitKey(delay) == ESCAPE_KEY:
