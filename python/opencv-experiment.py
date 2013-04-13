@@ -10,16 +10,25 @@ import cv2
 import numpy as np
 import math
 
+def draw_point(image, p, color):
+    cv2.circle(image, (int(p[0][0]),int(p[0][1])), 3, color, -1)
+
 def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
-    NO_KEY     = -1
-    QUIT_KEY   = 27  # escape
-    PAUSE_KEY  = 32  # space
-    SLOWER_KEY = 45  # -
-    FASTER_KEY = 61  # =
-    FEATURES_KEY = 10 # enter
-    RED_COLOR  = (0, 0, 255)
+    NO_KEY       = -1
+    QUIT_KEY     = 27   # escape
+    PAUSE_KEY    = 32   # space
+    SLOWER_KEY   = 45   # -
+    FASTER_KEY   = 61   # =
+    FEATURES_KEY = 10   # enter
+    STATS_KEY    = 115  # s
+    RED_COLOR   = (0, 0, 255)
+    GREEN_COLOR = (0, 255, 0)
+    BLUE_COLOR  = (255, 0, 0)
     DILATE_SIZE = 10
     ERODE_SIZE  = 10
+    MAX_FEATURES = 100
+    MIN_DISTANCE = 10
+    MIN_DISTANCE_SQUARED = MIN_DISTANCE * MIN_DISTANCE
 
     lk_params = dict(winSize  = (15,15),
                      maxLevel = 2,
@@ -29,9 +38,9 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
                          winSize  = (10,10),
                          criteria = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 20, 0.03))
 
-    feature_params = dict(maxCorners   = 500,
+    feature_params = dict(maxCorners   = MAX_FEATURES,
                           qualityLevel = 0.01,
-                          minDistance  = 10)
+                          minDistance  = MIN_DISTANCE)
 
     # Open the video and determine the frame rate.
     video         = cv2.VideoCapture(video_file)
@@ -48,7 +57,7 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
 
     stop = False
     while (not stop):
-        # Read a frame as grayscale.
+        # Read a frame as grayscale and downsample.
         _, frame = video.read()
         if frame is None:
             break
@@ -57,15 +66,34 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
 
         if new_features:
             features = cv2.goodFeaturesToTrack(gray, **feature_params)
+            cv2.cornerSubPix(gray, features, **subpix_params)
         else:
             prev_features_reshaped = np.float32(prev_features).reshape(-1, 1, 2)
             features, found, _ = cv2.calcOpticalFlowPyrLK(prev_gray, gray, prev_features_reshaped, None, **lk_params)
-            features = [p for (f,p) in zip(found, features) if f]
-            for p in features:
-                center = (int(p[0][0]),int(p[0][1]))
-                cv2.circle(frame, center, 3, RED_COLOR, -1)
-                cv2.imshow('features', frame)
-                    
+            features = [p for (f,p) in zip(found,features) if f]
+            for i in xrange(len(features)):
+                draw_point(frame, prev_features[i], GREEN_COLOR)
+                draw_point(frame, features[i],      RED_COLOR)
+
+            new_features = cv2.goodFeaturesToTrack(gray, **feature_params)
+            cv2.cornerSubPix(gray, new_features, **subpix_params)
+
+            for i in xrange(len(new_features)):
+                too_close = False
+                features_count = len(features)
+                if features_count == MAX_FEATURES:
+                    break
+                for j in xrange(features_count):
+                    dx = int(new_features[i][0][0] - features[j][0][0])
+                    dy = int(new_features[i][0][1] - features[j][0][1])
+                    if dx * dx + dy * dy <= MIN_DISTANCE_SQUARED:
+                        too_close = True
+                        break
+                if not too_close:
+                    features = np.append(features, [new_features[i]], axis = 0)
+
+            cv2.imshow('feature', frame)
+
         prev_gray     = gray
         prev_features = features
 
@@ -95,6 +123,8 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
             elif key == FEATURES_KEY:
                 new_features = True
                 print "New features"
+            elif key == STATS_KEY:
+                print "Number of features: %u" % len(features)
 
 if __name__ == "__main__":
     canny(sys.argv[1], 90, 1.0, 0, 255)
