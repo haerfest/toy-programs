@@ -14,7 +14,7 @@ import math
 def draw_point(image, p, color):
     cv2.circle(image, (int(p[0][0]),int(p[0][1])), 3, color, -1)
 
-def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
+def experiment(video_file, start_sec, speed):
     NO_KEY       = -1
     QUIT_KEY     = 27   # escape
     PAUSE_KEY    = 32   # space
@@ -115,5 +115,5 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
                 print "Number of features: %u" % len(features)
 
 if __name__ == "__main__":
-    canny(sys.argv[1], 90, 1.0, 0, 255)
+    experiment(sys.argv[1], 90, 1.0)
 
