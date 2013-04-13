@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#
+# Gracefully based on:
+#
+# https://github.com/jesolem/PCV/blob/master/examples/lktrack.py
+# http://robots.stanford.edu/cs223b05/notes/CS%20223-B%20T1%20stavens_opencv_optical_flow.pdf
 
 import sys
 import cv2
@@ -52,11 +57,10 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
 
         if new_features:
             features = cv2.goodFeaturesToTrack(gray, **feature_params)
-            #cv2.cornerSubPix(gray, features, **subpix_params)
         else:
-            tmp = np.float32(prev_features).reshape(-1, 1, 2)
-            features, status, _ = cv2.calcOpticalFlowPyrLK(prev_gray, gray, tmp, None, **lk_params)
-            features = [p for (st,p) in zip(status, features) if st]
+            prev_features_reshaped = np.float32(prev_features).reshape(-1, 1, 2)
+            features, found, _ = cv2.calcOpticalFlowPyrLK(prev_gray, gray, prev_features_reshaped, None, **lk_params)
+            features = [p for (f,p) in zip(found, features) if f]
             for p in features:
                 center = (int(p[0][0]),int(p[0][1]))
                 cv2.circle(frame, center, 3, RED_COLOR, -1)
