@@ -28,7 +28,6 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
     ERODE_SIZE  = 10
     MAX_FEATURES = 100
     MIN_DISTANCE = 10
-    MIN_DISTANCE_SQUARED = MIN_DISTANCE * MIN_DISTANCE
 
     lk_params = dict(winSize  = (15,15),
                      maxLevel = 2,
@@ -66,33 +65,22 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
 
         if new_features:
             features = cv2.goodFeaturesToTrack(gray, **feature_params)
-            cv2.cornerSubPix(gray, features, **subpix_params)
         else:
             prev_features_reshaped = np.float32(prev_features).reshape(-1, 1, 2)
             features, found, _ = cv2.calcOpticalFlowPyrLK(prev_gray, gray, prev_features_reshaped, None, **lk_params)
-            features = [p for (f,p) in zip(found,features) if f]
+
+            found_count = 0
             for i in xrange(len(features)):
-                draw_point(frame, prev_features[i], GREEN_COLOR)
-                draw_point(frame, features[i],      RED_COLOR)
-
-            new_features = cv2.goodFeaturesToTrack(gray, **feature_params)
-            cv2.cornerSubPix(gray, new_features, **subpix_params)
-
-            for i in xrange(len(new_features)):
-                too_close = False
-                features_count = len(features)
-                if features_count == MAX_FEATURES:
-                    break
-                for j in xrange(features_count):
-                    dx = int(new_features[i][0][0] - features[j][0][0])
-                    dy = int(new_features[i][0][1] - features[j][0][1])
-                    if dx * dx + dy * dy <= MIN_DISTANCE_SQUARED:
-                        too_close = True
-                        break
-                if not too_close:
-                    features = np.append(features, [new_features[i]], axis = 0)
+                if found[i]:
+                    draw_point(frame, prev_features[i], GREEN_COLOR)
+                    draw_point(frame, features[i],      RED_COLOR)
+                    found_count += 1
 
             cv2.imshow('feature', frame)
+
+            if found_count < 2 * MAX_FEATURES / 3:
+                features = cv2.goodFeaturesToTrack(gray, **feature_params)
+                print "Found %u features, new found %u" % (found_count, len(features))
 
         prev_gray     = gray
         prev_features = features
