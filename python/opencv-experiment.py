@@ -4,6 +4,7 @@
 #
 # https://github.com/jesolem/PCV/blob/master/examples/lktrack.py
 # http://robots.stanford.edu/cs223b05/notes/CS%20223-B%20T1%20stavens_opencv_optical_flow.pdf
+# http://www.youtube.com/watch?v=V4r2HXGA8jw
 
 import sys
 import cv2
@@ -28,6 +29,7 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
     ERODE_SIZE  = 10
     MAX_FEATURES = 100
     MIN_DISTANCE = 10
+    NEW_FEATURES_PERIOD = 100
 
     lk_params = dict(winSize  = (15,15),
                      maxLevel = 2,
@@ -51,8 +53,8 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
     if start_sec > 0:
         video.set(cv2.cv.CV_CAP_PROP_POS_MSEC, start_sec * 1000)
 
-    prev_gray    = None
-    new_features = True
+    prev_gray            = None
+    new_features_elapsed = NEW_FEATURES_PERIOD
 
     stop = False
     while (not stop):
@@ -63,8 +65,9 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
         gray = cv2.cvtColor(frame, cv2.cv.CV_RGB2GRAY)
         cv2.imshow('input', gray)
 
-        if new_features:
+        if new_features_elapsed == NEW_FEATURES_PERIOD:
             features = cv2.goodFeaturesToTrack(gray, **feature_params)
+            new_features_elapsed = 0
         else:
             prev_features_reshaped = np.float32(prev_features).reshape(-1, 1, 2)
             features, found, _ = cv2.calcOpticalFlowPyrLK(prev_gray, gray, prev_features_reshaped, None, **lk_params)
@@ -77,10 +80,7 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
                     found_count += 1
 
             cv2.imshow('feature', frame)
-
-            if found_count < 2 * MAX_FEATURES / 3:
-                features = cv2.goodFeaturesToTrack(gray, **feature_params)
-                print "Found %u features, new found %u" % (found_count, len(features))
+            new_features_elapsed += default_delay
 
         prev_gray     = gray
         prev_features = features
@@ -109,7 +109,7 @@ def canny(video_file, start_sec, speed, lower_threshold, higher_threshold):
                 delay = delay * 2
                 print "Speed is %.2fx" % (default_delay / delay)
             elif key == FEATURES_KEY:
-                new_features = True
+                new_features_elapsed = NEW_FEATURES_PERIOD
                 print "New features"
             elif key == STATS_KEY:
                 print "Number of features: %u" % len(features)
