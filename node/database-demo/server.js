@@ -36,11 +36,11 @@ app.get('/script.js', function (req, res) {
 });
 
 app.get('/api/find-regnum', function (req, res) {
-    db.all('select rec_time_micros from pdsiitevent where licence_plate = ?', req.query.regnum, function (err, rows) {
+    db.all("select strftime('%Y-%m-%d %H:%S:%f', rec_time_micros / 1E6, 'unixepoch') as title,rec_time_micros from pdsiitevent where licence_plate = ?", req.query.regnum, function (err, rows) {
         var json = JSON.stringify(rows.map(function (row) {
-            return row.rec_time_micros;
+            return {"title": row.title, "rec_time_micros": row.rec_time_micros};
         }));
-
+        
         res.writeHead(200, {'Content-Type': 'text/json'});
         res.end(json);
     });
