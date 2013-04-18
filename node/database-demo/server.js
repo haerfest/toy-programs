@@ -69,7 +69,7 @@ function returnImages (req, res, json, asset_management_ids) {
 }
 
 
-app.get("/api/event-at-time", function (req, res) {
+app.get("/api/get-events-at-time", function (req, res) {
     db.all("select distinct asset_management_id from pdsiitevent order by asset_management_id",
            function (err, rows) {
                var asset_management_ids = rows.map(function (r) { return r.asset_management_id; });
@@ -88,6 +88,13 @@ app.get("/api/next-event", function (req, res) {
 app.get("/api/prev-event", function (req, res) {
     var param = req.query.rec_time_micros;
     db.each("select strftime('%Y-%m-%d %H:%S:%f', rec_time_micros / 1E6, 'unixepoch') as title, rec_time_micros from pdsiitevent where rec_time_micros < ? order by rec_time_micros desc limit 1", param, function (err, row) {
+        res.writeHead(200, {"Content-Type": "text/json"});
+        res.end(JSON.stringify(row));
+    });
+});
+
+app.get("/api/get-time-range", function (req, res) {
+    db.get("select min(rec_time_micros) as minimum, max(rec_time_micros) as maximum from (select rec_time_micros from pdsiitevent union select rec_time_micros from pdstrackerevent)", function (err, row) {
         res.writeHead(200, {"Content-Type": "text/json"});
         res.end(JSON.stringify(row));
     });
