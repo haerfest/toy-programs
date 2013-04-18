@@ -1,0 +1,9 @@
+#images {
+    width: 100%;
+}
+
+#images div {
+    width: 30%;
+    float: left;
+    padding: 2px;
+}

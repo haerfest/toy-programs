@@ -31,6 +31,10 @@ app.get("/index.html", function (req, res) {
     returnFile(req.url.substr(1), res, "text/html");
 });
 
+app.get("/style.css", function (req, res) {
+    returnFile(req.url.substr(1), res, "text/css");
+});
+
 app.get("/script.js", function (req, res) {
     returnFile(req.url.substr(1), res, "text/javascript");
 });
@@ -43,13 +47,34 @@ app.get("/api/find-regnum", function (req, res) {
     });
 });
 
-app.get("/api/event-at-time", function (req, res) {
-    var param = req.query.rec_time_micros;
-    db.get("select image from pdsiitevent where rec_time_micros = ?", param, function (err, row) {
-        var base64 = new Buffer(row.image).toString("base64")
+
+function returnImages (req, res, json, asset_management_ids) {
+    if (asset_management_ids.length === 0) {
         res.writeHead(200, {"Content-Type": "text/html"});
-        res.end(base64);
-    });
+        res.end(JSON.stringify(json));
+    } else {
+        db.get("select image from pdsiitevent where asset_management_id = ? and rec_time_micros <= ? order by rec_time_micros desc limit 1",
+               asset_management_ids[0],
+               req.query.rec_time_micros,
+               function (err, row) {
+                   if (!err) {
+                       var base64 = new Buffer(row.image).toString("base64");
+                       json.push({"asset_management_id": asset_management_ids[0],
+                                  "image": base64});
+                   }
+                   
+                   returnImages(req, res, json, asset_management_ids.slice(1));
+               });
+    }
+}
+
+
+app.get("/api/event-at-time", function (req, res) {
+    db.all("select distinct asset_management_id from pdsiitevent order by asset_management_id",
+           function (err, rows) {
+               var asset_management_ids = rows.map(function (r) { return r.asset_management_id; });
+               returnImages(req, res, [], asset_management_ids);
+           });
 });
 
 app.get("/api/next-event", function (req, res) {

@@ -2,9 +2,9 @@ $(document).ready(function () {
 
     var regnum          = $("#regnum");
     var rec_time_micros = $("#rec_time_micros");
-    var image           = $("#image");
     var prev            = $("#prev");
     var next            = $("#next");
+    var images          = $("#images");
 
     prev.click(function () {
         $.get('api/prev-event', {'rec_time_micros': rec_time_micros.val()}, function (data) {
@@ -24,13 +24,23 @@ $(document).ready(function () {
 
     rec_time_micros.change(function () {
         if (this.value) {
-            $.get('api/event-at-time', {'rec_time_micros': this.value}, function (data) {
-                image.attr('src', 'data:image/jpeg;base64,' + data);
-                image.attr('hidden', false);
+            $.getJSON('api/event-at-time', {'rec_time_micros': this.value}, function (data) {
+                for (var index in data) {
+                    var id    = "image" + data[index].asset_management_id;
+                    var image = $("#" + id);
+                
+                    if (image.length === 0) {
+                        var div = $("<div/>");
+                        image   = $("<img/>", {"id": id, "style": "width:100%"});
+                        
+                        image.appendTo(div);
+                        div.appendTo(images);
+                    }
+
+                    image.attr('src', 'data:image/jpeg;base64,' + data[index].image);
+                    image.attr('hidden', false);
+                }
             });
-        } else {
-            image.attr('src', '');
-            image.attr('hidden', true);
         }
     });
 
