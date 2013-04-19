@@ -11,16 +11,18 @@ $(function () {
     //
     // Get a reference to the 2D context of the canvas and its dimensions.
     //
-    var canvas    = $("#canvas")[0],
-        ctx       = canvas.getContext("2d"),
-        width     = canvas.width,
-        height    = canvas.height,
-        width_m   = 2 * 24,
-        height_m  = 2 * 6,
-        alpr_m    = 12,
-        marker_px = 7;
+    var canvas       = $("#canvas")[0],
+        ctx          = canvas.getContext("2d"),
+        width        = canvas.width,
+        height       = canvas.height,
+        width_m      = 2 * 24,
+        height_m     = 2 * 12,
+        alpr_m       = 12,
+        marker_px    = 7,
+        tracks       = [],
+        track_colors = ["gray", "white"];
 
-    var drawTarmac = function () {
+    var plotTarmac = function () {
 
         ctx.save();
  
@@ -102,44 +104,97 @@ $(function () {
         ctx.restore();
     };
 
-    drawTarmac();
+    var setCanvasOrientationForTrackPlotting = function () {
+        //
+        // Set the canvas origin to the center.
+        //
+        ctx.translate(width / 2, height / 2);
 
-    //
-    // Set the canvas origin to the center.
-    //
-    ctx.translate(width / 2, height / 2);
+        //
+        // Scale it to be able to use physical units (meters) and
+        // orient the x-axis horizontally increasing to the right, and
+        // the y-axis vertically increasing upwards.
+        //
+        ctx.scale(width / width_m , -height / height_m);
+    };
 
-    //
-    // Scale it to be able to use physical units (meters) and
-    // orient the x-axis horizontally increasing to the right, and
-    // the y-axis vertically increasing upwards.
-    //
-    ctx.scale(width / width_m , -height / height_m);
+    var plotTrackEndpoints = function (start_x, start_y, end_x, end_y) {
+        ctx.fillStyle = track_colors[0];
+        ctx.beginPath();
+        ctx.arc(start_x, start_y, 0.4, 0, 2 * Math.PI, true);
+        ctx.fill();
 
-    //
-    // Draw a red circle in the center.
-    //
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 0.1;
-    ctx.beginPath();
-    ctx.arc(0, 0, 0.1, 0, 2 * Math.PI, true);
-    ctx.stroke();
+        ctx.fillStyle = track_colors[1];
+        ctx.beginPath();
+        ctx.arc(end_x, end_y, 0.4, 0, 2 * Math.PI, true);
+        ctx.fill();
+    };
 
-    //
-    // And a cyan one at x = 10m and y = 4 m.
-    //
-    ctx.strokeStyle = "cyan";
-    ctx.beginPath();
-    ctx.arc(10, 4, 0.1, 0, 2 * Math.PI, true);
-    ctx.stroke();
+    var plotTrackSimple = function (track) {
+        ctx.save();
+        setCanvasOrientationForTrackPlotting();
 
+        //
+        // Draw a simple line between start and end points, which are resident
+        // in memory.
+        //
+        var grad = ctx.createLinearGradient(track.start_x, track.start_y, track.end_x, track.end_y);
+
+        grad.addColorStop(0, track_colors[0]);
+        grad.addColorStop(1, track_colors[1]);
+
+        ctx.strokeStyle = grad;            
+        ctx.lineWidth   = 0.2;
+
+        ctx.beginPath();
+        ctx.moveTo(track.start_x, track.start_y);
+        ctx.lineTo(track.end_x, track.end_y);
+        ctx.stroke();
+
+        plotTrackEndpoints(track.start_x, track.start_y, track.end_x, track.end_y);
+        ctx.restore();
+    };
+
+    var plotTrackDetailed = function (track, now_msec) {
+        //
+        // We have to fetch more detailed track data first.
+        //
+        $.getJSON("/api/get-track/" + track.id,
+                  function (positions) {
+                      ctx.save();
+                      setCanvasOrientationForTrackPlotting();
+
+                      for (var i = 1; i < positions.length; i += 1) {
+                          var percentage = 0.5 + i / (positions.length / 0.5),
+                              intensity  = Math.floor(percentage * 255);
+
+                          ctx.beginPath();
+                          ctx.strokeStyle = "rgb(" + intensity + "," + intensity + "," + intensity + ")";
+
+                          if (positions[i].time <= now_msec) {
+                              ctx.lineWidth = 0.2;
+                          } else {
+                              ctx.lineWidth = 0.1;
+                          }
+
+                          ctx.moveTo(positions[i-1].x, positions[i-1].y);
+                          ctx.lineTo(positions[i].x, positions[i].y);
+
+                          ctx.stroke();
+                      }
+
+                      plotTrackEndpoints(track.start_x, track.start_y, track.end_x, track.end_y);
+                      ctx.restore();
+                  });
+    };
+ 
     //
     // Show all events that occurred at or right before #rec_time_micros.
     //
     var showEventsAtTime = function (rec_time_micros) {
         slider.slider("disable");
 
-        $.getJSON('api/get-events-at-time',
+        $.getJSON('api/get-images-at-time',
                   {'rec_time_micros': rec_time_micros},
                   function (data) {
                       for (var index in data) {
@@ -161,6 +216,34 @@ $(function () {
                   });
     };
 
+    var showTracksAtTime = function (now_msec, detailed) {
+        var visibility_msec = 1 * 1E3,
+            threshold_msec  = now_msec - visibility_msec;
+
+        //
+        // Clear the tarmac.
+        //
+        plotTarmac();
+
+        //
+        // Plot those tracks that still have a visible point. Don't plot
+        // tracks that haven't started yet.
+        //
+        for (var t = 0; t < tracks.length; t +=1) {
+            var track = tracks[t];
+
+            if (track.start_time <= now_msec && track.end_time > threshold_msec) {
+                if (detailed) {
+                    plotTrackDetailed(track, now_msec);
+                } else {
+                    plotTrackSimple(track);
+                }
+            }
+        }
+
+        ctx.restore();
+    };
+
     //
     // Update the slider if the user selects a new time from the drop-down box.
     //
@@ -174,24 +257,34 @@ $(function () {
     // Fetch time range and initialize time slider.
     //
     $.getJSON('/api/get-time-range', function (data) {
-        var minimum = data.minimum;
-        var maximum = data.maximum;
+        var minimum = data.minimum / 1E3;
+        var maximum = data.maximum / 1E3;
         
-        $("#slider_min_value").text(new Date(minimum / 1E3));
-        $("#slider_max_value").text(new Date(maximum / 1E3));
-        $("#slider_value").text(new Date(minimum / 1E3));
+        $("#slider_min_value").text(new Date(minimum));
+        $("#slider_max_value").text(new Date(maximum));
+        $("#slider_value").text(new Date(minimum));
  
-        slider.slider({ min: minimum ,
-                        max: maximum,
-                        slide: function (event, ui) {
-                            $("#slider_value").text(new Date(ui.value / 1E3));
-                        },
-                        change: function (event, ui) {
-                            $("#slider_value").text(new Date(ui.value / 1E3));
-                            showEventsAtTime(ui.value);
-                        }});
+        slider.slider({min: minimum ,
+                       max: maximum,
+                       slide: function (event, ui) {
+                           $("#slider_value").text(new Date(ui.value));
+                           showTracksAtTime(ui.value, false);
+                       },
+                       change: function (event, ui) {
+                           $("#slider_value").text(new Date(ui.value));
+                           showTracksAtTime(ui.value, true);
+                       }});
     });
 
+    //
+    // Fetch all track.
+    //
+    $.getJSON("/api/get-tracks",
+              function (data) {
+                  tracks = data;
+                  plotTarmac();
+              });
+    
     regnum.keydown(function (e) {
         var code = e.which;
 
