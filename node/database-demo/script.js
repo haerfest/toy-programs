@@ -304,6 +304,8 @@ $(function () {
         var minimum = data.minimum / 1E3;
         var maximum = data.maximum / 1E3;
         
+        console.log("slider range: " + minimum + " - " + maximum);
+
         $("#slider_min_value").text(new Date(minimum));
         $("#slider_max_value").text(new Date(maximum));
         $("#slider_value").text(new Date(minimum));
@@ -323,36 +325,37 @@ $(function () {
     //
     // Fetch all tracks.
     //
-    $.getJSON("/api/get-tracks",
-              function (data) {
-                  tracks = data;
-              });
+    $.getJSON("/api/get-tracks", function (data) { tracks = data; });
     
     //
     // Fetch all triggers.
     //
-    $.getJSON("/api/get-triggers",
-              function (data) {
-                  triggers = data;
-              });
+    $.getJSON("/api/get-triggers", function (data) { triggers = data; });
 
+    //
+    // Plot the tarmac.
+    //
+    plotTarmac();
+
+    //
+    // Handle the user typing a registration number.
+    //
     regnum.keydown(function (e) {
         var code = e.which;
 
         if (code === 13) {
             e.preventDefault();
-            regnum.attr("disabled", true);
-            slider.slider("disable");
             
-            $.getJSON('api/find-regnum', {'regnum': regnum.val()}, function (data) {
-                rec_time_micros.empty();
-                $.each(data, function () {
-                    rec_time_micros.append($('<option></option>').attr("value", this.rec_time_micros).text(new Date(this.rec_time_micros / 1E3)));
-                });
-                regnum.attr("disabled", false);
-                slider.slider("enable");
-                rec_time_micros.trigger("change");
-            });
+            $.getJSON("api/find-regnum",
+                      {"regnum": regnum.val()},
+                      function (data) {
+                          rec_time_micros.empty();
+                          $.each(data, function () {
+                              var time = this.rec_time_micros / 1E3;
+                              rec_time_micros.append($("<option/>").attr("value", time).text(new Date(time)));
+                          });
+                          rec_time_micros.trigger("change");
+                      });
         }
     });
 });
