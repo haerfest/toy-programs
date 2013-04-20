@@ -1,10 +1,20 @@
 var http    = require("http"),
     fs      = require("fs"),
+    path    = require("path"),
     sqlite3 = require("sqlite3"),
     express = require("express");
 
 var port     = 1337,
-    database = "/home/wouter/projects/vre/database/data-se01x0153mlc010-mpxbulk-1304080700/data-se01x0153mlc010-mpxbulk-1304080700.sqlite3";
+    database = process.argv[2];
+
+//
+// We need to have a database.
+//
+if (!database) {
+    var program_name = path.basename(process.argv[1]);
+    process.stderr.write("Usage: node " + program_name + " <sqlite3 database file>\n");
+    process.exit(1);
+}
 
 var db  = new sqlite3.Database(database),
     app = express();
