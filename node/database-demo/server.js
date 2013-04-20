@@ -124,22 +124,19 @@ app.get("/api/get-track/:id",
 
 app.get("/api/get-tracks",
         function (req, res) {
-            //db.all("select time, pdstrackerevent_id, (left_x + right_x) / 200 as center_x, (left_y + right_y) / 200 as center_y from track_position where time > 0 order by time asc",
             db.all("select id, start_time, start_pos_x / 100 as start_x, start_pos_y / 100 as start_y, end_time, end_pos_x / 100 as end_x, end_pos_y / 100 as end_y from pdstrackerevent",
                    function (err, rows) {
                        res.json(200, rows);
                    });
         });
 
-app.get("/api/get-tracks-at-time", function (req, res) {
-    db.all("select distinct asset_management_id from pdsiitevent order by asset_management_id",
-           function (err, rows) {
-               var asset_management_ids = rows.map(function (r) { return r.asset_management_id; });
-               //returnTracks(req, res, [], asset_management_ids);
-
-
-           });
-});
+app.get("/api/get-triggers",
+        function (req, res) {
+            db.all("select event_time as time, licence_plate as regnum, vehicle_pos_x / 100 as x, vehicle_pos_y / 100 as y from pdsiitevent",
+                   function (err, rows) {
+                       res.json(200, rows);
+                   });
+        });
 
 app.get("/api/get-time-range", function (req, res) {
     db.get("select min(rec_time_micros) as minimum, max(rec_time_micros) as maximum from (select rec_time_micros from pdsiitevent union select rec_time_micros from pdstrackerevent)", function (err, row) {

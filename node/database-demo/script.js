@@ -19,6 +19,7 @@ $(function () {
         height_m     = 2 * 12,
         alpr_m       = 12,
         marker_px    = 7,
+        triggers     = [],
         tracks       = [],
         track_colors = ["gray", "white"];
 
@@ -104,7 +105,7 @@ $(function () {
         ctx.restore();
     };
 
-    var setCanvasOrientationForTrackPlotting = function () {
+    var setCanvasOrienationToRealWorld = function () {
         //
         // Set the canvas origin to the center.
         //
@@ -116,6 +117,37 @@ $(function () {
         // the y-axis vertically increasing upwards.
         //
         ctx.scale(width / width_m , -height / height_m);
+    };
+
+    var plotTrigger = function (trigger) {
+        var col         = Math.floor(width  / 2 + trigger.x * width  / width_m),
+            row         = Math.floor(height / 2 - trigger.y * height / height_m),
+            colors      = (trigger.regnum === "?" ? ["white", "rgba(0,255,0,0.5)"] : ["white", "rgba(0,0,255,0.5)"]),
+            border      = 3,
+            text_height = 16,
+            text_width;
+
+        ctx.save();
+
+        ctx.font = text_height + "px Arial";
+
+        text_width = ctx.measureText(trigger.regnum).width;
+
+        ctx.beginPath();
+        ctx.rect(Math.floor(col - border - text_width / 2), Math.floor(row - border - text_height / 2), text_width + 2 * border, text_height + 2 * border);
+        ctx.fillStyle = colors[1];
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = colors[0];
+        ctx.stroke();
+        
+        ctx.fillStyle    = colors[0];
+        ctx.textBaseline = "middle";
+        ctx.textAlign    = "center";
+
+        ctx.fillText(trigger.regnum, col, row);
+
+        ctx.restore();
     };
 
     var plotTrackEndpoints = function (start_x, start_y, end_x, end_y) {
@@ -132,7 +164,7 @@ $(function () {
 
     var plotTrackSimple = function (track) {
         ctx.save();
-        setCanvasOrientationForTrackPlotting();
+        setCanvasOrienationToRealWorld();
 
         //
         // Draw a simple line between start and end points, which are resident
@@ -162,7 +194,7 @@ $(function () {
         $.getJSON("/api/get-track/" + track.id,
                   function (positions) {
                       ctx.save();
-                      setCanvasOrientationForTrackPlotting();
+                      setCanvasOrienationToRealWorld();
 
                       for (var i = 1; i < positions.length; i += 1) {
                           var percentage = 0.5 + i / (positions.length / 0.5),
@@ -218,7 +250,8 @@ $(function () {
 
     var showTracksAtTime = function (now_msec, detailed) {
         var visibility_msec = 1 * 1E3,
-            threshold_msec  = now_msec - visibility_msec;
+            threshold_msec  = now_msec - visibility_msec,
+            t;
 
         //
         // Clear the tarmac.
@@ -229,7 +262,7 @@ $(function () {
         // Plot those tracks that still have a visible point. Don't plot
         // tracks that haven't started yet.
         //
-        for (var t = 0; t < tracks.length; t +=1) {
+        for (t = 0; t < tracks.length; t +=1) {
             var track = tracks[t];
 
             if (track.start_time <= now_msec && track.end_time > threshold_msec) {
@@ -238,6 +271,17 @@ $(function () {
                 } else {
                     plotTrackSimple(track);
                 }
+            }
+        }
+
+        //
+        // Plot those triggers that occur.
+        //
+        for (t = 0; t < triggers.length; t += 1) {
+            var trigger = triggers[t];
+
+            if (trigger.time > threshold_msec && trigger.time <= now_msec) {
+                plotTrigger(trigger);
             }
         }
 
@@ -277,14 +321,21 @@ $(function () {
     });
 
     //
-    // Fetch all track.
+    // Fetch all tracks.
     //
     $.getJSON("/api/get-tracks",
               function (data) {
                   tracks = data;
-                  plotTarmac();
               });
     
+    //
+    // Fetch all triggers.
+    //
+    $.getJSON("/api/get-triggers",
+              function (data) {
+                  triggers = data;
+              });
+
     regnum.keydown(function (e) {
         var code = e.which;
 
