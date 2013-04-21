@@ -120,34 +120,14 @@ $(function () {
     };
 
     var plotTrigger = function (trigger) {
-        var col         = Math.floor(width  / 2 + trigger.x * width  / width_m),
-            row         = Math.floor(height / 2 - trigger.y * height / height_m),
-            colors      = (trigger.regnum === "?" ? ["white", "rgba(0,255,0,0.5)"] : ["white", "rgba(0,0,255,0.5)"]),
-            border      = 3,
-            text_height = 16,
-            text_width;
+        var col = Math.floor(width  / 2 + trigger.x * width  / width_m),
+            row = Math.floor(height / 2 - trigger.y * height / height_m),
+            div = $("<div/>",
+                    {"class": "regnum",
+                     text: trigger.regnum,
+                     style: "position:absolute;top:" + row + "px;left:" + col + "px"});
 
-        ctx.save();
-
-        ctx.font = text_height + "px Arial";
-
-        text_width = ctx.measureText(trigger.regnum).width;
-
-        ctx.beginPath();
-        ctx.rect(Math.floor(col - border - text_width / 2), Math.floor(row - border - text_height / 2), text_width + 2 * border, text_height + 2 * border);
-        ctx.fillStyle = colors[1];
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = colors[0];
-        ctx.stroke();
-        
-        ctx.fillStyle    = colors[0];
-        ctx.textBaseline = "middle";
-        ctx.textAlign    = "center";
-
-        ctx.fillText(trigger.regnum, col, row);
-
-        ctx.restore();
+        div.appendTo("#container");
     };
 
     var plotTrackEndpoints = function (start_x, start_y, end_x, end_y) {
@@ -275,6 +255,11 @@ $(function () {
         }
 
         //
+        // Remove old triggers.
+        //
+        $(".regnum").remove();
+
+        //
         // Plot those triggers that occur.
         //
         for (t = 0; t < triggers.length; t += 1) {
@@ -335,7 +320,7 @@ $(function () {
     //
     // Plot the tarmac.
     //
-    plotTarmac();
+    // plotTarmac();
 
     //
     // Handle the user typing a registration number.

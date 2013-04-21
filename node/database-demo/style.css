@@ -8,7 +8,31 @@
     padding: 2px;
 }
 
-canvas {
+div.regnum {
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    border: 2px white;
+    background: blue;
+    color: white;
+    opacity: 0.25;
+}
+
+div.regnum:hover {
+    opacity: 1.0;
+    font-size: 20px;
+    z-index: 1;
+}
+
+#container {
+    position: relative;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+}
+
+#canvas {
     border: 2px solid gray;
     padding-left: 0;
     padding-right: 0;
