@@ -14,18 +14,22 @@
 
   <body>
 
-    <div id="slider_min_value"></div>
     <div id="slider"></div>
-    <div id="slider_max_value"></div>
-    <div id="slider_value"></div>
-    
-    <form>
-      Registration number: <input type="text" id="regnum"><br>
-      Recording time (UTC):
-      <select id="rec_time_micros">
-      </select>
-    </form>
+    <div id="slider_container">
+      <div id="slider_min_value"></div>
+      <div id="slider_value"></div>
+      <div id="slider_max_value"></div>
+    </div>
 
+    <div id="search_container">
+      <form>
+        Registration number: <input type="text" id="regnum"><br>
+        Recording time:
+        <select id="rec_time_micros">
+        </select>
+      </form>
+    </div>
+    
     <div id="container">
       <canvas id="canvas" width="800" height="400"></canvas>
     </div>

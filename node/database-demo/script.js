@@ -15,7 +15,7 @@ $(function () {
         ctx          = canvas.getContext("2d"),
         width        = canvas.width,
         height       = canvas.height,
-        width_m      = 2 * 24,
+        width_m      = 2 * 25,
         height_m     = 2 * 12,
         alpr_m       = 12,
         marker_px    = 7,
@@ -122,12 +122,14 @@ $(function () {
     var plotTrigger = function (trigger) {
         var col = Math.floor(width  / 2 + trigger.x * width  / width_m),
             row = Math.floor(height / 2 - trigger.y * height / height_m),
-            div = $("<div/>",
-                    {"class": "regnum",
+            a   = $("<a/>",
+                    {"class": (trigger.regnum === "?" ? "questionmark" : "regnum"),
+                     href: "api/get-trigger-image/" + trigger.id,
+                     target: "_blank",
                      text: trigger.regnum,
                      style: "position:absolute;top:" + row + "px;left:" + col + "px"});
 
-        div.appendTo("#container");
+        a.appendTo("#container");
     };
 
     var plotTrackEndpoints = function (start_x, start_y, end_x, end_y) {
@@ -258,6 +260,7 @@ $(function () {
         // Remove old triggers.
         //
         $(".regnum").remove();
+        $(".questionmark").remove();
 
         //
         // Plot those triggers that occur.
@@ -320,7 +323,7 @@ $(function () {
     //
     // Plot the tarmac.
     //
-    // plotTarmac();
+    plotTarmac();
 
     //
     // Handle the user typing a registration number.

@@ -96,7 +96,7 @@ function returnTracks (req, res, json, asset_management_ids) {
     }
 }
 
-app.get("/api/get-image/:id", function (req, res) {
+app.get("/api/get-trigger-image/:id", function (req, res) {
     db.get("select image from pdsiitevent where id = ?", req.param("id"), function (err, row) {
         if (!err && row) {
             res.writeHead(200, {"Content-Type": "image/jpeg"});
@@ -132,7 +132,7 @@ app.get("/api/get-tracks",
 
 app.get("/api/get-triggers",
         function (req, res) {
-            db.all("select event_time as time, licence_plate as regnum, vehicle_pos_x / 100 as x, vehicle_pos_y / 100 as y from pdsiitevent",
+            db.all("select id, event_time as time, licence_plate as regnum, vehicle_pos_x / 100 as x, vehicle_pos_y / 100 as y from pdsiitevent",
                    function (err, rows) {
                        res.json(200, rows);
                    });

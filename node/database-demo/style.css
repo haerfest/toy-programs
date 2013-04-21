@@ -1,3 +1,13 @@
+body {
+    font-family: Helvetica, sans-serif, arial;
+    font-size: 12px;
+}
+
+#search_container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 #images {
     width: 100%;
 }
@@ -8,19 +18,67 @@
     padding: 2px;
 }
 
-div.regnum {
+#slider {
+    width: 80%;
+    margin-left: 10%;
+}
+
+#slider_container {
+    margin-top: 5px;
+    width: 100%;
+    overflow: auto;
+}
+
+#slider_min_value {
+    text-align: left;
+    float: left;
+    width: 33%;
+}
+
+#slider_value {
+    text-align: center;
+    float: left;
+    width: 34%;
+}
+
+#slider_max_value {
+    text-align: right;
+    float: right;
+    width: 33%;
+}
+
+a.questionmark {
     font-family: Helvetica, sans-serif;
     font-size: 12px;
     border: 2px white;
-    background: blue;
+    background: red;
     color: white;
     opacity: 0.25;
+    text-decoration: none;
 }
 
-div.regnum:hover {
+a.questionmark:hover {
     opacity: 1.0;
     font-size: 20px;
     z-index: 1;
+    text-decoration: none;
+}
+
+a.regnum {
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    border: 2px white;
+    background: green;
+    color: white;
+    opacity: 0.25;
+    text-decoration: none;
+}
+
+a.regnum:hover {
+    opacity: 1.0;
+    font-size: 20px;
+    z-index: 1;
+    text-decoration: none;
 }
 
 #container {
