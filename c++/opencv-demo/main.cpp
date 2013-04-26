@@ -6,7 +6,12 @@ using namespace std;
 using namespace cv;
 
 
-int main(int argc, char *argv[])
+// Forward declarations.
+static void playVideo (const string video_file);
+
+
+// Main program.
+int main (int argc, char *argv[])
 {
   // We need a video file as the only parameter.
   if (argc != 2) {
@@ -14,13 +19,21 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  // Open the video.
-  const string video_file = argv[1];
+  // Play the video.
+  playVideo(argv[1]);
+
+  return 0;
+}
+
+
+// Plays a video file.
+static void playVideo (const string video_file)
+{
   VideoCapture capture(video_file);
   
   if (!capture.isOpened()) {
     cerr << "Could not open video file " << video_file << endl;
-    return 1;
+    return;
   }
 
   // Retrieve the frame rate.
@@ -41,6 +54,6 @@ int main(int argc, char *argv[])
 
   // Release the video.
   capture.release();
-
-  return 0;
 }
+
+
