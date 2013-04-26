@@ -44,9 +44,11 @@ static void playVideo (const string video_file)
   const string window_title = "Video";
   const int    escape_key   = 27;
   Mat          image;
+  Mat          colored_image;
   
   while (capture.read(image)) {
-    imshow(window_title, image);
+    applyColorMap(image, colored_image, COLORMAP_JET);
+    imshow(window_title, colored_image);
     if (waitKey(inter_frame_delay) == escape_key) {
       break;
     }
