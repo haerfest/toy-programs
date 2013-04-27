@@ -14,6 +14,7 @@ using namespace cv;
 #define NEW_GAUSSIAN_WEIGHT              0.01
 #define LEARNING_RATE                    0.01
 #define PI                               3.14159265359
+#define T                                0.5
 
 
 // Types.
@@ -31,10 +32,12 @@ static void   playVideo (const string video_file, const unsigned int start_secon
 static bool   findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index);
 static void   deleteLeastProbableGaussian (GaussianMixture &gaussians);
 static bool   compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
+static bool   compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
 static void   addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel);
 static void   adjustWeights (GaussianMixture& gaussians, const int match_index = -1);
 static void   updateMatchingGaussian (Gaussian* gaussians, const unsigned char pixel);
 static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel);
+static void   selectGaussiansForBackgroundModel (GaussianMixture& gaussians);
 
 
 // Main program.
@@ -113,6 +116,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         if (foundMatch) {
           updateMatchingGaussian(gaussians[match_index], pixel);
         }
+
+        selectGaussiansForBackgroundModel(gaussians);
       }
     }
     
@@ -129,11 +134,12 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index) {
   for (int index = 0; index < gaussians.size(); index++) {
     if (abs(gaussians[index]->mean - pixel) <= 2 * gaussians[index]->standard_deviation) {
-      return index;
+      match_index = index;
+      return true;
     }
   }
 
-  return -1;
+  return false;
 }
 
 
@@ -148,6 +154,14 @@ static void deleteLeastProbableGaussian (GaussianMixture& gaussians) {
 
 static bool compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b) {
   return (a->weight > b->weight);
+}
+
+
+static bool compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b) {
+  const double ratio_a = a->weight / (a->standard_deviation * a->standard_deviation);
+  const double ratio_b = b->weight / (b->standard_deviation * b->standard_deviation);
+
+  return (ratio_a > ratio_b);
 }
 
 
@@ -196,4 +210,26 @@ static double calculateGaussian (const Gaussian* gaussian, const unsigned char p
   const double variance = gaussian->standard_deviation * gaussian->standard_deviation;
   
   return exp(-0.5 * (pixel - gaussian->mean) * (1 / variance) * (pixel - gaussian->mean)) / (sqrt(2 * PI) * gaussian->standard_deviation);
+}
+
+
+static void selectGaussiansForBackgroundModel (GaussianMixture& gaussians) {
+  sort(gaussians.begin(), gaussians.end(), compareGaussiansDecreasingByWeightOverVariance);
+
+  double weights_summed = 0;
+  for (int i = 0; i < gaussians.size(); i++) {
+    weights_summed += gaussians[i]->weight;
+  }
+
+  int    b                      = 0;
+  double first_b_weights_summed = 0;
+  while (b < gaussians.size() && first_b_weights_summed / weights_summed <= T) {
+    first_b_weights_summed += gaussians[b]->weight;
+    b++;
+  }
+
+  for (int i = gaussians.size() - 1; i >= b; i--) {
+    delete gaussians[i];
+    gaussians.pop_back();
+  }
 }
