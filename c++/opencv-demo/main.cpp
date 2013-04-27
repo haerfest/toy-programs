@@ -1,10 +1,18 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <opencv2/opencv.hpp>
 
 
 using namespace std;
 using namespace cv;
+
+
+// Defines.
+#define MAX_GAUSSIANS_PER_PIXEL          3
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  25
+#define NEW_GAUSSIAN_WEIGHT              0.01
+#define LEARNING_RATE                    0.01
 
 
 // Types.
@@ -14,11 +22,16 @@ typedef struct {
   double weight;
 } Gaussian;
 
-typedef vector<Gaussian> GaussianMixture;
+typedef vector<Gaussian*> GaussianMixture;
 
 
 // Forward declarations.
 static void playVideo (const string video_file, const unsigned int start_seconds);
+static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index);
+static void deleteLeastProbableGaussian (GaussianMixture &gaussians);
+static bool compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
+static void addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel);
+static void adjustWeights (GaussianMixture& gaussians, const int match_index = -1);
 
 
 // Main program.
@@ -64,14 +77,37 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   // Show the video.
   const int       escape_key   = 27;
-  Mat             colored_image;
   GaussianMixture gaussian_mixture[image.rows][image.cols];
   
   while (capture.read(image)) {
-    imshow("Input", image);
-    
+    Mat grayscale_image;
+    cvtColor(image, grayscale_image, CV_RGB2GRAY);
+    imshow("Grayscale", grayscale_image);
+
+    Mat colored_image;
     applyColorMap(image, colored_image, COLORMAP_JET);
     imshow("Colormap", colored_image);
+
+    for (int row = 0; row < image.rows; row++) {
+      for (int col = 0; col < image.cols; col++) {
+        GaussianMixture     gaussians  = gaussian_mixture[row][col];
+        const unsigned char pixel      = grayscale_image.at<unsigned char>(row, col);
+        int                 match_index;
+        const bool          foundMatch = findMatchingGaussian(pixel, gaussians, match_index);
+
+        if (!foundMatch) {
+          deleteLeastProbableGaussian(gaussians);
+          addNewGaussian(gaussians, pixel);
+          adjustWeights(gaussians, match_index);
+        }
+
+        if (foundMatch) {
+          adjustWeights(gaussians, match_index);
+        } else {
+          adjustWeights(gaussians);
+        }
+      }
+    }
     
     if (waitKey(inter_frame_delay) == escape_key) {
       break;
@@ -80,4 +116,61 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   // Release the video.
   capture.release();
+}
+
+
+static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index) {
+  for (int index = 0; index < gaussians.size(); index++) {
+    if (abs(gaussians[index]->mean - pixel) <= 2 * gaussians[index]->standard_deviation) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+
+static void deleteLeastProbableGaussian (GaussianMixture& gaussians) {
+  if (gaussians.size() == MAX_GAUSSIANS_PER_PIXEL) {
+    sort(gaussians.begin(), gaussians.end(), compareGaussiansDecreasingByWeight);
+    delete gaussians[MAX_GAUSSIANS_PER_PIXEL - 1];
+    gaussians.pop_back();
+  }    
+}
+
+
+static bool compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b) {
+  return (a->weight > b->weight);
+}
+
+
+static void addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel) {
+  Gaussian *gaussian = new Gaussian();
+
+  gaussian->mean               = pixel;
+  gaussian->standard_deviation = NEW_GAUSSIAN_STANDARD_DEVIATION;
+  gaussian->weight             = NEW_GAUSSIAN_WEIGHT;
+
+  gaussians.push_back(gaussian);
+}
+
+
+static void adjustWeights (GaussianMixture& gaussians, const int match_index) {
+  double sum = 0;
+
+  for (int index = 0; index < gaussians.size(); index++) {
+    Gaussian *gaussian = gaussians[index];
+
+    if (index == match_index) {
+      gaussian->weight = (1 - LEARNING_RATE) * gaussian->weight + LEARNING_RATE;
+    } else {
+      gaussian->weight = (1 - LEARNING_RATE) * gaussian->weight;
+    }
+
+    sum += gaussian->weight;
+  }
+
+  for (int index = 0; index < gaussians.size(); index++) {
+    gaussians[index]->weight /= sum;
+  }
 }
