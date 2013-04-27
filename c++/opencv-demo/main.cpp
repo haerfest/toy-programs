@@ -10,9 +10,9 @@ using namespace cv;
 
 // Defines.
 #define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  2
-#define NEW_GAUSSIAN_WEIGHT              0.000001
-#define LEARNING_RATE                    0.001
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  3
+#define NEW_GAUSSIAN_WEIGHT              0.001
+#define LEARNING_RATE                    0.01
 #define PI                               3.14159265359
 #define T                                0.6
 
@@ -86,6 +86,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const int       escape_key = 27;
   GaussianMixture gaussian_mixture[image.rows][image.cols];
   Mat             background_model(image.rows, image.cols, CV_8UC1);
+  Mat             foreground_image(image.rows, image.cols, CV_8UC1);
   
   while (capture.read(image)) {
     Mat grayscale_image;
@@ -95,6 +96,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     Mat colored_image;
     applyColorMap(image, colored_image, COLORMAP_JET);
     imshow("Input:colormap", colored_image);
+
+    foreground_image.setTo(0);
 
     for (int row = 0; row < image.rows; row++) {
       for (int col = 0; col < image.cols; col++) {
@@ -120,6 +123,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
 
         background_model.at<unsigned char>(row, col) = selectGaussiansForBackgroundModel(gaussians);
+
+        if (!foundMatch) {
+          foreground_image.at<unsigned char>(row, col) = 255;
+        }
       }
     }
     imshow("Background:grayscale", background_model);
@@ -127,6 +134,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     Mat colored_background_model;
     applyColorMap(background_model, colored_background_model, COLORMAP_JET);
     imshow("Background:colormap", colored_background_model);
+
+    imshow("Foreground:b/w", foreground_image);
 
     if (waitKey(inter_frame_delay) == escape_key) {
       break;
