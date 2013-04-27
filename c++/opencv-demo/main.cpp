@@ -13,6 +13,7 @@ using namespace cv;
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  25
 #define NEW_GAUSSIAN_WEIGHT              0.01
 #define LEARNING_RATE                    0.01
+#define PI                               3.14159265359
 
 
 // Types.
@@ -26,12 +27,14 @@ typedef vector<Gaussian*> GaussianMixture;
 
 
 // Forward declarations.
-static void playVideo (const string video_file, const unsigned int start_seconds);
-static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index);
-static void deleteLeastProbableGaussian (GaussianMixture &gaussians);
-static bool compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
-static void addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel);
-static void adjustWeights (GaussianMixture& gaussians, const int match_index = -1);
+static void   playVideo (const string video_file, const unsigned int start_seconds);
+static bool   findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index);
+static void   deleteLeastProbableGaussian (GaussianMixture &gaussians);
+static bool   compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
+static void   addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel);
+static void   adjustWeights (GaussianMixture& gaussians, const int match_index = -1);
+static void   updateMatchingGaussian (Gaussian* gaussians, const unsigned char pixel);
+static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel);
 
 
 // Main program.
@@ -106,6 +109,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         } else {
           adjustWeights(gaussians);
         }
+
+        if (foundMatch) {
+          updateMatchingGaussian(gaussians[match_index], pixel);
+        }
       }
     }
     
@@ -145,7 +152,7 @@ static bool compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussia
 
 
 static void addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel) {
-  Gaussian *gaussian = new Gaussian();
+  Gaussian* gaussian = new Gaussian();
 
   gaussian->mean               = pixel;
   gaussian->standard_deviation = NEW_GAUSSIAN_STANDARD_DEVIATION;
@@ -173,4 +180,20 @@ static void adjustWeights (GaussianMixture& gaussians, const int match_index) {
   for (int index = 0; index < gaussians.size(); index++) {
     gaussians[index]->weight /= sum;
   }
+}
+
+
+static void updateMatchingGaussian (Gaussian* gaussian, const unsigned char pixel) {
+  const double rho      = LEARNING_RATE * calculateGaussian(gaussian, pixel);
+  const double variance = (1 - rho) * (gaussian->standard_deviation * gaussian->standard_deviation) + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
+    
+  gaussian->mean               = (1 - rho) * gaussian->mean + rho * pixel;
+  gaussian->standard_deviation = sqrt(variance);
+}
+
+
+static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel) {
+  const double variance = gaussian->standard_deviation * gaussian->standard_deviation;
+  
+  return exp(-0.5 * (pixel - gaussian->mean) * (1 / variance) * (pixel - gaussian->mean)) / (sqrt(2 * PI) * gaussian->standard_deviation);
 }
