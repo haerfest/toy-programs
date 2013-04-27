@@ -29,15 +29,15 @@ typedef vector<Gaussian*> GaussianMixture;
 
 // Forward declarations.
 static void   playVideo (const string video_file, const unsigned int start_seconds);
-static bool   findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index);
-static void   deleteLeastProbableGaussian (GaussianMixture &gaussians);
+static bool   findMatchingGaussian (const unsigned char pixel, const GaussianMixture* gaussians, int* match_index);
+static void   deleteLeastProbableGaussian (GaussianMixture* gaussians);
 static bool   compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
 static bool   compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
-static void   addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel);
-static void   adjustWeights (GaussianMixture& gaussians, const int match_index = -1);
+static void   addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel);
+static void   adjustWeights (GaussianMixture* gaussians, const int match_index = -1);
 static void   updateMatchingGaussian (Gaussian* gaussians, const unsigned char pixel);
 static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel);
-static void   selectGaussiansForBackgroundModel (GaussianMixture& gaussians);
+static void   selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
 
 
 // Main program.
@@ -96,17 +96,17 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
     for (int row = 0; row < image.rows; row++) {
       for (int col = 0; col < image.cols; col++) {
-        GaussianMixture     gaussians  = gaussian_mixture[row][col];
-        const unsigned char pixel      = grayscale_image.at<unsigned char>(row, col);
-        int                 match_index;
-        const bool          foundMatch = findMatchingGaussian(pixel, gaussians, match_index);
+        GaussianMixture     *gaussians  = &gaussian_mixture[row][col];
+        const unsigned char  pixel      = grayscale_image.at<unsigned char>(row, col);
+        int                  match_index;
+        const bool           foundMatch = findMatchingGaussian(pixel, gaussians, &match_index);
 
         if (!foundMatch) {
           deleteLeastProbableGaussian(gaussians);
           addNewGaussian(gaussians, pixel);
           adjustWeights(gaussians, match_index);
         }
-
+#if 0
         if (foundMatch) {
           adjustWeights(gaussians, match_index);
         } else {
@@ -118,6 +118,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
 
         selectGaussiansForBackgroundModel(gaussians);
+#endif
       }
     }
     
@@ -131,10 +132,11 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 }
 
 
-static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixture gaussians, int& match_index) {
-  for (int index = 0; index < gaussians.size(); index++) {
-    if (abs(gaussians[index]->mean - pixel) <= 2 * gaussians[index]->standard_deviation) {
-      match_index = index;
+static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixture* gaussians, int* match_index) {
+  for (int index = 0; index < gaussians->size(); index++) {
+    const Gaussian *gaussian = (*gaussians)[index];      
+    if (abs(gaussian->mean - pixel) <= 2 * gaussian->standard_deviation) {
+      *match_index = index;
       return true;
     }
   }
@@ -143,11 +145,11 @@ static bool findMatchingGaussian (const unsigned char pixel, const GaussianMixtu
 }
 
 
-static void deleteLeastProbableGaussian (GaussianMixture& gaussians) {
-  if (gaussians.size() == MAX_GAUSSIANS_PER_PIXEL) {
-    sort(gaussians.begin(), gaussians.end(), compareGaussiansDecreasingByWeight);
-    delete gaussians[MAX_GAUSSIANS_PER_PIXEL - 1];
-    gaussians.pop_back();
+static void deleteLeastProbableGaussian (GaussianMixture* gaussians) {
+  if (gaussians->size() == MAX_GAUSSIANS_PER_PIXEL) {
+    sort(gaussians->begin(), gaussians->end(), compareGaussiansDecreasingByWeight);
+    delete (*gaussians)[MAX_GAUSSIANS_PER_PIXEL - 1];
+    gaussians->pop_back();
   }    
 }
 
@@ -165,22 +167,22 @@ static bool compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, c
 }
 
 
-static void addNewGaussian (GaussianMixture& gaussians, const unsigned char pixel) {
+static void addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel) {
   Gaussian* gaussian = new Gaussian();
 
   gaussian->mean               = pixel;
   gaussian->standard_deviation = NEW_GAUSSIAN_STANDARD_DEVIATION;
   gaussian->weight             = NEW_GAUSSIAN_WEIGHT;
 
-  gaussians.push_back(gaussian);
+  gaussians->push_back(gaussian);
 }
 
 
-static void adjustWeights (GaussianMixture& gaussians, const int match_index) {
+static void adjustWeights (GaussianMixture* gaussians, const int match_index) {
   double sum = 0;
 
-  for (int index = 0; index < gaussians.size(); index++) {
-    Gaussian *gaussian = gaussians[index];
+  for (int index = 0; index < gaussians->size(); index++) {
+    Gaussian *gaussian = (*gaussians)[index];
 
     if (index == match_index) {
       gaussian->weight = (1 - LEARNING_RATE) * gaussian->weight + LEARNING_RATE;
@@ -191,8 +193,9 @@ static void adjustWeights (GaussianMixture& gaussians, const int match_index) {
     sum += gaussian->weight;
   }
 
-  for (int index = 0; index < gaussians.size(); index++) {
-    gaussians[index]->weight /= sum;
+  for (int index = 0; index < gaussians->size(); index++) {
+    Gaussian *gaussian = (*gaussians)[index];
+    gaussian->weight /= sum;
   }
 }
 
@@ -213,23 +216,26 @@ static double calculateGaussian (const Gaussian* gaussian, const unsigned char p
 }
 
 
-static void selectGaussiansForBackgroundModel (GaussianMixture& gaussians) {
-  sort(gaussians.begin(), gaussians.end(), compareGaussiansDecreasingByWeightOverVariance);
+static void selectGaussiansForBackgroundModel (GaussianMixture* gaussians) {
+  sort(gaussians->begin(), gaussians->end(), compareGaussiansDecreasingByWeightOverVariance);
 
   double weights_summed = 0;
-  for (int i = 0; i < gaussians.size(); i++) {
-    weights_summed += gaussians[i]->weight;
+  for (int i = 0; i < gaussians->size(); i++) {
+    const Gaussian *gaussian = (*gaussians)[i];
+    weights_summed += gaussian->weight;
   }
 
   int    b                      = 0;
   double first_b_weights_summed = 0;
-  while (b < gaussians.size() && first_b_weights_summed / weights_summed <= T) {
-    first_b_weights_summed += gaussians[b]->weight;
+  while (b < gaussians->size() && first_b_weights_summed / weights_summed <= T) {
+    const Gaussian *gaussian = (*gaussians)[b];
+    first_b_weights_summed += gaussian->weight;
     b++;
   }
 
-  for (int i = gaussians.size() - 1; i >= b; i--) {
-    delete gaussians[i];
-    gaussians.pop_back();
+  for (int i = gaussians->size() - 1; i >= b; i--) {
+    Gaussian *gaussian = (*gaussians)[i];
+    delete gaussian;
+    gaussians->pop_back();
   }
 }
