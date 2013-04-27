@@ -10,11 +10,11 @@ using namespace cv;
 
 // Defines.
 #define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  25
-#define NEW_GAUSSIAN_WEIGHT              0.01
-#define LEARNING_RATE                    0.01
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  2
+#define NEW_GAUSSIAN_WEIGHT              0.000001
+#define LEARNING_RATE                    0.001
 #define PI                               3.14159265359
-#define T                                0.5
+#define T                                0.6
 
 
 // Types.
@@ -28,16 +28,17 @@ typedef vector<Gaussian*> GaussianMixture;
 
 
 // Forward declarations.
-static void   playVideo (const string video_file, const unsigned int start_seconds);
-static bool   findMatchingGaussian (const unsigned char pixel, const GaussianMixture* gaussians, int* match_index);
-static void   deleteLeastProbableGaussian (GaussianMixture* gaussians);
-static bool   compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
-static bool   compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
-static void   addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel);
-static void   adjustWeights (GaussianMixture* gaussians, const int match_index = -1);
-static void   updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel);
-static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel);
-static void   selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
+static void          addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel);
+static void          adjustWeights (GaussianMixture* gaussians, const int match_index = -1);
+static double        calculateGaussianProbability (const GaussianMixture* gaussians, const unsigned char pixel);
+static bool          compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
+static bool          compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
+static void          deleteLeastProbableGaussian (GaussianMixture* gaussians);
+static bool          findMatchingGaussian (const unsigned char pixel, const GaussianMixture* gaussians, int* match_index);
+static void          normalizeWeights (GaussianMixture *gaussians);
+static void          playVideo (const string video_file, const unsigned int start_seconds);
+static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
+static void          updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel);
 
 
 // Main program.
@@ -82,17 +83,18 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   (void) capture.set(CV_CAP_PROP_POS_MSEC, start_seconds * 1000);
 
   // Show the video.
-  const int       escape_key   = 27;
+  const int       escape_key = 27;
   GaussianMixture gaussian_mixture[image.rows][image.cols];
+  Mat             background_model(image.rows, image.cols, CV_8UC1);
   
   while (capture.read(image)) {
     Mat grayscale_image;
     cvtColor(image, grayscale_image, CV_RGB2GRAY);
-    imshow("Grayscale", grayscale_image);
+    imshow("Input:grayscale", grayscale_image);
 
     Mat colored_image;
     applyColorMap(image, colored_image, COLORMAP_JET);
-    imshow("Colormap", colored_image);
+    imshow("Input:colormap", colored_image);
 
     for (int row = 0; row < image.rows; row++) {
       for (int col = 0; col < image.cols; col++) {
@@ -117,10 +119,15 @@ static void playVideo (const string video_file, const unsigned int start_seconds
           updateMatchingGaussian(gaussians, match_index, pixel);
         }
 
-        selectGaussiansForBackgroundModel(gaussians);
+        background_model.at<unsigned char>(row, col) = selectGaussiansForBackgroundModel(gaussians);
       }
     }
-    
+    imshow("Background:grayscale", background_model);
+
+    Mat colored_background_model;
+    applyColorMap(background_model, colored_background_model, COLORMAP_JET);
+    imshow("Background:colormap", colored_background_model);
+
     if (waitKey(inter_frame_delay) == escape_key) {
       break;
     }
@@ -188,7 +195,17 @@ static void adjustWeights (GaussianMixture* gaussians, const int match_index) {
     } else {
       gaussian->weight = (1 - LEARNING_RATE) * gaussian->weight;
     }
+  }
 
+  normalizeWeights(gaussians);
+}
+
+
+static void normalizeWeights (GaussianMixture *gaussians) {
+  double sum = 0;
+
+  for (int index = 0; index < gaussians->size(); index++) {
+    Gaussian *gaussian = (*gaussians)[index];
     sum += gaussian->weight;
   }
 
@@ -201,22 +218,28 @@ static void adjustWeights (GaussianMixture* gaussians, const int match_index) {
 
 static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_index, const unsigned char pixel) {
   Gaussian*    gaussian = (*gaussians)[match_index];
-  const double rho      = LEARNING_RATE * calculateGaussian(gaussian, pixel);
-  const double variance = (1 - rho) * (gaussian->standard_deviation * gaussian->standard_deviation) + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
+  const double rho      = LEARNING_RATE * calculateGaussianProbability(gaussians, pixel);
+  const double variance = (1 - rho) * gaussian->standard_deviation * gaussian->standard_deviation + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
     
   gaussian->mean               = (1 - rho) * gaussian->mean + rho * pixel;
   gaussian->standard_deviation = sqrt(variance);
 }
 
 
-static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel) {
-  const double variance = gaussian->standard_deviation * gaussian->standard_deviation;
-  
-  return exp(-0.5 * (pixel - gaussian->mean) * (1 / variance) * (pixel - gaussian->mean)) / (sqrt(2 * PI) * gaussian->standard_deviation);
+static double calculateGaussianProbability (const GaussianMixture* gaussians, const unsigned char pixel) {
+  double probability = 0;
+
+  for (int i = 0; i < gaussians->size(); i++) {
+    const Gaussian *gaussian = (*gaussians)[i];
+    const double    variance = gaussian->standard_deviation * gaussian->standard_deviation;
+    probability += exp(-0.5 * (pixel - gaussian->mean) * (1 / variance) * (pixel - gaussian->mean)) / (sqrt(2 * PI) * gaussian->standard_deviation);
+  }
+
+  return probability;
 }
 
 
-static void selectGaussiansForBackgroundModel (GaussianMixture* gaussians) {
+static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussians) {
   sort(gaussians->begin(), gaussians->end(), compareGaussiansDecreasingByWeightOverVariance);
 
   double weights_summed = 0;
@@ -233,9 +256,33 @@ static void selectGaussiansForBackgroundModel (GaussianMixture* gaussians) {
     b++;
   }
 
+  // normalizeWeights(gaussians);
+
+  double pixel = 0;
+  for (int i = 0; i < b; i++) {
+    const Gaussian* gaussian = (*gaussians)[i];
+    pixel += gaussian->weight * gaussian->mean;
+  }
+
+  return (unsigned char) pixel;
+
+#if 0
   for (int i = gaussians->size() - 1; i >= b; i--) {
     Gaussian *gaussian = (*gaussians)[i];
     delete gaussian;
     gaussians->pop_back();
   }
+#endif
+}
+
+
+static unsigned char calculateBackgroundPixel (const GaussianMixture* gaussians) {
+  unsigned char pixel = 0;
+
+  for (int i = 0; i < gaussians->size(); i++) {
+    const Gaussian* gaussian = (*gaussians)[i];
+    pixel += gaussian->weight * gaussian->mean;
+  }
+
+  return pixel;
 }
