@@ -35,7 +35,7 @@ static bool   compareGaussiansDecreasingByWeight (const Gaussian* a, const Gauss
 static bool   compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
 static void   addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel);
 static void   adjustWeights (GaussianMixture* gaussians, const int match_index = -1);
-static void   updateMatchingGaussian (Gaussian* gaussians, const unsigned char pixel);
+static void   updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel);
 static double calculateGaussian (const Gaussian* gaussian, const unsigned char pixel);
 static void   selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
 
@@ -106,7 +106,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
           addNewGaussian(gaussians, pixel);
           adjustWeights(gaussians, match_index);
         }
-#if 0
+
         if (foundMatch) {
           adjustWeights(gaussians, match_index);
         } else {
@@ -114,11 +114,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
 
         if (foundMatch) {
-          updateMatchingGaussian(gaussians[match_index], pixel);
+          updateMatchingGaussian(gaussians, match_index, pixel);
         }
 
         selectGaussiansForBackgroundModel(gaussians);
-#endif
       }
     }
     
@@ -200,7 +199,8 @@ static void adjustWeights (GaussianMixture* gaussians, const int match_index) {
 }
 
 
-static void updateMatchingGaussian (Gaussian* gaussian, const unsigned char pixel) {
+static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_index, const unsigned char pixel) {
+  Gaussian*    gaussian = (*gaussians)[match_index];
   const double rho      = LEARNING_RATE * calculateGaussian(gaussian, pixel);
   const double variance = (1 - rho) * (gaussian->standard_deviation * gaussian->standard_deviation) + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
     
