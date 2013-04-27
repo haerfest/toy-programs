@@ -256,8 +256,6 @@ static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussia
     b++;
   }
 
-  // normalizeWeights(gaussians);
-
   double pixel = 0;
   for (int i = 0; i < b; i++) {
     const Gaussian* gaussian = (*gaussians)[i];
@@ -265,14 +263,6 @@ static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussia
   }
 
   return (unsigned char) pixel;
-
-#if 0
-  for (int i = gaussians->size() - 1; i >= b; i--) {
-    Gaussian *gaussian = (*gaussians)[i];
-    delete gaussian;
-    gaussians->pop_back();
-  }
-#endif
 }
 
 
