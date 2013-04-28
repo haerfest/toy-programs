@@ -41,6 +41,7 @@ static void          normalizeWeights (GaussianMixture *gaussians);
 static void          playVideo (const string video_file, const unsigned int start_seconds);
 static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
 static void          updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel);
+static void          onMouseEvent (int event, int x, int y, int, void*);
 
 
 // Main program.
@@ -93,17 +94,36 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const int       gaussian_image_height = 100;
   Mat             gaussian_image(gaussian_image_height, 256, CV_8UC1);
 
+  // Create windows and attach mouse handlers.
+  const string input_grayscale_window      = "Input:grayscale";
+  const string input_colormap_window       = "Input:colormap";
+  const string background_grayscale_window = "Background:grayscale";
+  const string background_colormap_window  = "Background:colormap";
+  const string foreground_bw_window        = "Foreground:bw";
+  const string gaussian_histogram_window   = "Gaussian:histogram";
+
+  CvPoint clicked_point = {image.cols / 2, image.rows / 2};
+  namedWindow(input_grayscale_window);      setMouseCallback(input_grayscale_window,      onMouseEvent, &clicked_point);
+  namedWindow(input_colormap_window);       setMouseCallback(input_colormap_window,       onMouseEvent, &clicked_point);
+  namedWindow(background_grayscale_window); setMouseCallback(background_grayscale_window, onMouseEvent, &clicked_point);
+  namedWindow(background_colormap_window);  setMouseCallback(background_colormap_window,  onMouseEvent, &clicked_point);
+  namedWindow(foreground_bw_window);        setMouseCallback(foreground_bw_window,        onMouseEvent, &clicked_point);
+  namedWindow(gaussian_histogram_window);
+ 
   while (capture.read(image)) {
+    // Show the input in grayscale.
     Mat grayscale_image;
     cvtColor(image, grayscale_image, CV_RGB2GRAY);
-    imshow("Input:grayscale", grayscale_image);
+    imshow(input_grayscale_window, grayscale_image);
 
+    // Show the input with a colormap applied.
     Mat colored_image;
     applyColorMap(image, colored_image, COLORMAP_JET);
-    imshow("Input:colormap", colored_image);
+    imshow(input_colormap_window, colored_image);
 
     foreground_image.setTo(0);
 
+    // Apply the GMM algorithm to create a model of the background.
     for (int row = 0; row < image.rows; row++) {
       for (int col = 0; col < image.cols; col++) {
         GaussianMixture     *gaussians  = &gaussian_mixture[row][col];
@@ -134,16 +154,19 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
       }
     }
-    imshow("Background:grayscale", background_model);
+    imshow(background_grayscale_window, background_model);
 
+    // Show the background model with a colormap applied.
     Mat colored_background_model;
     applyColorMap(background_model, colored_background_model, COLORMAP_JET);
-    imshow("Background:colormap", colored_background_model);
+    imshow(background_colormap_window, colored_background_model);
 
-    imshow("Foreground:b/w", foreground_image);
+    // Show the foreground pixels.
+    imshow(foreground_bw_window, foreground_image);
 
+    // Show for one user-selected pixel its gaussians.
     gaussian_image.setTo(0);
-    GaussianMixture *gaussians = &gaussian_mixture[image.rows / 2][image.cols / 2];
+    GaussianMixture *gaussians = &gaussian_mixture[clicked_point.y][clicked_point.x];
 
     double max_probability = 1;
     for (int i = 0; i < gaussians->size(); i++) {
@@ -167,7 +190,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
       }
     }
-    imshow("Gaussians", gaussian_image);
+    imshow(gaussian_histogram_window, gaussian_image);
 
     if (waitKey(inter_frame_delay) == escape_key) {
       break;
@@ -322,4 +345,13 @@ static unsigned char calculateBackgroundPixel (const GaussianMixture* gaussians)
   }
 
   return pixel;
+}
+
+
+static void onMouseEvent (int event, int x, int y, int, void* caller_object) {
+  if (event == EVENT_LBUTTONDOWN) {
+    CvPoint *clicked_point = (CvPoint *) caller_object;
+    clicked_point->x = x;
+    clicked_point->y = y;
+  }
 }
