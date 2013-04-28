@@ -13,6 +13,7 @@ using namespace cv;
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  3
 #define NEW_GAUSSIAN_WEIGHT              0.001
 #define LEARNING_RATE                    0.01
+#define MIN_VARIANCE                     0.0000001
 #define PI                               3.14159265359
 #define T                                0.6
 
@@ -262,7 +263,7 @@ static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_
   const double variance = (1 - rho) * gaussian->standard_deviation * gaussian->standard_deviation + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
     
   gaussian->mean               = (1 - rho) * gaussian->mean + rho * pixel;
-  gaussian->standard_deviation = sqrt(variance);
+  gaussian->standard_deviation = sqrt(variance > MIN_VARIANCE ? variance : MIN_VARIANCE);
 }
 
 
