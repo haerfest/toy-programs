@@ -179,14 +179,18 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       }
     }
     
-    for (int i = 0; i < gaussians->size(); i++) {
+    // Draw the gaussians backwards, so that the heavy weight is on top.
+    for (int i = gaussians->size() - 1; i >= 0; i--) {
       const Gaussian* gaussian = (*gaussians)[i];
       for (int col = 0; col < 256; col++) {
         const double probability = calculateGaussianProbability(gaussian, col);
         const int    row         = (int) (gaussian_image_height * probability / max_probability);
 
         if (row > 0) {
-          gaussian_image.at<unsigned char>(gaussian_image_height - row, col) = 255;
+          const Point from      = Point(col, gaussian_image_height - row);
+          const Point to        = Point(col, gaussian_image_height - 1);
+          const int   intensity = 128 + (int) (128 * gaussian->weight);
+          line(gaussian_image, from, to, CV_RGB(intensity, intensity, intensity));
         }
       }
     }
