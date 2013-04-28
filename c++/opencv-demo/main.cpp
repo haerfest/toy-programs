@@ -168,7 +168,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     gaussian_image.setTo(0);
     GaussianMixture *gaussians = &gaussian_mixture[clicked_point.y][clicked_point.x];
 
-    double max_probability = 1;
+    double max_probability = 0;
     for (int i = 0; i < gaussians->size(); i++) {
       const Gaussian* gaussian = (*gaussians)[i];
       for (int col = 0; col < 256; col++) {
