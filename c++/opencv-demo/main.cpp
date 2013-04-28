@@ -9,7 +9,7 @@ using namespace cv;
 
 
 // Defines.
-#define MAX_GAUSSIANS_PER_PIXEL          3
+#define MAX_GAUSSIANS_PER_PIXEL          5
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  3
 #define NEW_GAUSSIAN_WEIGHT              0.001
 #define LEARNING_RATE                    0.01
