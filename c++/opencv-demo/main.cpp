@@ -30,7 +30,8 @@ typedef vector<Gaussian*> GaussianMixture;
 // Forward declarations.
 static void          addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel);
 static void          adjustWeights (GaussianMixture* gaussians, const int match_index = -1);
-static double        calculateGaussianProbability (const GaussianMixture* gaussians, const unsigned char pixel);
+static double        calculateGaussianProbability (const Gaussian* gaussian, const unsigned char pixel);
+static double        calculateGaussianMixtureProbability (const GaussianMixture* gaussians, const unsigned char pixel);
 static bool          compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
 static bool          compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
 static void          deleteLeastProbableGaussian (GaussianMixture* gaussians);
@@ -87,7 +88,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   GaussianMixture gaussian_mixture[image.rows][image.cols];
   Mat             background_model(image.rows, image.cols, CV_8UC1);
   Mat             foreground_image(image.rows, image.cols, CV_8UC1);
-  
+
+  const int       gaussian_image_height = 100;
+  Mat             gaussian_image(gaussian_image_height, 256, CV_8UC1);
+
   while (capture.read(image)) {
     Mat grayscale_image;
     cvtColor(image, grayscale_image, CV_RGB2GRAY);
@@ -136,6 +140,33 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     imshow("Background:colormap", colored_background_model);
 
     imshow("Foreground:b/w", foreground_image);
+
+    gaussian_image.setTo(0);
+    GaussianMixture *gaussians = &gaussian_mixture[image.rows / 2][image.cols / 2];
+
+    double max_probability = 1;
+    for (int i = 0; i < gaussians->size(); i++) {
+      const Gaussian* gaussian = (*gaussians)[i];
+      for (int col = 0; col < 256; col++) {
+        const double probability = calculateGaussianProbability(gaussian, col);
+        if (probability > max_probability) {
+          max_probability = probability;
+        }
+      }
+    }
+    
+    for (int i = 0; i < gaussians->size(); i++) {
+      const Gaussian* gaussian = (*gaussians)[i];
+      for (int col = 0; col < 256; col++) {
+        const double probability = calculateGaussianProbability(gaussian, col);
+        const int    row         = (int) (gaussian_image_height * probability / max_probability);
+
+        if (row > 0) {
+          gaussian_image.at<unsigned char>(gaussian_image_height - row, col) = 255;
+        }
+      }
+    }
+    imshow("Gaussians", gaussian_image);
 
     if (waitKey(inter_frame_delay) == escape_key) {
       break;
@@ -227,7 +258,7 @@ static void normalizeWeights (GaussianMixture *gaussians) {
 
 static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_index, const unsigned char pixel) {
   Gaussian*    gaussian = (*gaussians)[match_index];
-  const double rho      = LEARNING_RATE * calculateGaussianProbability(gaussians, pixel);
+  const double rho      = LEARNING_RATE * calculateGaussianMixtureProbability(gaussians, pixel);
   const double variance = (1 - rho) * gaussian->standard_deviation * gaussian->standard_deviation + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
     
   gaussian->mean               = (1 - rho) * gaussian->mean + rho * pixel;
@@ -235,16 +266,22 @@ static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_
 }
 
 
-static double calculateGaussianProbability (const GaussianMixture* gaussians, const unsigned char pixel) {
+static double calculateGaussianMixtureProbability (const GaussianMixture* gaussians, const unsigned char pixel) {
   double probability = 0;
 
   for (int i = 0; i < gaussians->size(); i++) {
     const Gaussian *gaussian = (*gaussians)[i];
-    const double    variance = gaussian->standard_deviation * gaussian->standard_deviation;
-    probability += exp(-0.5 * (pixel - gaussian->mean) * (1 / variance) * (pixel - gaussian->mean)) / (sqrt(2 * PI) * gaussian->standard_deviation);
+    probability += gaussian->weight * calculateGaussianProbability(gaussian, pixel);
   }
 
   return probability;
+}
+
+
+static double calculateGaussianProbability (const Gaussian* gaussian, const unsigned char pixel) {
+  const double variance = gaussian->standard_deviation * gaussian->standard_deviation;
+
+  return (1 / (sqrt(2 * PI) * gaussian->standard_deviation)) * exp(-0.5 * (pixel - gaussian->mean) * (1 / variance) * (pixel - gaussian->mean));
 }
 
 
