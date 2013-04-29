@@ -25,6 +25,7 @@ typedef struct {
   double mean;
   double standard_deviation;
   double weight;
+  bool   is_background;
 } Gaussian;
 
 typedef vector<Gaussian*> GaussianMixture;
@@ -82,8 +83,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   // Retrieve the frame rate.
   const double frame_rate                 = capture.get(CV_CAP_PROP_FPS);
-  const int    original_inter_frame_delay = 1000 / frame_rate;
-  int          inter_frame_delay          = original_inter_frame_delay;
+  const double original_inter_frame_delay = 1000 / frame_rate;
+  double       inter_frame_delay          = original_inter_frame_delay;
 
   // Read the first frame to know the image size.
   if (!capture.read(image)) {
@@ -122,7 +123,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   namedWindow(foreground_bw_window);        setMouseCallback(foreground_bw_window,        onMouseEvent, &clicked_point);
   namedWindow(gaussian_histogram_window);
 
-  bool paused = false;
+  bool is_paused = false;
   while (capture.read(image)) {
     // Show the input in grayscale.
     Mat grayscale_image;
@@ -176,7 +177,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Show the foreground pixels.
     imshow(foreground_bw_window, foreground_image);
 
-    bool quit = false;
+    bool do_quit = false;
     do {
 
       // Show for one user-selected pixel its gaussians.
@@ -232,9 +233,9 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       }
       imshow(gaussian_histogram_window, gaussian_image);
 
-      const int key = waitKey(inter_frame_delay);
+      const int key = waitKey((int) inter_frame_delay);
       if (key == escape_key) {
-        quit = true;
+        do_quit = true;
         break;
       }
     
@@ -255,30 +256,38 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         break;
 
       case ' ':
-        paused = !paused;
+        is_paused = !is_paused;
+        if (is_paused) {
+          cout << "Paused" << endl;
+        } else {
+          cout << "Playing" << endl;
+        }
         break;
 
       case '+':
       case '=':
-        inter_frame_delay >> 1;
+        inter_frame_delay /= 1.1;
+        cout << "Speed: " << fixed << setprecision(1) << (original_inter_frame_delay / (double) inter_frame_delay) << "x" << endl;
         break;
 
       case '-':
-        inter_frame_delay << 1;
+        inter_frame_delay *= 1.1;
+        cout << "Speed: " << fixed << setprecision(1) << (original_inter_frame_delay / (double) inter_frame_delay) << "x" << endl;
         break;
 
       case 'o':
       case 'O':
         inter_frame_delay = original_inter_frame_delay;
+        cout << "Speed: 1.0x" << endl;
         break;
  
       default:
         break;
       }
     }
-    while (paused);
+    while (is_paused);
 
-    if (quit) {
+    if (do_quit) {
       break;
     }
   }
