@@ -140,29 +140,30 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Apply the GMM algorithm to create a model of the background.
     for (int row = 0; row < image.rows; row++) {
       for (int col = 0; col < image.cols; col++) {
-        GaussianMixture     *gaussians  = &gaussian_mixture[row][col];
-        const unsigned char  pixel      = grayscale_image.at<unsigned char>(row, col);
+        GaussianMixture     *gaussians     = &gaussian_mixture[row][col];
+        const unsigned char  pixel         = grayscale_image.at<unsigned char>(row, col);
         int                  match_index;
-        const bool           foundMatch = findMatchingGaussian(pixel, gaussians, &match_index);
-
-        if (!foundMatch) {
+        const bool           found_match   = findMatchingGaussian(pixel, gaussians, &match_index);
+        const bool           is_foreground = !found_match || !((*gaussians)[match_index])->is_background;
+        
+        if (!found_match) {
           deleteLeastProbableGaussian(gaussians);
           addNewGaussian(gaussians, pixel);
         }
 
-        if (foundMatch) {
+        if (found_match) {
           adjustWeights(gaussians, match_index);
         } else {
           adjustWeights(gaussians);
         }
 
-        if (foundMatch) {
+        if (found_match) {
           updateMatchingGaussian(gaussians, match_index, pixel);
         }
 
         background_model.at<unsigned char>(row, col) = selectGaussiansForBackgroundModel(gaussians);
 
-        if (!foundMatch) {
+        if (is_foreground) {
           foreground_image.at<unsigned char>(row, col) = 255;
         }
       }
