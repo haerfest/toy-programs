@@ -12,7 +12,7 @@ using namespace cv;
 // Defines.
 #define MAX_GAUSSIANS_PER_PIXEL          3
 #define FONT                             FONT_HERSHEY_PLAIN
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  5             /* New Gaussians have a large standard deviation. */
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  7            /* New Gaussians have a large standard deviation. */
 #define NEW_GAUSSIAN_WEIGHT              1E-300
 #define LEARNING_RATE                    0.01
 #define MIN_STANDARD_DEVIATION           0.01
