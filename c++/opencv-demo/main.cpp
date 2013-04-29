@@ -120,7 +120,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   namedWindow(background_colormap_window);  setMouseCallback(background_colormap_window,  onMouseEvent, &clicked_point);
   namedWindow(foreground_bw_window);        setMouseCallback(foreground_bw_window,        onMouseEvent, &clicked_point);
   namedWindow(gaussian_histogram_window);
- 
+
+  bool paused = false;
   while (capture.read(image)) {
     // Show the input in grayscale.
     Mat grayscale_image;
@@ -174,81 +175,95 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Show the foreground pixels.
     imshow(foreground_bw_window, foreground_image);
 
-    // Show for one user-selected pixel its gaussians.
-    gaussian_image.setTo(0);
-    GaussianMixture *gaussians = &gaussian_mixture[clicked_point.y][clicked_point.x];
+    bool quit = false;
+    do {
 
-    double max_probability = 0;
-    for (int i = 0; i < gaussians->size(); i++) {
-      const Gaussian* gaussian = (*gaussians)[i];
-      for (int col = 0; col < 256; col++) {
-        const double probability = calculateGaussianProbability(gaussian, col);
-        if (probability > max_probability) {
-          max_probability = probability;
+      // Show for one user-selected pixel its gaussians.
+      gaussian_image.setTo(0);
+      GaussianMixture *gaussians = &gaussian_mixture[clicked_point.y][clicked_point.x];
+
+      double max_probability = 0;
+      for (int i = 0; i < gaussians->size(); i++) {
+        const Gaussian* gaussian = (*gaussians)[i];
+        for (int col = 0; col < 256; col++) {
+          const double probability = calculateGaussianProbability(gaussian, col);
+          if (probability > max_probability) {
+            max_probability = probability;
+          }
         }
       }
-    }
     
-    // Draw the gaussians backwards, so that the heavy weight is on top.
-    for (int i = gaussians->size() - 1; i >= 0; i--) {
-      const Gaussian* gaussian  = (*gaussians)[i];
-      const int       intensity = 16 + (int) (240 * gaussian->weight);
+      // Draw the gaussians backwards, so that the heavy weight is on top.
+      for (int i = gaussians->size() - 1; i >= 0; i--) {
+        const Gaussian* gaussian  = (*gaussians)[i];
+        const int       intensity = 64 + (int) (192 * gaussian->weight);
       
-      for (int col = 0; col < 256; col++) {
-        const double probability = calculateGaussianProbability(gaussian, col);
-        const int    row         = (int) (gaussian_image_height * probability / max_probability);
+        for (int col = 0; col < 256; col++) {
+          const double probability = calculateGaussianProbability(gaussian, col);
+          const int    row         = (int) (gaussian_image_height * probability / max_probability);
 
-        if (row > 0) {
-          const Point from      = Point(col, gaussian_image_height - row);
-          const Point to        = Point(col, gaussian_image_height - 1);
-          line(gaussian_image, from, to, CV_RGB(intensity, intensity, intensity));
+          if (row > 0) {
+            const Point from      = Point(col, gaussian_image_height - row);
+            const Point to        = Point(col, gaussian_image_height - 1);
+            line(gaussian_image, from, to, CV_RGB(intensity, intensity, intensity));
+          }
         }
+
+        ostringstream title_string;
+        switch (gaussian_property_to_show) {
+        case E_GAUSSIAN_PROPERTY_WEIGHT:
+          title_string << fixed << setprecision(3) << gaussian->weight;
+          break;
+        case E_GAUSSIAN_PROPERTY_VARIANCE:
+          title_string << fixed << setprecision(3) << (gaussian->standard_deviation * gaussian->standard_deviation);
+          break;
+        case E_GAUSSIAN_PROPERTY_MEAN:
+          title_string << fixed << setprecision(3) << gaussian->mean;
+          break;
+        }        
+
+        text_size                 = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
+        const int     left_x      = gaussian->mean - text_size.width / 2;
+        const int     right_x     = left_x + text_size.width;
+        const CvPoint bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
+      
+        putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, CV_RGB(intensity, intensity, intensity));
       }
+      imshow(gaussian_histogram_window, gaussian_image);
 
-      ostringstream title_string;
-      switch (gaussian_property_to_show) {
-      case E_GAUSSIAN_PROPERTY_WEIGHT:
-        title_string << fixed << setprecision(3) << gaussian->weight;
+      const int key = waitKey(inter_frame_delay);
+      if (key == escape_key) {
+        quit = true;
         break;
-      case E_GAUSSIAN_PROPERTY_VARIANCE:
-        title_string << fixed << setprecision(3) << (gaussian->standard_deviation * gaussian->standard_deviation);
-        break;
-      case E_GAUSSIAN_PROPERTY_MEAN:
-        title_string << fixed << setprecision(3) << gaussian->mean;
-        break;
-      }        
-
-      text_size                 = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
-      const int     left_x      = gaussian->mean - text_size.width / 2;
-      const int     right_x     = left_x + text_size.width;
-      const CvPoint bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
-      
-      putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, CV_RGB(intensity, intensity, intensity));
-    }
-    imshow(gaussian_histogram_window, gaussian_image);
-
-    const int key = waitKey(inter_frame_delay);
-    if (key == escape_key) {
-      break;
-    }
+      }
     
-    switch (key) {
-    case 'v':
-    case 'V':
-      gaussian_property_to_show = E_GAUSSIAN_PROPERTY_VARIANCE;
-      break;
+      switch (key) {
+      case 'v':
+      case 'V':
+        gaussian_property_to_show = E_GAUSSIAN_PROPERTY_VARIANCE;
+        break;
       
-    case 'w':
-    case 'W':
-      gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
-      break;
+      case 'w':
+      case 'W':
+        gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
+        break;
 
-    case 'm':
-    case 'M':
-      gaussian_property_to_show = E_GAUSSIAN_PROPERTY_MEAN;
-      break;
+      case 'm':
+      case 'M':
+        gaussian_property_to_show = E_GAUSSIAN_PROPERTY_MEAN;
+        break;
 
-    default:
+      case ' ':
+        paused = !paused;
+        break;
+
+      default:
+        break;
+      }
+    }
+    while (paused);
+
+    if (quit) {
       break;
     }
   }
