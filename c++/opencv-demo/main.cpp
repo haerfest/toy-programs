@@ -105,7 +105,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   int              base_line;
   Size             text_size                 = getTextSize("H", FONT, 1.0, 1, &base_line);
   const int        gaussian_image_height     = 100;
-  Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * 2 * text_size.height, 256, CV_8UC1);
+  Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * 2 * text_size.height, 256, CV_8UC3);
   
   // Create windows and attach mouse handlers.
   const string input_grayscale_window      = "Input:grayscale";
@@ -197,8 +197,11 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     
       // Draw the gaussians backwards, so that the heavy weight is on top.
       for (int i = gaussians->size() - 1; i >= 0; i--) {
-        const Gaussian* gaussian  = (*gaussians)[i];
-        const int       intensity = 64 + (int) (192 * gaussian->weight);
+        const Gaussian*      gaussian  = (*gaussians)[i];
+        const float          intensity = 64 + (int) (192 * gaussian->weight);
+        const Scalar_<float> color     = (gaussian->is_background
+                                          ? Scalar_<float>(0, intensity, 0)
+                                          : Scalar_<float>(intensity, intensity, intensity));
       
         for (int col = 0; col < 256; col++) {
           const double probability = calculateGaussianProbability(gaussian, col);
@@ -207,7 +210,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
           if (row > 0) {
             const Point from      = Point(col, gaussian_image_height - row);
             const Point to        = Point(col, gaussian_image_height - 1);
-            line(gaussian_image, from, to, CV_RGB(intensity, intensity, intensity));
+            line(gaussian_image, from, to, color);
           }
         }
 
@@ -216,9 +219,11 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         case E_GAUSSIAN_PROPERTY_WEIGHT:
           title_string << fixed << setprecision(3) << gaussian->weight;
           break;
+
         case E_GAUSSIAN_PROPERTY_VARIANCE:
           title_string << fixed << setprecision(3) << (gaussian->standard_deviation * gaussian->standard_deviation);
           break;
+
         case E_GAUSSIAN_PROPERTY_MEAN:
           title_string << fixed << setprecision(3) << gaussian->mean;
           break;
@@ -229,7 +234,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         const int     right_x     = left_x + text_size.width;
         const CvPoint bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
       
-        putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, CV_RGB(intensity, intensity, intensity));
+        putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, color);
       }
       imshow(gaussian_histogram_window, gaussian_image);
 
@@ -410,14 +415,16 @@ static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussia
 
   double weights_summed = 0;
   for (int i = 0; i < gaussians->size(); i++) {
-    const Gaussian *gaussian = (*gaussians)[i];
+    Gaussian *gaussian = (*gaussians)[i];
+    gaussian->is_background = false;
     weights_summed += gaussian->weight;
   }
 
   int    b                      = 0;
   double first_b_weights_summed = 0;
   while ((b < gaussians->size()) && ((first_b_weights_summed / weights_summed) <= T)) {
-    const Gaussian *gaussian = (*gaussians)[b];
+    Gaussian *gaussian = (*gaussians)[b];
+    gaussian->is_background = true;
     first_b_weights_summed += gaussian->weight;
     b++;
   }
