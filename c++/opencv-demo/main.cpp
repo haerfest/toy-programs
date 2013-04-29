@@ -81,8 +81,9 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   }
 
   // Retrieve the frame rate.
-  const double frame_rate        = capture.get(CV_CAP_PROP_FPS);
-  const int    inter_frame_delay = 1000 / frame_rate;
+  const double frame_rate                 = capture.get(CV_CAP_PROP_FPS);
+  const int    original_inter_frame_delay = 1000 / frame_rate;
+  int          inter_frame_delay          = original_inter_frame_delay;
 
   // Read the first frame to know the image size.
   if (!capture.read(image)) {
@@ -257,6 +258,20 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         paused = !paused;
         break;
 
+      case '+':
+      case '=':
+        inter_frame_delay >> 1;
+        break;
+
+      case '-':
+        inter_frame_delay << 1;
+        break;
+
+      case 'o':
+      case 'O':
+        inter_frame_delay = original_inter_frame_delay;
+        break;
+ 
       default:
         break;
       }
