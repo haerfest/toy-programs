@@ -10,14 +10,15 @@ using namespace cv;
 
 
 // Defines.
-#define MAX_GAUSSIANS_PER_PIXEL          5
-#define FONT                             FONT_HERSHEY_PLAIN
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  7            /* New Gaussians have a large standard deviation. */
-#define NEW_GAUSSIAN_WEIGHT              1E-300
-#define LEARNING_RATE                    0.01
-#define MIN_STANDARD_DEVIATION           0.01
 #define PI                               3.14159265359
-#define T                                0.8
+#define FONT                             FONT_HERSHEY_PLAIN
+#define MAX_GAUSSIANS_PER_PIXEL          3
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  7           /* New Gaussians have a large variance = std. dev. squared. */
+#define NEW_GAUSSIAN_WEIGHT              0.001
+#define MIN_STANDARD_DEVIATION           2           /* A small std. dev. causes noise to be seen as foreground pixels. */
+#define LEARNING_RATE                    0.01
+#define T                                0.65
+#define GAMMA                            3.133
 
 
 // Types.
@@ -82,9 +83,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   }
 
   // Retrieve the frame rate.
-  const double frame_rate                 = capture.get(CV_CAP_PROP_FPS);
-  const double original_inter_frame_delay = 1000 / frame_rate;
-  double       inter_frame_delay          = original_inter_frame_delay;
+  const double frame_rate        = capture.get(CV_CAP_PROP_FPS);
+  const int    inter_frame_delay = 1000 / frame_rate;
 
   // Read the first frame to know the image size.
   if (!capture.read(image)) {
@@ -209,12 +209,19 @@ static void playVideo (const string video_file, const unsigned int start_seconds
           const int    row         = (int) (gaussian_image_height * probability / max_probability);
 
           if (row > 0) {
-            const Point from      = Point(col, gaussian_image_height - row);
-            const Point to        = Point(col, gaussian_image_height - 1);
+            const Point from = Point(col, gaussian_image_height - row);
+            const Point to   = Point(col, gaussian_image_height - 1);
             line(gaussian_image, from, to, color);
           }
         }
 
+        // Draw the current pixel intensity as a vertical line.
+        const unsigned char col  = grayscale_image.at<unsigned char>(clicked_point.y, clicked_point.x);
+        const Point         from = Point(col, 0);
+        const Point         to   = Point(col, gaussian_image_height - 1);
+        line(gaussian_image, from, to, CV_RGB(255, 0, 0));
+
+        // Draw Gaussian properties below them.
         ostringstream title_string;
         switch (gaussian_property_to_show) {
         case E_GAUSSIAN_PROPERTY_WEIGHT:
@@ -239,7 +246,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       }
       imshow(gaussian_histogram_window, gaussian_image);
 
-      const int key = waitKey((int) inter_frame_delay);
+      const int key = waitKey(inter_frame_delay);
       if (key == escape_key) {
         do_quit = true;
         break;
@@ -270,23 +277,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
         break;
 
-      case '+':
-      case '=':
-        inter_frame_delay /= 1.1;
-        cout << "Speed: " << fixed << setprecision(1) << (original_inter_frame_delay / (double) inter_frame_delay) << "x" << endl;
-        break;
-
-      case '-':
-        inter_frame_delay *= 1.1;
-        cout << "Speed: " << fixed << setprecision(1) << (original_inter_frame_delay / (double) inter_frame_delay) << "x" << endl;
-        break;
-
-      case 'o':
-      case 'O':
-        inter_frame_delay = original_inter_frame_delay;
-        cout << "Speed: 1.0x" << endl;
-        break;
- 
       default:
         break;
       }
