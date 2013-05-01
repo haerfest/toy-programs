@@ -12,11 +12,12 @@ using namespace cv;
 // Defines.
 #define PI                               3.14159265359
 #define FONT                             FONT_HERSHEY_PLAIN
-#define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  7           /* New Gaussians have a large variance = std. dev. squared. */
+#define INPUT_SCALE_FACTOR               0.25
+#define MAX_GAUSSIANS_PER_PIXEL          5
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  25          /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.001
 #define MIN_STANDARD_DEVIATION           2           /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.01
+#define LEARNING_RATE                    0.001
 #define T                                0.65
 #define GAMMA                            3.133
 
@@ -97,9 +98,12 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   // Show the video.
   const int       escape_key = 27;
-  GaussianMixture gaussian_mixture[image.rows][image.cols];
-  Mat             background_model(image.rows, image.cols, CV_8UC1);
-  Mat             foreground_image(image.rows, image.cols, CV_8UC1);
+  const int       width      = (int) (INPUT_SCALE_FACTOR * image.cols);
+  const int       height     = (int) (INPUT_SCALE_FACTOR * image.rows);
+
+  GaussianMixture gaussian_mixture[height][width];
+  Mat             background_model(height, width, CV_8UC1);
+  Mat             foreground_image(height, width, CV_8UC1);
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
@@ -115,7 +119,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const string foreground_bw_window        = "Foreground:bw";
   const string gaussian_histogram_window   = "Gaussian:histogram";
 
-  CvPoint clicked_point = {image.cols / 2, image.rows / 2};
+  CvPoint clicked_point = {width / 2, height / 2};
   namedWindow(input_grayscale_window);      setMouseCallback(input_grayscale_window,      onMouseEvent, &clicked_point);
   namedWindow(input_colormap_window);       setMouseCallback(input_colormap_window,       onMouseEvent, &clicked_point);
   namedWindow(background_grayscale_window); setMouseCallback(background_grayscale_window, onMouseEvent, &clicked_point);
@@ -125,21 +129,24 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   bool is_paused = false;
   while (capture.read(image)) {
-    // Show the input in grayscale.
+    // Show the input resized, in grayscale.
+    Mat        small_image;
+    const Size zero_size(0, 0);
+    resize(image, small_image, zero_size, INPUT_SCALE_FACTOR, INPUT_SCALE_FACTOR);
     Mat grayscale_image;
-    cvtColor(image, grayscale_image, CV_RGB2GRAY);
+    cvtColor(small_image, grayscale_image, CV_RGB2GRAY);
     imshow(input_grayscale_window, grayscale_image);
 
     // Show the input with a colormap applied.
     Mat colored_image;
-    applyColorMap(image, colored_image, COLORMAP_JET);
+    applyColorMap(grayscale_image, colored_image, COLORMAP_JET);
     imshow(input_colormap_window, colored_image);
 
     foreground_image.setTo(0);
 
     // Apply the GMM algorithm to create a model of the background.
-    for (int row = 0; row < image.rows; row++) {
-      for (int col = 0; col < image.cols; col++) {
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
         GaussianMixture     *gaussians     = &gaussian_mixture[row][col];
         const unsigned char  pixel         = grayscale_image.at<unsigned char>(row, col);
         int                  match_index;
