@@ -246,7 +246,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       }
       imshow(gaussian_histogram_window, gaussian_image);
 
-      const int key = waitKey(inter_frame_delay);
+      const int key = waitKey(inter_frame_delay) % 256;
       if (key == escape_key) {
         do_quit = true;
         break;
