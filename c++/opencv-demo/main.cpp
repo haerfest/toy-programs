@@ -12,13 +12,14 @@ using namespace cv;
 // Defines.
 #define PI                               3.14159265359
 #define FONT                             FONT_HERSHEY_PLAIN
-#define INPUT_SCALE_FACTOR               0.25
+#define INPUT_SCALE_FACTOR               1.00
 #define MAX_GAUSSIANS_PER_PIXEL          5
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  15          /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.001
-#define MIN_STANDARD_DEVIATION           2           /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.001
+#define MIN_STANDARD_DEVIATION           3           /* A small std. dev. causes noise to be seen as foreground pixels. */
+#define LEARNING_RATE                    0.01
 #define T                                0.65
+#define MIN_CONTOUR_AREA                 1500        /* Small car = 2.5 x 1.5 m at 20px/m = 1500 px^2 */
 
 
 // Types.
@@ -111,24 +112,27 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * 2 * text_size.height, 256, CV_8UC3);
   
   // Create windows and attach mouse handlers.
-  const string input_grayscale_window      = "Input:grayscale";
-  const string input_blurred_window        = "Input:blurred";
-  const string input_colormap_window       = "Input:colormap";
-  const string background_grayscale_window = "Background:grayscale";
-  const string background_colormap_window  = "Background:colormap";
-  const string foreground_bw_window        = "Foreground:bw";
-  const string foreground_contours_window  = "Foreground:contours";
-  const string gaussian_histogram_window   = "Gaussian:histogram";
+  const string input_grayscale_window         = "in:gray";
+  const string input_blurred_window           = "in:blur";
+  const string input_colormap_window          = "in:color";
+  const string background_grayscale_window    = "bck:gray";
+  const string background_colormap_window     = "bck:color";
+  const string foreground_bw_window           = "fg:bw";
+  const string foreground_contours_window     = "fg:cont";
+  const string foreground_big_contours_window = "fg:big-cont";
+  const string rectangles_image_window        = "fg:rect";
+  const string gaussian_histogram_window      = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
-  namedWindow(input_grayscale_window);      setMouseCallback(input_grayscale_window,      onMouseEvent, &clicked_point);
-  namedWindow(input_blurred_window);        setMouseCallback(input_blurred_window,        onMouseEvent, &clicked_point);
-  namedWindow(input_colormap_window);       setMouseCallback(input_colormap_window,       onMouseEvent, &clicked_point);
-  namedWindow(background_grayscale_window); setMouseCallback(background_grayscale_window, onMouseEvent, &clicked_point);
-  namedWindow(background_colormap_window);  setMouseCallback(background_colormap_window,  onMouseEvent, &clicked_point);
-  namedWindow(foreground_bw_window);        setMouseCallback(foreground_bw_window,        onMouseEvent, &clicked_point);
-  namedWindow(foreground_contours_window);  setMouseCallback(foreground_contours_window,  onMouseEvent, &clicked_point);
-  
+  namedWindow(input_grayscale_window);         setMouseCallback(input_grayscale_window,         onMouseEvent, &clicked_point);
+  namedWindow(input_blurred_window);           setMouseCallback(input_blurred_window,           onMouseEvent, &clicked_point);
+  namedWindow(input_colormap_window);          setMouseCallback(input_colormap_window,          onMouseEvent, &clicked_point);
+  namedWindow(background_grayscale_window);    setMouseCallback(background_grayscale_window,    onMouseEvent, &clicked_point);
+  namedWindow(background_colormap_window);     setMouseCallback(background_colormap_window,     onMouseEvent, &clicked_point);
+  namedWindow(foreground_bw_window);           setMouseCallback(foreground_bw_window,           onMouseEvent, &clicked_point);
+  namedWindow(foreground_contours_window);     setMouseCallback(foreground_contours_window,     onMouseEvent, &clicked_point);
+  namedWindow(foreground_big_contours_window); setMouseCallback(foreground_big_contours_window, onMouseEvent, &clicked_point);
+  namedWindow(rectangles_image_window);        setMouseCallback(rectangles_image_window,        onMouseEvent, &clicked_point);
   namedWindow(gaussian_histogram_window);
 
   bool is_paused = false;
@@ -196,19 +200,36 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     imshow(foreground_bw_window, foreground_image);
 
     // Trace foreground contours.
-    Mat contours_image = Mat::zeros(foreground_image.rows, foreground_image.cols, CV_8UC3);
+    Mat contours_image     = Mat::zeros(foreground_image.rows, foreground_image.cols, CV_8UC3);
+    Mat big_contours_image = Mat::zeros(foreground_image.rows, foreground_image.cols, CV_8UC3);
+    Mat rectangles_image   = Mat::zeros(foreground_image.rows, foreground_image.cols, CV_8UC3);
     vector<vector<Point> > contours;
     vector<Vec4i>         hierarchy;
     findContours(foreground_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
     if (!contours.empty()) {
       for (int i = 0; i >= 0; i = hierarchy[i][0]) {
         const Scalar color(rand() & 255, rand() & 255, rand() & 255);
         const int    thickness = 2;
-        const int    line_type = CV_AA;
+        const int    line_type = 8;
         drawContours(contours_image, contours, i, color, thickness, line_type, hierarchy);
+
+        if (contourArea(contours[i]) >= MIN_CONTOUR_AREA * INPUT_SCALE_FACTOR) {
+          drawContours(big_contours_image, contours, i, color, thickness, line_type, hierarchy);
+ 
+          vector<RotatedRect> min_rect(contours.size());
+          Point2f rect_points[4];
+          min_rect[i] = minAreaRect(Mat(contours[i]));
+          min_rect[i].points(rect_points);
+          for (int j = 0; j < 4; j++) {
+            line(rectangles_image, rect_points[j], rect_points[(j + 1) % 4], color, thickness, line_type);
+          }
+        }
       }
     }
-    imshow(foreground_contours_window, contours_image);
+    imshow(foreground_contours_window,     contours_image);
+    imshow(foreground_big_contours_window, big_contours_image);
+    imshow(rectangles_image_window,        rectangles_image);
     
     bool do_quit = false;
     do {
