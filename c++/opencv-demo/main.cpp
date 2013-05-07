@@ -53,6 +53,7 @@ static void          onMouseEvent (int event, int x, int y, int, void*);
 static void          playVideo (const string video_file, const unsigned int start_seconds);
 static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
 static void          updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel);
+static string        humanReadableTimestamp (const double msec);
 
 
 // Main program.
@@ -122,6 +123,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const string foreground_big_contours_window = "fg:big-cont";
   const string rectangles_image_window        = "fg:rect";
   const string gaussian_histogram_window      = "pixel:gaus";
+  const string time_window                    = "time";
 
   CvPoint clicked_point = {width / 2, height / 2};
   namedWindow(input_grayscale_window);         setMouseCallback(input_grayscale_window,         onMouseEvent, &clicked_point);
@@ -133,10 +135,24 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   namedWindow(foreground_contours_window);     setMouseCallback(foreground_contours_window,     onMouseEvent, &clicked_point);
   namedWindow(foreground_big_contours_window); setMouseCallback(foreground_big_contours_window, onMouseEvent, &clicked_point);
   namedWindow(rectangles_image_window);        setMouseCallback(rectangles_image_window,        onMouseEvent, &clicked_point);
+
+  namedWindow(time_window);
   namedWindow(gaussian_histogram_window);
 
   bool is_paused = false;
   while (capture.read(image)) {
+    // Show the timestamp.
+    const double msec        = capture.get(CV_CAP_PROP_POS_MSEC);
+    string       timestamp   = humanReadableTimestamp(msec);
+    
+    text_size = getTextSize(timestamp, FONT, 1.0, 1, &base_line);
+    const int border      = 5;
+    CvPoint   bottom_left = {border, text_size.height + border};
+    Mat       timestamp_image = Mat::zeros(text_size.height + 2 * border, text_size.width + 2 * border, CV_8UC1);
+
+    putText(timestamp_image, timestamp, bottom_left, FONT, 1.0, CV_RGB(255, 255, 255));
+    imshow(time_window, timestamp_image);
+
     // Show the input resized, in grayscale.
     Mat        small_image;
     const Size zero_size(0, 0);
@@ -290,10 +306,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
           break;
         }        
 
-        text_size                 = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
-        const int     left_x      = gaussian->mean - text_size.width / 2;
-        const int     right_x     = left_x + text_size.width;
-        const CvPoint bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
+        text_size             = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
+        const int left_x      = gaussian->mean - text_size.width / 2;
+        const int right_x     = left_x + text_size.width;
+        CvPoint   bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
       
         putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, color);
       }
@@ -501,4 +517,28 @@ static void onMouseEvent (int event, int x, int y, int, void* caller_object) {
     clicked_point->x = x;
     clicked_point->y = y;
   }
+}
+
+
+static string humanReadableTimestamp (const double msec) {
+  unsigned int seconds = msec / 1000;
+  unsigned int minutes = seconds / 60; seconds %= 60;
+  unsigned int hours   = minutes / 60; minutes %= 60;
+  ostringstream s;
+
+  s.fill('0');
+  s.width(2);
+
+  s << right << hours << ':';
+
+  s.width(2);
+  s << right << minutes << ':';
+
+  s.width(2);
+  s << right << seconds << '.';
+
+  s.width(3);
+  s << right << (((unsigned int) msec) % 1000);
+  
+  return s.str();
 }
