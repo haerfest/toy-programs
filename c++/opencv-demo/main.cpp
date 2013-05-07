@@ -12,7 +12,7 @@ using namespace cv;
 // Defines.
 #define PI                               3.14159265359
 #define FONT                             FONT_HERSHEY_PLAIN
-#define INPUT_SCALE_FACTOR               1.0         /* 0.25 */
+#define INPUT_SCALE_FACTOR               0.25
 #define MAX_GAUSSIANS_PER_PIXEL          5
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  15          /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.001
@@ -97,7 +97,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   // Show the video.
   const int       escape_key = 27;
-  const int       width      = (int) (INPUT_SCALE_FACTOR * image.cols);
+  const int       width      = (int) (INPUT_SCALE_FACTOR *image.cols);
   const int       height     = (int) (INPUT_SCALE_FACTOR * image.rows);
 
   GaussianMixture gaussian_mixture[height][width];
@@ -203,7 +203,9 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     if (!contours.empty()) {
       for (int i = 0; i >= 0; i = hierarchy[i][0]) {
         const Scalar color(rand() & 255, rand() & 255, rand() & 255);
-        drawContours(contours_image, contours, i, color, CV_FILLED, 8, hierarchy);
+        const int    thickness = 2;
+        const int    line_type = CV_AA;
+        drawContours(contours_image, contours, i, color, thickness, line_type, hierarchy);
       }
     }
     imshow(foreground_contours_window, contours_image);
