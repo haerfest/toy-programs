@@ -12,14 +12,13 @@ using namespace cv;
 // Defines.
 #define PI                               3.14159265359
 #define FONT                             FONT_HERSHEY_PLAIN
-#define INPUT_SCALE_FACTOR               0.25
+#define INPUT_SCALE_FACTOR               1.0         /* 0.25 */
 #define MAX_GAUSSIANS_PER_PIXEL          5
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  25          /* New Gaussians have a large variance = std. dev. squared. */
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  15          /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.001
 #define MIN_STANDARD_DEVIATION           2           /* A small std. dev. causes noise to be seen as foreground pixels. */
 #define LEARNING_RATE                    0.001
 #define T                                0.65
-#define GAMMA                            3.133
 
 
 // Types.
@@ -113,18 +112,23 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   
   // Create windows and attach mouse handlers.
   const string input_grayscale_window      = "Input:grayscale";
+  const string input_blurred_window        = "Input:blurred";
   const string input_colormap_window       = "Input:colormap";
   const string background_grayscale_window = "Background:grayscale";
   const string background_colormap_window  = "Background:colormap";
   const string foreground_bw_window        = "Foreground:bw";
+  const string foreground_contours_window  = "Foreground:contours";
   const string gaussian_histogram_window   = "Gaussian:histogram";
 
   CvPoint clicked_point = {width / 2, height / 2};
   namedWindow(input_grayscale_window);      setMouseCallback(input_grayscale_window,      onMouseEvent, &clicked_point);
+  namedWindow(input_blurred_window);        setMouseCallback(input_blurred_window,        onMouseEvent, &clicked_point);
   namedWindow(input_colormap_window);       setMouseCallback(input_colormap_window,       onMouseEvent, &clicked_point);
   namedWindow(background_grayscale_window); setMouseCallback(background_grayscale_window, onMouseEvent, &clicked_point);
   namedWindow(background_colormap_window);  setMouseCallback(background_colormap_window,  onMouseEvent, &clicked_point);
   namedWindow(foreground_bw_window);        setMouseCallback(foreground_bw_window,        onMouseEvent, &clicked_point);
+  namedWindow(foreground_contours_window);  setMouseCallback(foreground_contours_window,  onMouseEvent, &clicked_point);
+  
   namedWindow(gaussian_histogram_window);
 
   bool is_paused = false;
@@ -133,13 +137,19 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     Mat        small_image;
     const Size zero_size(0, 0);
     resize(image, small_image, zero_size, INPUT_SCALE_FACTOR, INPUT_SCALE_FACTOR);
+
     Mat grayscale_image;
     cvtColor(small_image, grayscale_image, CV_RGB2GRAY);
     imshow(input_grayscale_window, grayscale_image);
-
+    
+    Mat blurred_image;
+    Size kernel_size(5, 5);
+    GaussianBlur(grayscale_image, blurred_image, kernel_size, 0, 0);
+    imshow(input_blurred_window, blurred_image);
+    
     // Show the input with a colormap applied.
     Mat colored_image;
-    applyColorMap(grayscale_image, colored_image, COLORMAP_JET);
+    applyColorMap(blurred_image, colored_image, COLORMAP_JET);
     imshow(input_colormap_window, colored_image);
 
     foreground_image.setTo(0);
@@ -148,7 +158,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     for (int row = 0; row < height; row++) {
       for (int col = 0; col < width; col++) {
         GaussianMixture     *gaussians     = &gaussian_mixture[row][col];
-        const unsigned char  pixel         = grayscale_image.at<unsigned char>(row, col);
+        const unsigned char  pixel         = blurred_image.at<unsigned char>(row, col);
         int                  match_index;
         const bool           found_match   = findMatchingGaussian(pixel, gaussians, &match_index);
         const bool           is_foreground = !found_match || !((*gaussians)[match_index])->is_background;
@@ -185,6 +195,19 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Show the foreground pixels.
     imshow(foreground_bw_window, foreground_image);
 
+    // Trace foreground contours.
+    Mat contours_image = Mat::zeros(foreground_image.rows, foreground_image.cols, CV_8UC3);
+    vector<vector<Point> > contours;
+    vector<Vec4i>         hierarchy;
+    findContours(foreground_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    if (!contours.empty()) {
+      for (int i = 0; i >= 0; i = hierarchy[i][0]) {
+        const Scalar color(rand() & 255, rand() & 255, rand() & 255);
+        drawContours(contours_image, contours, i, color, CV_FILLED, 8, hierarchy);
+      }
+    }
+    imshow(foreground_contours_window, contours_image);
+    
     bool do_quit = false;
     do {
 
@@ -223,7 +246,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
 
         // Draw the current pixel intensity as a vertical line.
-        const unsigned char col  = grayscale_image.at<unsigned char>(clicked_point.y, clicked_point.x);
+        const unsigned char col  = blurred_image.at<unsigned char>(clicked_point.y, clicked_point.x);
         const Point         from = Point(col, 0);
         const Point         to   = Point(col, gaussian_image_height - 1);
         line(gaussian_image, from, to, CV_RGB(255, 0, 0));
