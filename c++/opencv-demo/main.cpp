@@ -9,16 +9,19 @@ using namespace std;
 using namespace cv;
 
 
-// Defines.
+// Tunable GMM defines.
+#define MAX_GAUSSIANS_PER_PIXEL          3
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  50         /* New Gaussians have a large variance = std. dev. squared. */
+#define NEW_GAUSSIAN_WEIGHT              0.00001
+#define MIN_STANDARD_DEVIATION           3          /* A small std. dev. causes noise to be seen as foreground pixels. */
+#define LEARNING_RATE                    0.15
+#define T                                0.5
+
+// Fixed program defines.
+#define INPUT_SCALE_FACTOR               0.5
 #define PI                               3.14159265359
 #define FONT                             FONT_HERSHEY_PLAIN
-#define INPUT_SCALE_FACTOR               1.00
-#define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  10          /* New Gaussians have a large variance = std. dev. squared. */
-#define NEW_GAUSSIAN_WEIGHT              1E-10
-#define MIN_STANDARD_DEVIATION           5           /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.001
-#define T                                0.5
+#define NO_MATCH_INDEX                   -1
 
 
 // Types.
@@ -40,7 +43,7 @@ typedef enum {
 
 // Forward declarations.
 static void          addNewGaussian (GaussianMixture* gaussians, const unsigned char pixel);
-static void          adjustWeights (GaussianMixture* gaussians, const int match_index = -1);
+static void          adjustWeights (GaussianMixture* gaussians, const int match_index, const double learning_rate);
 static double        calculateGaussianProbability (const Gaussian* gaussian, const unsigned char pixel);
 static double        calculateGaussianMixtureProbability (const GaussianMixture* gaussians, const unsigned char pixel);
 static bool          compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
@@ -51,8 +54,8 @@ static void          normalizeWeights (GaussianMixture *gaussians);
 static void          onMouseEvent (int event, int x, int y, int, void*);
 static void          playVideo (const string video_file, const unsigned int start_seconds);
 static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
-static void          updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel);
-
+static void          updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel, const double learning_rate);
+static string        humanReadableTimestamp (const double msec);
 
 // Main program.
 int main (int argc, char *argv[]) {
@@ -95,8 +98,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   // Seek to the startion position.
   (void) capture.set(CV_CAP_PROP_POS_MSEC, start_seconds * 1000);
 
+  // Initialize some things.
+  double           learning_rate = LEARNING_RATE;
+
   // Show the video.
-  const int       escape_key = 27;
   const int       width      = (int) (INPUT_SCALE_FACTOR *image.cols);
   const int       height     = (int) (INPUT_SCALE_FACTOR * image.rows);
 
@@ -112,21 +117,19 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * 2 * text_size.height, 256, CV_8UC3);
   
   // Create windows and attach mouse handlers.
-  const string input_grayscale_window         = "in:gray";
   const string input_colormap_window          = "in:color";
-  const string background_grayscale_window    = "bck:gray";
   const string background_colormap_window     = "bck:color";
   const string foreground_mask_window         = "fg:mask";
   const string foreground_window              = "fg:gray";
+  const string foreground_morph_window        = "fg:morph";
   const string gaussian_histogram_window      = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
-  namedWindow(input_grayscale_window);         setMouseCallback(input_grayscale_window,         onMouseEvent, &clicked_point);
   namedWindow(input_colormap_window);          setMouseCallback(input_colormap_window,          onMouseEvent, &clicked_point);
-  namedWindow(background_grayscale_window);    setMouseCallback(background_grayscale_window,    onMouseEvent, &clicked_point);
   namedWindow(background_colormap_window);     setMouseCallback(background_colormap_window,     onMouseEvent, &clicked_point);
   namedWindow(foreground_window);              setMouseCallback(foreground_window,              onMouseEvent, &clicked_point);
   namedWindow(foreground_mask_window);         setMouseCallback(foreground_mask_window,         onMouseEvent, &clicked_point);
+  namedWindow(foreground_morph_window);        setMouseCallback(foreground_morph_window,        onMouseEvent, &clicked_point);
 
   namedWindow(gaussian_histogram_window);
 
@@ -143,7 +146,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     
     Mat grayscale_image;
     cvtColor(blurred_image, grayscale_image, CV_RGB2GRAY);
-    imshow(input_grayscale_window, grayscale_image);
     
     // Show the input with a colormap applied.
     Mat colored_image;
@@ -168,13 +170,13 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         }
 
         if (found_match) {
-          adjustWeights(gaussians, match_index);
+          adjustWeights(gaussians, match_index, learning_rate);
         } else {
-          adjustWeights(gaussians);
+          adjustWeights(gaussians, NO_MATCH_INDEX, learning_rate);
         }
 
         if (found_match) {
-          updateMatchingGaussian(gaussians, match_index, pixel);
+          updateMatchingGaussian(gaussians, match_index, pixel, learning_rate);
         }
 
         background_model.at<unsigned char>(row, col) = selectGaussiansForBackgroundModel(gaussians);
@@ -186,8 +188,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       }
     }
 
-    imshow(background_grayscale_window, background_model);
-
     // Show the background model with a colormap applied.
     Mat colored_background_model;
     applyColorMap(background_model, colored_background_model, COLORMAP_JET);
@@ -196,6 +196,15 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Show the foreground pixels and the mask.
     imshow(foreground_window,      foreground_image);
     imshow(foreground_mask_window, foreground_mask_image);
+
+    // Apply a morphological operator to remove small objects and close gaps.
+    const Mat element5(5, 5, CV_8U, Scalar(1));
+    const Mat element9(9, 9, CV_8U, Scalar(1));
+    Mat       foreground_morph_image;
+    Mat       foreground_morph2_image;
+    morphologyEx(foreground_mask_image,   foreground_morph_image, MORPH_OPEN,  element5);
+    morphologyEx(foreground_morph_image, foreground_morph2_image, MORPH_CLOSE, element9);
+    imshow(foreground_morph_window, foreground_morph2_image);
 
     bool do_quit = false;
     do {
@@ -266,7 +275,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       imshow(gaussian_histogram_window, gaussian_image);
 
       const int key = waitKey(inter_frame_delay) % 256;
-      if (key == escape_key) {
+      if (key == 'q' || key == 'Q') {
         do_quit = true;
         break;
       }
@@ -285,6 +294,21 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       case 'm':
       case 'M':
         gaussian_property_to_show = E_GAUSSIAN_PROPERTY_MEAN;
+        break;
+
+      case 'r':
+        learning_rate /= 1.1;
+        cout << "Learning rate = " << setprecision(5) << learning_rate << endl;
+        break;
+
+      case 'R':
+        learning_rate *= 1.1;
+        cout << "Learning rate = " << setprecision(5) << learning_rate << endl;
+        break;
+
+      case 't':
+      case 'T':
+        cout << humanReadableTimestamp(capture.get(CV_CAP_PROP_POS_MSEC)) << endl;
         break;
 
       case ' ':
@@ -359,16 +383,16 @@ static void addNewGaussian (GaussianMixture* gaussians, const unsigned char pixe
 }
 
 
-static void adjustWeights (GaussianMixture* gaussians, const int match_index) {
+static void adjustWeights (GaussianMixture* gaussians, const int match_index, const double learning_rate) {
   double sum = 0;
 
   for (int index = 0; index < gaussians->size(); index++) {
     Gaussian *gaussian = (*gaussians)[index];
 
     if (index == match_index) {
-      gaussian->weight = (1 - LEARNING_RATE) * gaussian->weight + LEARNING_RATE;
+      gaussian->weight = (1 - learning_rate) * gaussian->weight + learning_rate;
     } else {
-      gaussian->weight = (1 - LEARNING_RATE) * gaussian->weight;
+      gaussian->weight = (1 - learning_rate) * gaussian->weight;
     }
   }
 
@@ -391,9 +415,9 @@ static void normalizeWeights (GaussianMixture *gaussians) {
 }
 
 
-static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_index, const unsigned char pixel) {
+static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_index, const unsigned char pixel, const double learning_rate) {
   Gaussian*    gaussian = (*gaussians)[match_index];
-  const double rho      = LEARNING_RATE * calculateGaussianMixtureProbability(gaussians, pixel);
+  const double rho      = learning_rate * calculateGaussianMixtureProbability(gaussians, pixel);
   const double variance = (1 - rho) * gaussian->standard_deviation * gaussian->standard_deviation + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
     
   gaussian->mean               = (1 - rho) * gaussian->mean + rho * pixel;
@@ -467,4 +491,28 @@ static void onMouseEvent (int event, int x, int y, int, void* caller_object) {
     clicked_point->x = x;
     clicked_point->y = y;
   }
+}
+
+
+static string humanReadableTimestamp (const double msec) {
+  unsigned int seconds = msec / 1000;
+  unsigned int minutes = seconds / 60; seconds %= 60;
+  unsigned int hours   = minutes / 60; minutes %= 60;
+  ostringstream s;
+
+  s.fill('0');
+  s.width(2);
+
+  s << right << hours << ':';
+
+  s.width(2);
+  s << right << minutes << ':';
+
+  s.width(2);
+  s << right << seconds << '.';
+
+  s.width(3);
+  s << right << (((unsigned int) msec) % 1000);
+  
+  return s.str();
 }
