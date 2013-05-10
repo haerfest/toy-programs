@@ -121,7 +121,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const string background_colormap_window     = "bck:color";
   const string foreground_mask_window         = "fg:mask";
   const string foreground_window              = "fg:gray";
-  const string foreground_morph_window        = "fg:morph";
   const string gaussian_histogram_window      = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
@@ -129,7 +128,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   namedWindow(background_colormap_window);     setMouseCallback(background_colormap_window,     onMouseEvent, &clicked_point);
   namedWindow(foreground_window);              setMouseCallback(foreground_window,              onMouseEvent, &clicked_point);
   namedWindow(foreground_mask_window);         setMouseCallback(foreground_mask_window,         onMouseEvent, &clicked_point);
-  namedWindow(foreground_morph_window);        setMouseCallback(foreground_morph_window,        onMouseEvent, &clicked_point);
 
   namedWindow(gaussian_histogram_window);
 
@@ -196,15 +194,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Show the foreground pixels and the mask.
     imshow(foreground_window,      foreground_image);
     imshow(foreground_mask_window, foreground_mask_image);
-
-    // Apply a morphological operator to remove small objects and close gaps.
-    const Mat element5(5, 5, CV_8U, Scalar(1));
-    const Mat element9(9, 9, CV_8U, Scalar(1));
-    Mat       foreground_morph_image;
-    Mat       foreground_morph2_image;
-    morphologyEx(foreground_mask_image,   foreground_morph_image, MORPH_OPEN,  element5);
-    morphologyEx(foreground_morph_image, foreground_morph2_image, MORPH_CLOSE, element9);
-    imshow(foreground_morph_window, foreground_morph2_image);
 
     bool do_quit = false;
     do {
