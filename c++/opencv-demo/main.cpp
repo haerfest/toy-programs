@@ -11,10 +11,10 @@ using namespace cv;
 
 // Tunable GMM defines.
 #define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  50         /* New Gaussians have a large variance = std. dev. squared. */
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  15         /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.00001
 #define MIN_STANDARD_DEVIATION           3          /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.15
+#define LEARNING_RATE                    0.01
 #define T                                0.5
 
 // Fixed program defines.
@@ -108,7 +108,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   GaussianMixture gaussian_mixture[height][width];
   Mat             background_model(height, width, CV_8UC1);
   Mat             foreground_image(height, width, CV_8UC3);
-  Mat             foreground_mask_image(height, width, CV_8UC1);
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
@@ -119,7 +118,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   // Create windows and attach mouse handlers.
   const string input_colormap_window          = "in:color";
   const string background_colormap_window     = "bck:color";
-  const string foreground_mask_window         = "fg:mask";
   const string foreground_window              = "fg:gray";
   const string gaussian_histogram_window      = "pixel:gaus";
 
@@ -127,7 +125,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   namedWindow(input_colormap_window);          setMouseCallback(input_colormap_window,          onMouseEvent, &clicked_point);
   namedWindow(background_colormap_window);     setMouseCallback(background_colormap_window,     onMouseEvent, &clicked_point);
   namedWindow(foreground_window);              setMouseCallback(foreground_window,              onMouseEvent, &clicked_point);
-  namedWindow(foreground_mask_window);         setMouseCallback(foreground_mask_window,         onMouseEvent, &clicked_point);
 
   namedWindow(gaussian_histogram_window);
 
@@ -151,7 +148,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     imshow(input_colormap_window, colored_image);
 
     foreground_image = Scalar(0, 127, 255);  // Orange.
-    foreground_mask_image = Scalar(0);
 
     // Apply the GMM algorithm to create a model of the background.
     for (int row = 0; row < height; row++) {
@@ -181,7 +177,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
         if (is_foreground) {
           foreground_image.at<Vec3b>(row, col)              = Vec3b(pixel, pixel, pixel);
-          foreground_mask_image.at<unsigned char>(row, col) = 255;
         }
       }
     }
@@ -193,7 +188,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
     // Show the foreground pixels and the mask.
     imshow(foreground_window,      foreground_image);
-    imshow(foreground_mask_window, foreground_mask_image);
 
     bool do_quit = false;
     do {
