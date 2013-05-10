@@ -11,10 +11,10 @@ using namespace cv;
 
 // Tunable GMM defines.
 #define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  15         /* New Gaussians have a large variance = std. dev. squared. */
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  7          /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.00001
 #define MIN_STANDARD_DEVIATION           3          /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.01
+#define LEARNING_RATE                    0.001
 #define T                                0.5
 
 // Fixed program defines.
@@ -46,16 +46,18 @@ static void          addNewGaussian (GaussianMixture* gaussians, const unsigned 
 static void          adjustWeights (GaussianMixture* gaussians, const int match_index, const double learning_rate);
 static double        calculateGaussianProbability (const Gaussian* gaussian, const unsigned char pixel);
 static double        calculateGaussianMixtureProbability (const GaussianMixture* gaussians, const unsigned char pixel);
+static double        calculateNormalizedCrossCorrelation (const Mat &foreground, const Mat &background, const int row, const int col, double *ptr_er, double *ptr_eb, double *ptr_et);
 static bool          compareGaussiansDecreasingByWeight (const Gaussian* a, const Gaussian* b);
 static bool          compareGaussiansDecreasingByWeightOverVariance (const Gaussian *a, const Gaussian *b);
 static void          deleteLeastProbableGaussian (GaussianMixture* gaussians);
 static bool          findMatchingGaussian (const unsigned char pixel, GaussianMixture* gaussians, int* match_index);
+static string        humanReadableTimestamp (const double msec);
 static void          normalizeWeights (GaussianMixture *gaussians);
 static void          onMouseEvent (int event, int x, int y, int, void*);
 static void          playVideo (const string video_file, const unsigned int start_seconds);
 static unsigned char selectGaussiansForBackgroundModel (GaussianMixture* gaussians);
 static void          updateMatchingGaussian (GaussianMixture* gaussian, const int match_index, const unsigned char pixel, const double learning_rate);
-static string        humanReadableTimestamp (const double msec);
+
 
 // Main program.
 int main (int argc, char *argv[]) {
@@ -108,23 +110,27 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   GaussianMixture gaussian_mixture[height][width];
   Mat             background_model(height, width, CV_8UC1);
   Mat             foreground_image(height, width, CV_8UC3);
+  Mat             foreground_mask_image(height, width, CV_8UC1);
+  Mat             shadow_image(height, width, CV_8UC3);
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
   Size             text_size                 = getTextSize("H", FONT, 1.0, 1, &base_line);
   const int        gaussian_image_height     = 100;
-  Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * 2 * text_size.height, 256, CV_8UC3);
+  Mat              gaussian_image(gaussian_image_height + (MAX_GAUSSIANS_PER_PIXEL + 4 /* shadow */) * text_size.height, 640, CV_8UC3);
   
   // Create windows and attach mouse handlers.
   const string input_colormap_window          = "in:color";
   const string background_colormap_window     = "bck:color";
   const string foreground_window              = "fg:gray";
+  const string shadow_window                  = "shadow";
   const string gaussian_histogram_window      = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
-  namedWindow(input_colormap_window);          setMouseCallback(input_colormap_window,          onMouseEvent, &clicked_point);
-  namedWindow(background_colormap_window);     setMouseCallback(background_colormap_window,     onMouseEvent, &clicked_point);
-  namedWindow(foreground_window);              setMouseCallback(foreground_window,              onMouseEvent, &clicked_point);
+  namedWindow(input_colormap_window);      setMouseCallback(input_colormap_window,      onMouseEvent, &clicked_point);
+  namedWindow(background_colormap_window); setMouseCallback(background_colormap_window, onMouseEvent, &clicked_point);
+  namedWindow(foreground_window);          setMouseCallback(foreground_window,          onMouseEvent, &clicked_point);
+  namedWindow(shadow_window);              setMouseCallback(shadow_window,              onMouseEvent, &clicked_point);    
 
   namedWindow(gaussian_histogram_window);
 
@@ -147,7 +153,9 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     applyColorMap(grayscale_image, colored_image, COLORMAP_JET);
     imshow(input_colormap_window, colored_image);
 
-    foreground_image = Scalar(0, 127, 255);  // Orange.
+    shadow_image          = Scalar(0, 127, 255);
+    foreground_image      = Scalar(0, 127, 255);
+    foreground_mask_image = Scalar(0);
 
     // Apply the GMM algorithm to create a model of the background.
     for (int row = 0; row < height; row++) {
@@ -177,6 +185,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
         if (is_foreground) {
           foreground_image.at<Vec3b>(row, col)              = Vec3b(pixel, pixel, pixel);
+          foreground_mask_image.at<unsigned char>(row, col) = 255;
         }
       }
     }
@@ -187,7 +196,24 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     imshow(background_colormap_window, colored_background_model);
 
     // Show the foreground pixels and the mask.
-    imshow(foreground_window,      foreground_image);
+    imshow(foreground_window, foreground_image);
+
+    // Detect shadow.
+    for (int row = 0; row < image.rows; row++) {
+      for (int col = 0; col < image.cols; col++) {
+        if (foreground_mask_image.at<unsigned char>(row, col) != 0) {
+          double       eb;
+          double       et;
+          const double ncc = calculateNormalizedCrossCorrelation(grayscale_image, background_model, row, col, NULL, &eb, &et);
+          
+          if (et < eb && ncc >= 0.95) {
+            const unsigned char pixel = grayscale_image.at<unsigned char>(row, col);
+            shadow_image.at<Vec3b>(row, col) = Vec3b(pixel, pixel, pixel);
+          }
+        }
+      }
+    }
+    imshow(shadow_window, shadow_image);
 
     bool do_quit = false;
     do {
@@ -251,10 +277,26 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         text_size             = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
         const int left_x      = gaussian->mean - text_size.width / 2;
         const int right_x     = left_x + text_size.width;
-        CvPoint   bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
+        CvPoint   bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - (i + 4 /* shadow */) * text_size.height};
       
         putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, color);
       }
+
+      // Show shadow statistics.
+      double       er;
+      double       eb;
+      double       et;
+      const double ncc = calculateNormalizedCrossCorrelation(grayscale_image, background_model, clicked_point.y, clicked_point.x, &er, &eb, &et);
+
+      ostringstream shadow_string;
+      shadow_string << setprecision(2) << "ncc: " << ncc
+                    << fixed << setprecision(1) << " [er: " << er
+                    << fixed << setprecision(1) << " eb: "  << eb
+                    << fixed << setprecision(1) << " et: "  << et << "]";
+      text_size = getTextSize(shadow_string.str(), FONT, 1.0, 1, &base_line);
+      CvPoint bottom_left = {0, gaussian_image.rows};
+      putText(gaussian_image, shadow_string.str(), bottom_left, FONT, 1.0, CV_RGB(255, 255, 255));
+      
       imshow(gaussian_histogram_window, gaussian_image);
 
       const int key = waitKey(inter_frame_delay) % 256;
@@ -499,3 +541,37 @@ static string humanReadableTimestamp (const double msec) {
   
   return s.str();
 }
+
+
+static double calculateNormalizedCrossCorrelation (const Mat &foreground, const Mat &background, const int row, const int col, double *ptr_er, double *ptr_eb, double *ptr_et) {
+  const int    n          = 4;
+  const int    left_col   = (col - n < 0 ? 0 : col - n);
+  const int    right_col  = (col + n > foreground.cols - 1 ? foreground.cols - 1 : col + n);
+  const int    top_row    = (row - n < 0 ? 0 : row - n);
+  const int    bottom_row = (row + n > foreground.rows - 1 ? foreground.rows - 1 : row + n);
+  
+  double er = 0;  // Energy of region, as B * T.
+  double eb = 0;  // Energy of background (B).
+  double et = 0;  // Energy of template (T).
+
+  for (int row = top_row; row <= bottom_row; row++) {
+    for (int col = left_col; col <= right_col; col++) {
+      const unsigned char background_pixel = background.at<unsigned char>(row, col);
+      const unsigned char template_pixel   = foreground.at<unsigned char>(row, col);
+
+      er += background_pixel * template_pixel;
+      eb += background_pixel * background_pixel;
+      et += template_pixel   * template_pixel;
+    }
+  }
+
+  eb = sqrt(eb);
+  et = sqrt(et);
+
+  if (ptr_er != NULL) *ptr_er = er;
+  if (ptr_eb != NULL) *ptr_eb = eb;
+  if (ptr_et != NULL) *ptr_et = et;
+
+  return er / (eb * et);
+}
+
