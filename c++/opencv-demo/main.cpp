@@ -14,9 +14,10 @@ using namespace cv;
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  7          /* New Gaussians have a large variance = std. dev. squared. */
 #define NEW_GAUSSIAN_WEIGHT              0.00001
 #define MIN_STANDARD_DEVIATION           3          /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.001
+#define LEARNING_RATE                    0.1
 #define T                                0.5
 
+// Canny recommends a ratio 1:2 or 1:3 between these.
 #define CANNY_LOWER_THRESHOLD            (1 * (256 / 4))
 #define CANNY_HIGHER_THRESHOLD           (3 * (256 / 4))
 
@@ -114,7 +115,11 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat             background_model(height, width, CV_8UC1);
   Mat             foreground_image(height, width, CV_8UC3);
   Mat             foreground_mask_image(height, width, CV_8UC1);
+  Mat             background_canny_image(height, width, CV_8UC1);
   Mat             canny_image(height, width, CV_8UC1);
+  Mat             previous_grayscale_image(height, width, CV_8UC1);
+  Mat             diff_grayscale_image(height, width, CV_8UC1);
+  bool            has_previous_grayscale_image = false;
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
@@ -124,19 +129,25 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   
   // Create windows and attach mouse handlers.
   const string input_colormap_window          = "in:color";
+  const string input_diff_window              = "in:diff";
+  const string diff_thresh_window             = "diff:thresh";
   const string background_colormap_window     = "bck:color";
   const string foreground_window              = "fg:gray";
   const string foreground_morph_window        = "fg:morph";
-  const string canny_window                   = "fg:canny";
+  const string background_canny_window        = "bg:canny";
+  const string canny_window                   = "in:canny";
   const string gaussian_histogram_window      = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
   namedWindow(input_colormap_window);      setMouseCallback(input_colormap_window,      onMouseEvent, &clicked_point);
+  namedWindow(input_diff_window);          setMouseCallback(input_diff_window,          onMouseEvent, &clicked_point);
+  namedWindow(diff_thresh_window);         setMouseCallback(diff_thresh_window,         onMouseEvent, &clicked_point);
   namedWindow(background_colormap_window); setMouseCallback(background_colormap_window, onMouseEvent, &clicked_point);
   namedWindow(foreground_window);          setMouseCallback(foreground_window,          onMouseEvent, &clicked_point);
   namedWindow(foreground_morph_window);    setMouseCallback(foreground_morph_window,    onMouseEvent, &clicked_point);
+  namedWindow(background_canny_window);    setMouseCallback(background_canny_window,    onMouseEvent, &clicked_point);
   namedWindow(canny_window);               setMouseCallback(canny_window,               onMouseEvent, &clicked_point);
-
+  
   namedWindow(gaussian_histogram_window);
 
   bool is_paused = false;
@@ -149,6 +160,18 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     Mat grayscale_image;
     cvtColor(resized_image, grayscale_image, CV_RGB2GRAY);
     
+    if (has_previous_grayscale_image) {
+      diff_grayscale_image = abs(grayscale_image - previous_grayscale_image);
+      Mat diff_colored_image;
+      applyColorMap(diff_grayscale_image, diff_colored_image, COLORMAP_JET);
+      imshow(input_diff_window, diff_colored_image);
+
+      Mat thresh_image = diff_grayscale_image > 12;  // 5% of 256
+      imshow(diff_thresh_window, thresh_image);
+    }
+    grayscale_image.copyTo(previous_grayscale_image);
+    has_previous_grayscale_image = true;
+
     // Show the input with a colormap applied.
     Mat colored_image;
     applyColorMap(grayscale_image, colored_image, COLORMAP_JET);
@@ -207,16 +230,12 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     morphologyEx(opened_image,           closed_image, MORPH_CLOSE, element30);
     imshow(foreground_morph_window, closed_image);
 
-    // Apply the Canny edge detector to the foreground area.
+    // Find background edges.
+    Canny(background_model, background_canny_image, CANNY_LOWER_THRESHOLD, CANNY_HIGHER_THRESHOLD);
+    imshow(background_canny_window, background_canny_image);
+
+    // Find current edges.
     Canny(grayscale_image, canny_image, CANNY_LOWER_THRESHOLD, CANNY_HIGHER_THRESHOLD);
-    for (int row = 0; row < image.rows; row++) {
-      for (int col = 0; col < image.cols; col++) {
-        if (closed_image.at<unsigned char>(row, col) == 0) {
-          // Hide all edges that are not foreground.
-          canny_image.at<unsigned char>(row, col) = 0;
-        }
-      }
-    }
     imshow(canny_window, canny_image);
 
     bool do_quit = false;
