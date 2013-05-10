@@ -18,7 +18,7 @@ using namespace cv;
 #define T                                0.5
 
 // Fixed program defines.
-#define INPUT_SCALE_FACTOR               0.5
+#define INPUT_SCALE_FACTOR               1.0
 #define PI                               3.14159265359
 #define FONT                             FONT_HERSHEY_PLAIN
 #define NO_MATCH_INDEX                   -1
@@ -111,49 +111,42 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat             background_model(height, width, CV_8UC1);
   Mat             foreground_image(height, width, CV_8UC3);
   Mat             foreground_mask_image(height, width, CV_8UC1);
-  Mat             shadow_image(height, width, CV_8UC3);
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
   Size             text_size                 = getTextSize("H", FONT, 1.0, 1, &base_line);
   const int        gaussian_image_height     = 100;
-  Mat              gaussian_image(gaussian_image_height + (MAX_GAUSSIANS_PER_PIXEL + 4 /* shadow */) * text_size.height, 640, CV_8UC3);
+  Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * text_size.height, 256, CV_8UC3);
   
   // Create windows and attach mouse handlers.
   const string input_colormap_window          = "in:color";
   const string background_colormap_window     = "bck:color";
   const string foreground_window              = "fg:gray";
-  const string shadow_window                  = "shadow";
+  const string foreground_morph_window        = "fg:morph";
   const string gaussian_histogram_window      = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
   namedWindow(input_colormap_window);      setMouseCallback(input_colormap_window,      onMouseEvent, &clicked_point);
   namedWindow(background_colormap_window); setMouseCallback(background_colormap_window, onMouseEvent, &clicked_point);
   namedWindow(foreground_window);          setMouseCallback(foreground_window,          onMouseEvent, &clicked_point);
-  namedWindow(shadow_window);              setMouseCallback(shadow_window,              onMouseEvent, &clicked_point);    
-
+  namedWindow(foreground_morph_window);    setMouseCallback(foreground_morph_window,    onMouseEvent, &clicked_point);
   namedWindow(gaussian_histogram_window);
 
   bool is_paused = false;
   while (capture.read(image)) {
-    // Show the input resized, blurred, in grayscale.
+    // Show the input resized, in grayscale.
     Mat        resized_image;
     const Size zero_size(0, 0);
     resize(image, resized_image, zero_size, INPUT_SCALE_FACTOR, INPUT_SCALE_FACTOR);
 
-    Mat        blurred_image;
-    const Size kernel_size(7, 7);
-    GaussianBlur(resized_image, blurred_image, kernel_size, 0);
-    
     Mat grayscale_image;
-    cvtColor(blurred_image, grayscale_image, CV_RGB2GRAY);
+    cvtColor(resized_image, grayscale_image, CV_RGB2GRAY);
     
     // Show the input with a colormap applied.
     Mat colored_image;
     applyColorMap(grayscale_image, colored_image, COLORMAP_JET);
     imshow(input_colormap_window, colored_image);
 
-    shadow_image          = Scalar(0, 127, 255);
     foreground_image      = Scalar(0, 127, 255);
     foreground_mask_image = Scalar(0);
 
@@ -198,22 +191,14 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     // Show the foreground pixels and the mask.
     imshow(foreground_window, foreground_image);
 
-    // Detect shadow.
-    for (int row = 0; row < image.rows; row++) {
-      for (int col = 0; col < image.cols; col++) {
-        if (foreground_mask_image.at<unsigned char>(row, col) != 0) {
-          double       eb;
-          double       et;
-          const double ncc = calculateNormalizedCrossCorrelation(grayscale_image, background_model, row, col, NULL, &eb, &et);
-          
-          if (et < eb && ncc >= 0.95) {
-            const unsigned char pixel = grayscale_image.at<unsigned char>(row, col);
-            shadow_image.at<Vec3b>(row, col) = Vec3b(pixel, pixel, pixel);
-          }
-        }
-      }
-    }
-    imshow(shadow_window, shadow_image);
+    // Apply a morphological operator to remove small objects and close gaps.
+    const Mat element10(10, 10, CV_8U, Scalar(1));
+    const Mat element30(30, 30, CV_8U, Scalar(1));
+    Mat       opened_image;
+    Mat       closed_image;
+    morphologyEx(foreground_mask_image,  opened_image, MORPH_OPEN,  element10);
+    morphologyEx(opened_image,           closed_image, MORPH_CLOSE, element30);
+    imshow(foreground_morph_window, closed_image);
 
     bool do_quit = false;
     do {
@@ -277,26 +262,10 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         text_size             = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
         const int left_x      = gaussian->mean - text_size.width / 2;
         const int right_x     = left_x + text_size.width;
-        CvPoint   bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - (i + 4 /* shadow */) * text_size.height};
+        CvPoint   bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
       
         putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, color);
       }
-
-      // Show shadow statistics.
-      double       er;
-      double       eb;
-      double       et;
-      const double ncc = calculateNormalizedCrossCorrelation(grayscale_image, background_model, clicked_point.y, clicked_point.x, &er, &eb, &et);
-
-      ostringstream shadow_string;
-      shadow_string << setprecision(2) << "ncc: " << ncc
-                    << fixed << setprecision(1) << " [er: " << er
-                    << fixed << setprecision(1) << " eb: "  << eb
-                    << fixed << setprecision(1) << " et: "  << et << "]";
-      text_size = getTextSize(shadow_string.str(), FONT, 1.0, 1, &base_line);
-      CvPoint bottom_left = {0, gaussian_image.rows};
-      putText(gaussian_image, shadow_string.str(), bottom_left, FONT, 1.0, CV_RGB(255, 255, 255));
-      
       imshow(gaussian_histogram_window, gaussian_image);
 
       const int key = waitKey(inter_frame_delay) % 256;
