@@ -14,7 +14,7 @@ using namespace cv;
 #define NEW_GAUSSIAN_STANDARD_DEVIATION  15         // New Gaussians have a large variance = std. dev. squared.
 #define NEW_GAUSSIAN_WEIGHT              0.00001
 #define MIN_STANDARD_DEVIATION           3          // A small std. dev. causes noise to be seen as foreground pixels.
-#define LEARNING_RATE                    0.01
+#define LEARNING_RATE                    0.005
 #define T                                0.5
 
 // Fixed program defines.
@@ -124,16 +124,20 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const string input_colormap_window            = "in:color";
   const string background_colormap_window       = "bck:color";
   const string foreground_window                = "fg:gray";
+  const string foreground_mask_window           = "fg:mask";
   const string foreground_morph_window          = "fg:morph";
   const string foreground_intensity_drop_window = "fg:int.drop";
+  const string contours_window                  = "fg:contours";
   const string gaussian_histogram_window        = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
-  namedWindow(input_colormap_window);            setMouseCallback(input_colormap_window,      onMouseEvent, &clicked_point);
-  namedWindow(background_colormap_window);       setMouseCallback(background_colormap_window, onMouseEvent, &clicked_point);
-  namedWindow(foreground_window);                setMouseCallback(foreground_window,          onMouseEvent, &clicked_point);
-  namedWindow(foreground_morph_window);          setMouseCallback(foreground_morph_window,    onMouseEvent, &clicked_point);
+  namedWindow(input_colormap_window);            setMouseCallback(input_colormap_window,            onMouseEvent, &clicked_point);
+  namedWindow(background_colormap_window);       setMouseCallback(background_colormap_window,       onMouseEvent, &clicked_point);
+  namedWindow(foreground_window);                setMouseCallback(foreground_window,                onMouseEvent, &clicked_point);
+  namedWindow(foreground_mask_window);           setMouseCallback(foreground_mask_window,           onMouseEvent, &clicked_point);
+  namedWindow(foreground_morph_window);          setMouseCallback(foreground_morph_window,          onMouseEvent, &clicked_point);
   namedWindow(foreground_intensity_drop_window); setMouseCallback(foreground_intensity_drop_window, onMouseEvent, &clicked_point);
+  namedWindow(contours_window);                  setMouseCallback(contours_window,                  onMouseEvent, &clicked_point);
 
   namedWindow(gaussian_histogram_window);
 
@@ -182,7 +186,6 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         background_model.at<unsigned char>(row, col) = selectGaussiansForBackgroundModel(gaussians);
 
         if (is_foreground) {
-          foreground_image.at<Vec3b>(row, col)              = Vec3b(pixel, pixel, pixel);
           foreground_mask_image.at<unsigned char>(row, col) = 255;
         }
       }
@@ -192,22 +195,52 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     applyColorMap(background_model, colored_image, COLORMAP_JET);
     imshow(background_colormap_window, colored_image);
 
-    // Show the foreground pixels and the mask.
-    imshow(foreground_window, foreground_image);
+    // Show the foreground mask.
+    imshow(foreground_mask_window, foreground_mask_image);
 
-    // Apply a morphological operator to remove small objects and close gaps.
-    const Mat element10(10, 10, CV_8U, Scalar(1));
-    const Mat element30(30, 30, CV_8U, Scalar(1));
-    Mat       opened_image;
-    Mat       closed_image;
-    morphologyEx(foreground_mask_image,  opened_image, MORPH_OPEN,  element10);
-    morphologyEx(opened_image,           closed_image, MORPH_CLOSE, element30);
-    imshow(foreground_morph_window, closed_image);
+    // Apply a morphological operator to fill small holes.
+    Mat foreground_morph1_image;
+    const Mat element_close(7, 7, CV_8U, Scalar(1));
+    morphologyEx(foreground_mask_image, foreground_morph1_image, MORPH_CLOSE, element_close);
+
+    // Apply a morphological operator to remove small objects.
+    Mat foreground_morph2_image;
+    const Mat element_open(7, 7, CV_8U, Scalar(1));
+    morphologyEx(foreground_morph1_image, foreground_morph2_image, MORPH_OPEN, element_open);
+    imshow(foreground_morph_window, foreground_morph2_image);
+
+    // Find contours.
+    Mat contours_image = Mat::zeros(image.rows, image.cols, CV_8UC3);
+    vector<vector<Point> > contours;
+    vector<Vec4i>          hierarchy;
+
+    // Plot the contours in different colors.
+    findContours(foreground_morph2_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    if (!contours.empty()) {
+      for (int i = 0; i >= 0; i = hierarchy[i][0])
+      {
+        const Scalar color(128 + rand() & 127, 128 + rand() & 127, 128 + rand() & 127);
+        drawContours(contours_image, contours, i, color, CV_FILLED, 8, hierarchy);
+      }
+    }
+    imshow(contours_window, contours_image);
+
+    // Show the foreground pixels for the contours.
+    for (int row = 0; row < image.rows; row++) {
+      for (int col = 0; col < image.cols; col++) {
+        const Vec3b black_pixel(0, 0, 0);
+        if (contours_image.at<Vec3b>(row, col) != black_pixel) {
+          const unsigned char pixel = grayscale_image.at<unsigned char>(row, col);
+          foreground_image.at<Vec3b>(row, col) = Vec3b(pixel, pixel, pixel);
+        }
+      }
+    }
+    imshow(foreground_window, foreground_image);
 
     // Show for each foreground pixel that is darker than the background, a normalized intensity drop.
     for (int row = 0; row < image.rows; row++) {
       for (int col = 0; col < image.cols; col++) {
-        if (foreground_mask_image.at<unsigned char>(row, col) != 0) {
+        if (foreground_morph2_image.at<unsigned char>(row, col) != 0) {
           const unsigned char fg = grayscale_image.at<unsigned char>(row, col);
           const unsigned char bg = background_model.at<unsigned char>(row, col);
 
