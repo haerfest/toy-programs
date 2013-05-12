@@ -11,15 +11,11 @@ using namespace cv;
 
 // Tunable GMM defines.
 #define MAX_GAUSSIANS_PER_PIXEL          3
-#define NEW_GAUSSIAN_STANDARD_DEVIATION  7          /* New Gaussians have a large variance = std. dev. squared. */
+#define NEW_GAUSSIAN_STANDARD_DEVIATION  15         // New Gaussians have a large variance = std. dev. squared.
 #define NEW_GAUSSIAN_WEIGHT              0.00001
-#define MIN_STANDARD_DEVIATION           3          /* A small std. dev. causes noise to be seen as foreground pixels. */
-#define LEARNING_RATE                    0.1
+#define MIN_STANDARD_DEVIATION           3          // A small std. dev. causes noise to be seen as foreground pixels.
+#define LEARNING_RATE                    0.01
 #define T                                0.5
-
-// Canny recommends a ratio 1:2 or 1:3 between these.
-#define CANNY_LOWER_THRESHOLD            (1 * (256 / 4))
-#define CANNY_HIGHER_THRESHOLD           (3 * (256 / 4))
 
 // Fixed program defines.
 #define INPUT_SCALE_FACTOR               1.0
@@ -85,7 +81,7 @@ int main (int argc, char *argv[]) {
 static void playVideo (const string video_file, const unsigned int start_seconds = 0) {
   Mat          image;
   VideoCapture capture(video_file);
-  
+
   if (!capture.isOpened()) {
     cerr << "Could not open video file " << video_file << endl;
     return;
@@ -100,7 +96,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     cerr << "Could not read a frame from the video" << endl;
     return;
   }
-    
+
   // Seek to the startion position.
   (void) capture.set(CV_CAP_PROP_POS_MSEC, start_seconds * 1000);
 
@@ -115,39 +111,30 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat             background_model(height, width, CV_8UC1);
   Mat             foreground_image(height, width, CV_8UC3);
   Mat             foreground_mask_image(height, width, CV_8UC1);
-  Mat             background_canny_image(height, width, CV_8UC1);
-  Mat             canny_image(height, width, CV_8UC1);
-  Mat             previous_grayscale_image(height, width, CV_8UC1);
-  Mat             diff_grayscale_image(height, width, CV_8UC1);
-  bool            has_previous_grayscale_image = false;
+  Mat             foreground_intensity_drop_image(height, width, CV_8UC1);
+  Mat             colored_image;
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
   Size             text_size                 = getTextSize("H", FONT, 1.0, 1, &base_line);
   const int        gaussian_image_height     = 100;
-  Mat              gaussian_image(gaussian_image_height + MAX_GAUSSIANS_PER_PIXEL * text_size.height, 256, CV_8UC3);
-  
+  Mat              gaussian_image(gaussian_image_height + (MAX_GAUSSIANS_PER_PIXEL + 1) * text_size.height, 256, CV_8UC3);
+
   // Create windows and attach mouse handlers.
-  const string input_colormap_window          = "in:color";
-  const string input_diff_window              = "in:diff";
-  const string diff_thresh_window             = "diff:thresh";
-  const string background_colormap_window     = "bck:color";
-  const string foreground_window              = "fg:gray";
-  const string foreground_morph_window        = "fg:morph";
-  const string background_canny_window        = "bg:canny";
-  const string canny_window                   = "in:canny";
-  const string gaussian_histogram_window      = "pixel:gaus";
+  const string input_colormap_window            = "in:color";
+  const string background_colormap_window       = "bck:color";
+  const string foreground_window                = "fg:gray";
+  const string foreground_morph_window          = "fg:morph";
+  const string foreground_intensity_drop_window = "fg:int.drop";
+  const string gaussian_histogram_window        = "pixel:gaus";
 
   CvPoint clicked_point = {width / 2, height / 2};
-  namedWindow(input_colormap_window);      setMouseCallback(input_colormap_window,      onMouseEvent, &clicked_point);
-  namedWindow(input_diff_window);          setMouseCallback(input_diff_window,          onMouseEvent, &clicked_point);
-  namedWindow(diff_thresh_window);         setMouseCallback(diff_thresh_window,         onMouseEvent, &clicked_point);
-  namedWindow(background_colormap_window); setMouseCallback(background_colormap_window, onMouseEvent, &clicked_point);
-  namedWindow(foreground_window);          setMouseCallback(foreground_window,          onMouseEvent, &clicked_point);
-  namedWindow(foreground_morph_window);    setMouseCallback(foreground_morph_window,    onMouseEvent, &clicked_point);
-  namedWindow(background_canny_window);    setMouseCallback(background_canny_window,    onMouseEvent, &clicked_point);
-  namedWindow(canny_window);               setMouseCallback(canny_window,               onMouseEvent, &clicked_point);
-  
+  namedWindow(input_colormap_window);            setMouseCallback(input_colormap_window,      onMouseEvent, &clicked_point);
+  namedWindow(background_colormap_window);       setMouseCallback(background_colormap_window, onMouseEvent, &clicked_point);
+  namedWindow(foreground_window);                setMouseCallback(foreground_window,          onMouseEvent, &clicked_point);
+  namedWindow(foreground_morph_window);          setMouseCallback(foreground_morph_window,    onMouseEvent, &clicked_point);
+  namedWindow(foreground_intensity_drop_window); setMouseCallback(foreground_intensity_drop_window, onMouseEvent, &clicked_point);
+
   namedWindow(gaussian_histogram_window);
 
   bool is_paused = false;
@@ -159,26 +146,14 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
     Mat grayscale_image;
     cvtColor(resized_image, grayscale_image, CV_RGB2GRAY);
-    
-    if (has_previous_grayscale_image) {
-      diff_grayscale_image = abs(grayscale_image - previous_grayscale_image);
-      Mat diff_colored_image;
-      applyColorMap(diff_grayscale_image, diff_colored_image, COLORMAP_JET);
-      imshow(input_diff_window, diff_colored_image);
-
-      Mat thresh_image = diff_grayscale_image > 12;  // 5% of 256
-      imshow(diff_thresh_window, thresh_image);
-    }
-    grayscale_image.copyTo(previous_grayscale_image);
-    has_previous_grayscale_image = true;
 
     // Show the input with a colormap applied.
-    Mat colored_image;
     applyColorMap(grayscale_image, colored_image, COLORMAP_JET);
     imshow(input_colormap_window, colored_image);
 
-    foreground_image      = Scalar(0, 127, 255);
-    foreground_mask_image = Scalar(0);
+    foreground_image                = Scalar(0, 127, 255);
+    foreground_mask_image           = Scalar(0);
+    foreground_intensity_drop_image = Scalar(0);
 
     // Apply the GMM algorithm to create a model of the background.
     for (int row = 0; row < height; row++) {
@@ -188,7 +163,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         int                  match_index;
         const bool           found_match   = findMatchingGaussian(pixel, gaussians, &match_index);
         const bool           is_foreground = !found_match || !((*gaussians)[match_index])->is_background;
-        
+
         if (!found_match) {
           deleteLeastProbableGaussian(gaussians);
           addNewGaussian(gaussians, pixel);
@@ -214,9 +189,8 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     }
 
     // Show the background model with a colormap applied.
-    Mat colored_background_model;
-    applyColorMap(background_model, colored_background_model, COLORMAP_JET);
-    imshow(background_colormap_window, colored_background_model);
+    applyColorMap(background_model, colored_image, COLORMAP_JET);
+    imshow(background_colormap_window, colored_image);
 
     // Show the foreground pixels and the mask.
     imshow(foreground_window, foreground_image);
@@ -230,13 +204,22 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     morphologyEx(opened_image,           closed_image, MORPH_CLOSE, element30);
     imshow(foreground_morph_window, closed_image);
 
-    // Find background edges.
-    Canny(background_model, background_canny_image, CANNY_LOWER_THRESHOLD, CANNY_HIGHER_THRESHOLD);
-    imshow(background_canny_window, background_canny_image);
+    // Show for each foreground pixel that is darker than the background, a normalized intensity drop.
+    for (int row = 0; row < image.rows; row++) {
+      for (int col = 0; col < image.cols; col++) {
+        if (foreground_mask_image.at<unsigned char>(row, col) != 0) {
+          const unsigned char fg = grayscale_image.at<unsigned char>(row, col);
+          const unsigned char bg = background_model.at<unsigned char>(row, col);
 
-    // Find current edges.
-    Canny(grayscale_image, canny_image, CANNY_LOWER_THRESHOLD, CANNY_HIGHER_THRESHOLD);
-    imshow(canny_window, canny_image);
+          if (fg < bg) {
+            const unsigned char drop = 256 * (bg - fg) / bg;
+            foreground_intensity_drop_image.at<unsigned char>(row, col) = drop;
+          }
+        }
+      }
+    }
+    applyColorMap(foreground_intensity_drop_image, colored_image, COLORMAP_JET);
+    imshow(foreground_intensity_drop_window, colored_image);
 
     bool do_quit = false;
     do {
@@ -255,15 +238,15 @@ static void playVideo (const string video_file, const unsigned int start_seconds
           }
         }
       }
-    
+
       // Draw the gaussians backwards, so that the heavy weight is on top.
       for (int i = gaussians->size() - 1; i >= 0; i--) {
         const Gaussian*      gaussian  = (*gaussians)[i];
         const float          intensity = 64 + (int) (192 * gaussian->weight);
         const Scalar_<float> color     = (gaussian->is_background
-                                          ? Scalar_<float>(0, intensity, 0)
-                                          : Scalar_<float>(intensity, intensity, intensity));
-      
+            ? Scalar_<float>(0, intensity, 0)
+            : Scalar_<float>(intensity, intensity, intensity));
+
         for (int col = 0; col < 256; col++) {
           const double probability = calculateGaussianProbability(gaussian, col);
           const int    row         = (int) (gaussian_image_height * probability / max_probability);
@@ -281,27 +264,38 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         const Point         to   = Point(col, gaussian_image_height - 1);
         line(gaussian_image, from, to, CV_RGB(255, 0, 0));
 
+        // Print its intensity as well.
+        ostringstream intensity_string;
+        intensity_string << fixed << (int) col;
+
+        text_size            = getTextSize(intensity_string.str(), FONT, 1.0, 1, &base_line);
+        int      left_x      = col - text_size.width / 2;
+        int      right_x     = left_x + text_size.width;
+        CvPoint  bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - MAX_GAUSSIANS_PER_PIXEL * text_size.height};
+        putText(gaussian_image, intensity_string.str(), bottom_left, FONT, 1.0, CV_RGB(255, 0, 0));
+
         // Draw Gaussian properties below them.
         ostringstream title_string;
         switch (gaussian_property_to_show) {
-        case E_GAUSSIAN_PROPERTY_WEIGHT:
-          title_string << fixed << setprecision(3) << gaussian->weight;
-          break;
+          case E_GAUSSIAN_PROPERTY_WEIGHT:
+            title_string << fixed << setprecision(3) << gaussian->weight;
+            break;
 
-        case E_GAUSSIAN_PROPERTY_VARIANCE:
-          title_string << fixed << setprecision(3) << (gaussian->standard_deviation * gaussian->standard_deviation);
-          break;
+          case E_GAUSSIAN_PROPERTY_VARIANCE:
+            title_string << fixed << setprecision(3) << (gaussian->standard_deviation * gaussian->standard_deviation);
+            break;
 
-        case E_GAUSSIAN_PROPERTY_MEAN:
-          title_string << fixed << setprecision(3) << gaussian->mean;
-          break;
+          case E_GAUSSIAN_PROPERTY_MEAN:
+            title_string << fixed << setprecision(3) << gaussian->mean;
+            break;
         }        
 
-        text_size             = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
-        const int left_x      = gaussian->mean - text_size.width / 2;
-        const int right_x     = left_x + text_size.width;
-        CvPoint   bottom_left = {left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x), gaussian_image.rows - i * text_size.height};
-      
+        text_size     = getTextSize(title_string.str(), FONT, 1.0, 1, &base_line);
+        left_x        = gaussian->mean - text_size.width / 2;
+        right_x       = left_x + text_size.width;
+        bottom_left.x = left_x < 0 ? 0 : (right_x >= gaussian_image.cols ? gaussian_image.cols - text_size.width : left_x);
+        bottom_left.y = gaussian_image.rows - i * text_size.height;
+
         putText(gaussian_image, title_string.str(), bottom_left, FONT, 1.0, color);
       }
       imshow(gaussian_histogram_window, gaussian_image);
@@ -311,49 +305,49 @@ static void playVideo (const string video_file, const unsigned int start_seconds
         do_quit = true;
         break;
       }
-    
+
       switch (key) {
-      case 'v':
-      case 'V':
-        gaussian_property_to_show = E_GAUSSIAN_PROPERTY_VARIANCE;
-        break;
-      
-      case 'w':
-      case 'W':
-        gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
-        break;
+        case 'v':
+        case 'V':
+          gaussian_property_to_show = E_GAUSSIAN_PROPERTY_VARIANCE;
+          break;
 
-      case 'm':
-      case 'M':
-        gaussian_property_to_show = E_GAUSSIAN_PROPERTY_MEAN;
-        break;
+        case 'w':
+        case 'W':
+          gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
+          break;
 
-      case 'r':
-        learning_rate /= 1.1;
-        cout << "Learning rate = " << setprecision(5) << learning_rate << endl;
-        break;
+        case 'm':
+        case 'M':
+          gaussian_property_to_show = E_GAUSSIAN_PROPERTY_MEAN;
+          break;
 
-      case 'R':
-        learning_rate *= 1.1;
-        cout << "Learning rate = " << setprecision(5) << learning_rate << endl;
-        break;
+        case 'r':
+          learning_rate /= 1.1;
+          cout << "Learning rate = " << setprecision(5) << learning_rate << endl;
+          break;
 
-      case 't':
-      case 'T':
-        cout << humanReadableTimestamp(capture.get(CV_CAP_PROP_POS_MSEC)) << endl;
-        break;
+        case 'R':
+          learning_rate *= 1.1;
+          cout << "Learning rate = " << setprecision(5) << learning_rate << endl;
+          break;
 
-      case ' ':
-        is_paused = !is_paused;
-        if (is_paused) {
-          cout << "Paused" << endl;
-        } else {
-          cout << "Playing" << endl;
-        }
-        break;
+        case 't':
+        case 'T':
+          cout << humanReadableTimestamp(capture.get(CV_CAP_PROP_POS_MSEC)) << endl;
+          break;
 
-      default:
-        break;
+        case ' ':
+          is_paused = !is_paused;
+          if (is_paused) {
+            cout << "Paused" << endl;
+          } else {
+            cout << "Playing" << endl;
+          }
+          break;
+
+        default:
+          break;
       }
     }
     while (is_paused);
@@ -451,7 +445,7 @@ static void updateMatchingGaussian (GaussianMixture* gaussians, const int match_
   Gaussian*    gaussian = (*gaussians)[match_index];
   const double rho      = learning_rate * calculateGaussianMixtureProbability(gaussians, pixel);
   const double variance = (1 - rho) * gaussian->standard_deviation * gaussian->standard_deviation + rho * (pixel - gaussian->mean) * (pixel - gaussian->mean);
-    
+
   gaussian->mean               = (1 - rho) * gaussian->mean + rho * pixel;
   gaussian->standard_deviation = (variance > MIN_STANDARD_DEVIATION * MIN_STANDARD_DEVIATION ? sqrt(variance) : MIN_STANDARD_DEVIATION);
 }
@@ -545,7 +539,7 @@ static string humanReadableTimestamp (const double msec) {
 
   s.width(3);
   s << right << (((unsigned int) msec) % 1000);
-  
+
   return s.str();
 }
 
@@ -556,7 +550,7 @@ static double calculateNormalizedCrossCorrelation (const Mat &foreground, const 
   const int    right_col  = (col + n > foreground.cols - 1 ? foreground.cols - 1 : col + n);
   const int    top_row    = (row - n < 0 ? 0 : row - n);
   const int    bottom_row = (row + n > foreground.rows - 1 ? foreground.rows - 1 : row + n);
-  
+
   double er = 0;  // Energy of region, as B * T.
   double eb = 0;  // Energy of background (B).
   double et = 0;  // Energy of template (T).
