@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -143,6 +144,9 @@ static void playVideo (const string video_file, const unsigned int start_seconds
 
   bool is_paused = false;
   while (capture.read(image)) {
+    struct timeval start_time;
+    (void) gettimeofday(&start_time, NULL);
+
     // Show the input resized, in grayscale.
     Mat        resized_image;
     const Size zero_size(0, 0);
@@ -333,7 +337,15 @@ static void playVideo (const string video_file, const unsigned int start_seconds
       }
       imshow(gaussian_histogram_window, gaussian_image);
 
-      const int key = waitKey(inter_frame_delay) % 256;
+      // Calculate elapsed time, so that we don't wait too long on the next frame.
+      struct timeval end_time;
+      (void) gettimeofday(&end_time, NULL);
+      long int elapsed_time_msec      = ((end_time.tv_usec + 1000000 * end_time.tv_sec) - (start_time.tv_usec + 1000000 * start_time.tv_sec)) / 1000;
+      int      this_inter_frame_delay = (elapsed_time_msec < inter_frame_delay
+         ? inter_frame_delay - elapsed_time_msec
+         : 1);
+
+      const int key = waitKey(this_inter_frame_delay) % 256;
       if (key == 'q' || key == 'Q') {
         do_quit = true;
         break;
