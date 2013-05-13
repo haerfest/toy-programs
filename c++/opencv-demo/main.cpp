@@ -18,6 +18,10 @@ using namespace cv;
 #define LEARNING_RATE                    0.005
 #define T                                0.5
 
+// Tuneable Canny defines. Canny advises a 1:2 or 1:3 ratio.
+#define CANNY_LOWER_THRESHOLD            (1 * 256 / 4)
+#define CANNY_UPPER_THRESHOLD            (3 * 256 / 4)
+
 // Fixed program defines.
 #define INPUT_SCALE_FACTOR               1.0
 #define PI                               3.14159265359
@@ -114,6 +118,9 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat             foreground_mask_image(height, width, CV_8UC1);
   Mat             foreground_intensity_drop_image(height, width, CV_8UC1);
   Mat             colored_image;
+  Mat             background_edges(height, width, CV_8UC1);
+  Mat             all_edges(height, width, CV_8UC1);
+  Mat             foreground_edges(height, width, CV_8UC1);
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
@@ -128,6 +135,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   const string foreground_mask_window           = "fg:mask";
   const string foreground_morph_window          = "fg:morph";
   const string foreground_intensity_drop_window = "fg:int.drop";
+  const string foreground_edges_window          = "fg:edges";
   const string contours_window                  = "fg:contours";
   const string gaussian_histogram_window        = "pixel:gaus";
 
@@ -138,6 +146,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   namedWindow(foreground_mask_window);           setMouseCallback(foreground_mask_window,           onMouseEvent, &clicked_point);
   namedWindow(foreground_morph_window);          setMouseCallback(foreground_morph_window,          onMouseEvent, &clicked_point);
   namedWindow(foreground_intensity_drop_window); setMouseCallback(foreground_intensity_drop_window, onMouseEvent, &clicked_point);
+  namedWindow(foreground_edges_window);          setMouseCallback(foreground_edges_window,          onMouseEvent, &clicked_point);
   namedWindow(contours_window);                  setMouseCallback(contours_window,                  onMouseEvent, &clicked_point);
 
   namedWindow(gaussian_histogram_window);
@@ -258,6 +267,23 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     applyColorMap(foreground_intensity_drop_image, colored_image, COLORMAP_JET);
     imshow(foreground_intensity_drop_window, colored_image);
 
+    // Show foreground edges.
+    foreground_edges = Scalar(0);
+    Canny(background_model, background_edges, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD);
+    Canny(grayscale_image,  all_edges,        CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD);
+    for (int row = 0; row < image.rows; row++) {
+      for (int col = 0; col < image.cols; col++) {
+        const Vec3b black_pixel(0, 0, 0);
+        if (contours_image.at<Vec3b>(row, col) != black_pixel) {
+          if (all_edges.at<unsigned char>(row, col) != 0 &&
+              background_edges.at<unsigned char>(row, col) == 0) {
+            foreground_edges.at<unsigned char>(row, col) = 255;
+          }
+        }
+      }
+    }
+    imshow(foreground_edges_window, foreground_edges);
+ 
     bool do_quit = false;
     do {
 
