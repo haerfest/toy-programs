@@ -120,7 +120,7 @@ static void playVideo (const string video_file, const unsigned int start_seconds
   Mat             colored_image;
   Mat             background_edges(height, width, CV_8UC1);
   Mat             all_edges(height, width, CV_8UC1);
-  Mat             foreground_edges(height, width, CV_8UC1);
+  Mat             foreground_edges(height, width, CV_8UC3);
 
   GaussianProperty gaussian_property_to_show = E_GAUSSIAN_PROPERTY_WEIGHT;
   int              base_line;
@@ -268,16 +268,25 @@ static void playVideo (const string video_file, const unsigned int start_seconds
     imshow(foreground_intensity_drop_window, colored_image);
 
     // Show foreground edges.
-    foreground_edges = Scalar(0);
-    Canny(background_model, background_edges, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD);
-    Canny(grayscale_image,  all_edges,        CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD);
-    for (int row = 0; row < image.rows; row++) {
-      for (int col = 0; col < image.cols; col++) {
-        const Vec3b black_pixel(0, 0, 0);
-        if (contours_image.at<Vec3b>(row, col) != black_pixel) {
-          if (all_edges.at<unsigned char>(row, col) != 0 &&
-              background_edges.at<unsigned char>(row, col) == 0) {
-            foreground_edges.at<unsigned char>(row, col) = 255;
+    // 1. Plot the contour edges.
+    foreground_edges = Scalar(0, 0, 0);
+    if (!contours.empty()) {
+      const Scalar white(255, 255, 255);
+      for (int i = 0; i >= 0; i = hierarchy[i][0])
+      {
+        drawContours(foreground_edges, contours, i, white, 1, 8, hierarchy);
+      }
+      // 2. Plot the Canny edges of the foreground areas, that are not also background edges.
+      Canny(background_model, background_edges, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD);
+      Canny(grayscale_image,  all_edges,        CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD);
+      for (int row = 0; row < image.rows; row++) {
+        for (int col = 0; col < image.cols; col++) {
+          const Vec3b black_pixel(0, 0, 0);
+          if (contours_image.at<Vec3b>(row, col) != black_pixel) {
+            if (all_edges.at<unsigned char>(row, col) != 0 &&
+                background_edges.at<unsigned char>(row, col) == 0) {
+              foreground_edges.at<Vec3b>(row, col) = Vec3b(255, 255, 255);
+            }
           }
         }
       }
