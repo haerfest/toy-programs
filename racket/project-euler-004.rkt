@@ -17,9 +17,9 @@
   (equal? (digits n) (reverse (digits n))))
 
 (define (largest-product-palindrome)
-  (apply max (filter palindrome? 
-                     (for*/list ([a (in-range 999 99 -1)]
-                                 [b (in-range a 99 -1)])
-                       (* a b)))))
+  (apply max (for*/list ([a (in-range 999 99 -1)]
+                         [b (in-range a 99 -1)]
+                         #:when (palindrome? (* a b)))
+               (* a b))))
 
 (largest-product-palindrome)  ; => 906609
