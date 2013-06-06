@@ -5,20 +5,20 @@
     
     (define (mark-multiples-of n)
       (let loop ([number (sqr n)])
-        (when (< number (vector-length numbers))
+        (when (< number upper-limit)
           (vector-set! numbers number 'marked)  ; number is not prime
             (loop (+ number n)))))
     
     (define (find-next-number-to-mark number)
       (let loop ([candidate number])
-        (cond [(>= (sqr candidate) (vector-length numbers)) 0]  ; done with numbers
+        (cond [(>= (sqr candidate) upper-limit) 0]  ; done with numbers
               [(eq? (vector-ref numbers candidate) 'unmarked) candidate]
               [else (loop (add1 candidate))])))
     
     (define (sum-primes)
       (let loop ([number 2]
                  [sum 0])
-        (if (>= number (vector-length numbers))
+        (if (>= number upper-limit)
             sum
             (loop (add1 number)
                   (if (eq? (vector-ref numbers number) 'unmarked)
