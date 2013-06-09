@@ -48,7 +48,7 @@
           (loop for r from row below row-count
                 collect (let ((c (if (eq dir 'right)
                                    (- r row)
-                                   (- column-count 1 (- r row)))))
+                                   (- col-count 1 (- r row)))))
                           (cell r c)))))
 
 (defun diagonal-col (col dir)
@@ -68,15 +68,9 @@
   "Returns the Project Euler #11 answer."
   (apply #'max
          (mapcar #'max-product
-                 (append (loop for r from 0 below row-count
-                               collect (row r))
-                         (loop for c from 0 below col-count
-                               collect (col c))
-                         (loop for r from 0 below row-count
-                               collect (diagonal-row r 'right))
-                         (loop for r from 0 below row-count
-                               collect (diagonal-row r 'left))
-                         (loop for c from 0 below col-count
-                               collect (diagonal-col c 'right))
-                         (loop for c from 0 below col-count
-                               collect (diagonal-col c 'left))))))
+                 (append (loop for r from 0 below row-count collect (row r))
+                         (loop for c from 0 below col-count collect (col c))
+                         (loop for r from 0 below row-count collect (diagonal-row r 'right))
+                         (loop for r from 0 below row-count collect (diagonal-row r 'left))
+                         (loop for c from 0 below col-count collect (diagonal-col c 'right))
+                         (loop for c from 0 below col-count collect (diagonal-col c 'left))))))
