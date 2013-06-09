@@ -178,9 +178,9 @@ class Scenario
   end
 
   def play(duration, t = 0)
-    abort "No camera defined yet"   unless @camera
-    abort "No road defined yet"     unless @road
-    abort "No vehicles defined yet" unless @vehicles.count > 0
+    abort 'No camera defined yet'   unless @camera
+    abort 'No road defined yet'     unless @road
+    abort 'No vehicles defined yet' unless @vehicles.count > 0
 
     @vehicles.each { |v| v.start(t) }
     
@@ -189,13 +189,17 @@ class Scenario
       @vehicles.each do |v|
         v.act(t)
         r = noisify(@road.pixels(@road.limit(@camera.project(v))))
-        print "%.1f\t%.1f\t%.1f\t%.1f" % [r.left_x, r.right_x, r.top_y, r.bottom_y] if r
+        if r
+          print "%.1f\t%.1f\t%.1f\t%.1f\t" % [r.left_x, r.right_x, r.top_y, r.bottom_y]
+        else
+          print "?\t?\t?\t?\t"
+        end
       end
       puts
     end
   end
 
-  def noisify(r, level = 15)
+  def noisify(r, level = 5)
     return nil unless r
 
     p = Rectangle.new
@@ -216,8 +220,15 @@ s.road   = Road.new(-21.5, +2.5, +9.0, +6.0)
 peu208 = Vehicle.new(3.962, 1.739, 1.460, :right, 'Peugeot 208')
 s.vehicles << peu208
 
+megane = Vehicle.new(4.498, 1.777, 1.457, :right, 'Renault Megane Grand Tour')
+s.vehicles << megane
+
 peu208.place(0, -25.0, +7.5, 20)
 peu208.brake(3, 6.0, 0)
 peu208.accelerate(6, 1.5, 50)
+
+megane.place(0, -37.0, +7.0, 20)
+megane.brake(3.5, 5.0, 0)
+megane.accelerate(7, 1.0, 45)
 
 s.play(10.0)
