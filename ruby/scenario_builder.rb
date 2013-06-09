@@ -43,6 +43,11 @@ end
 
 class Rectangle
   attr_accessor :left_x, :right_x, :top_y, :bottom_y
+
+  def to_s(road = nil)
+    q = road ? road.pixels(self) : self
+    "%.1f\t%.1f\t%.1f\t%.1f\t" % [q.left_x, q.right_x, q.top_y, q.bottom_y]
+  end
 end
 
 
@@ -89,9 +94,9 @@ end
 
 
 class Vehicle
-  attr_reader :name, :length, :width, :height, :x, :y
+  attr_reader :length, :width, :height, :x, :y
 
-  def initialize(length, width, height, dir = :right, name = nil)
+  def initialize(length, width, height, dir = :right)
     @length       = length
     @width        = width
     @height       = height
@@ -99,7 +104,6 @@ class Vehicle
     @velocity     = 0.0
     @acceleration = 0.0
     @limit        = nil
-    @name         = name || "Vehicle#{rand(1000)}"
     @actions      = {}
     @time         = nil
   end
@@ -171,10 +175,11 @@ end
 class Scenario
   attr_accessor :camera, :road, :vehicles
 
-  def initialize
-    @camera   = nil
-    @road     = nil
-    @vehicles = []
+  def initialize(combine_dist = 2.7)
+    @combine_dist = combine_dist
+    @camera       = nil
+    @road         = nil
+    @vehicles     = []
   end
 
   def play(duration, t = 0)
@@ -186,29 +191,60 @@ class Scenario
     
     t.step(t + duration, 0.033) do |t|
       print "%.3f\t" % t
-      @vehicles.each do |v|
+
+      rects = @vehicles.reduce([]) do |acc, v|
         v.act(t)
-        r = noisify(@road.pixels(@road.limit(@camera.project(v))))
-        if r
-          print "%.1f\t%.1f\t%.1f\t%.1f\t" % [r.left_x, r.right_x, r.top_y, r.bottom_y]
-        else
-          print "?\t?\t?\t?\t"
+        if r = noisify(@road.limit(@camera.project(v)))
+          if combined?(acc, r)
+            acc[-1] = combine(acc, r)
+          else
+            acc << r
+          end
         end
+        acc
       end
+
+      rects.each { |r| print r.to_s(@road) }
       puts
     end
   end
 
-  def noisify(r, level = 5)
+  private
+
+  def noisify(r, level = 0.5)
     return nil unless r
 
+    f = 1E3
+
     p = Rectangle.new
-    p.left_x   = r.left_x   + rand(2 * level + 1) - level
-    p.right_x  = r.right_x  + rand(2 * level + 1) - level
-    p.top_y    = r.top_y    + rand(2 * level + 1) - level
-    p.bottom_y = r.bottom_y + rand(2 * level + 1) - level
+    p.left_x   = r.left_x   + rand(f * 2 * level + 1) / f - level
+    p.right_x  = r.right_x  + rand(f * 2 * level + 1) / f- level
+    p.top_y    = r.top_y    + rand(f * 2 * level + 1) / f - level
+    p.bottom_y = r.bottom_y + rand(f * 2 * level + 1) / f - level
 
     return p
+  end
+
+  def combined?(rects, r)
+    return false if rects.empty?
+    
+    prev = rects.last
+
+    dx = [prev.left_x,   r.left_x].max   - [prev.right_x, r.right_x].min
+    dy = [prev.bottom_y, r.bottom_y].max - [prev.top_y,   r.top_y].min
+
+    dx.abs <= @combine_dist and dy.abs <= @combine_dist
+  end
+
+  def combine(rects, r)
+    combined = Rectangle.new
+
+    combined.left_x   = [rects.last.left_x,   r.left_x].min
+    combined.right_x  = [rects.last.right_x,  r.right_x].max
+    combined.top_y    = [rects.last.top_y,    r.top_y].max
+    combined.bottom_y = [rects.last.bottom_y, r.bottom_y].min
+
+    return combined
   end
 end
 
@@ -217,10 +253,10 @@ s = Scenario.new
 s.camera = Camera.new(0, +7.5, +6.0, :left)
 s.road   = Road.new(-21.5, +2.5, +9.0, +6.0)
 
-peu208 = Vehicle.new(3.962, 1.739, 1.460, :right, 'Peugeot 208')
+peu208 = Vehicle.new(3.962, 1.739, 1.460, :right)
 s.vehicles << peu208
 
-megane = Vehicle.new(4.498, 1.777, 1.457, :right, 'Renault Megane Grand Tour')
+megane = Vehicle.new(4.498, 1.777, 1.457, :right)
 s.vehicles << megane
 
 peu208.place(0, -25.0, +7.5, 20)
@@ -229,6 +265,6 @@ peu208.accelerate(6, 1.5, 50)
 
 megane.place(0, -37.0, +7.0, 20)
 megane.brake(3.5, 5.0, 0)
-megane.accelerate(7, 1.0, 45)
+megane.accelerate(7, 1.8, 45)
 
 s.play(10.0)
