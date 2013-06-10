@@ -46,7 +46,7 @@ class Rectangle
 
   def to_s(road = nil)
     q = road ? road.pixels(self) : self
-    "%.1f\t%.1f\t%.1f\t%.1f\t" % [q.left_x, q.right_x, q.top_y, q.bottom_y]
+    "%d %d %d %d " % [100 * q.left_x, 100 * q.right_x, 100 * q.top_y, 100 * q.bottom_y]
   end
 end
 
@@ -190,8 +190,6 @@ class Scenario
     @vehicles.each { |v| v.start(t) }
     
     t.step(t + duration, 0.033) do |t|
-      print "%.3f\t" % t
-
       rects = @vehicles.reduce([]) do |acc, v|
         v.act(t)
         if r = noisify(@road.limit(@camera.project(v)))
@@ -204,7 +202,8 @@ class Scenario
         acc
       end
 
-      rects.each { |r| print r.to_s(@road) }
+      print "%.2f %d " % [t, rects.count]
+      rects.each { |r| print r.to_s }
       puts
     end
   end
