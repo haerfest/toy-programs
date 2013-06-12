@@ -5,11 +5,12 @@
     (letfn [(collatz [n history mem]
               (if-let [len (get mem n)]
                 ; have memoized n already, update history
-                (reduce (fn [[len mem] n]
-                          (let [len (inc len)]
-                            [len (assoc! mem n len)]))
-                        [len mem]
-                        history)
+                (loop [len len
+                       mem mem
+                       history history]
+                  (if (empty? history)
+                    [len mem]
+                    (recur (inc len) (assoc! mem (first history) len) (rest history))))
                 ; not memoized, recurse
                 (recur (if (even? n)
                          (/ n 2)
