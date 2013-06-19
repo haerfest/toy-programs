@@ -1,23 +1,24 @@
 (defn e [n m]
-  (let [p (vec (for [x (range 1 (inc n))]
-                 (/ (dec (* 2 x (inc (- n x))))
-                    (* n n))))
-        ws (atom (vec (repeat n 1)))]
-    (dotimes [_ m]
-      (dotimes [x n]
-        (let [w (@ws x)]
-          (swap! ws assoc x (+ (* w (- 1 (p x)))
-                               (* (- 1 w) (p x)))))))
-    (reduce + @ws)))
+  (letfn [(turn-probability [disk]
+            (/ (dec (*' 2 disk (inc (- n disk)))) n n))
 
-(e 3 1)             ; => 10/9
-(e 3 2)             ; => 5/3
-(float (e 10 4))    ; => 5.1570263
-(float (e 100 10))  ; => 51.8928
+          (expected-value [disk]
+            (let [p (turn-probability disk)]
+              (loop [i     m
+                     w     1.0]
+                (if (zero? i)
+                  w
+                  (recur (dec i) (+ (* w (- 1 p))
+                                    (* (- 1 w) p)))))))]
 
-; unfortunately (e 1E10 4000) does not work, as Clojure spends *minutes*
-; generating the initial 1E10-element 'p' vector, after which the JVM
-; runs out of heap space :(
+    (let [middle-disk (quot n 2)]
+      (loop [disk middle-disk
+             sum  0]
+        (if (zero? disk)
+          (+ (* 2 sum) (if (odd? n)
+                         (expected-value (inc middle-disk))
+                         0))
+          (recur (dec disk) (+ sum (expected-value disk))))))))
 
 ; ----------------------------------------------------------------------
 ; inspiration (not final solution) to this solution from:
