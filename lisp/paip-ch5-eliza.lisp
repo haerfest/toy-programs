@@ -2,6 +2,14 @@
   '((((?* ?x) hello (?* ?y))
      (How do you do.  Please state your problem.))
 
+    (((?* ?x) hi (?* ?y))
+     (How are you.  How may I help you?))
+
+    (((?* ?x) weather (?* ?y))
+     (What about the weather?)
+     (I am afraid I have not been outside today)
+     (Do you like the weather today?))
+
     (((?* ?x) I want (?* ?y))
      (What would it mean to you if you got ?y)
      (Why do you want ?y)
@@ -115,11 +123,26 @@
 
 (defun rule-responses (rule) (rest rule))
 
+(defun skip-invalid (input start)
+  "Returns the first position in input starting at start with a valid character."
+  (if (>= start (length input))
+    start
+    (case (char input start)
+      ((#\, #\" #\;) (skip-invalid-input input (1+ start)))
+      (otherwise start))))
+
+(defun read-input (input &optional (start 0) (the-list nil))
+  "Reads input from the user and returns it as a list."
+  (if (>= start (length input))
+    the-list
+    (multiple-value-bind (element pos) (read-from-string input t nil :start start)
+      (read-input input (skip-invalid input pos) (append the-list (list element))))))
+
 (defun eliza ()
   "Respond to user input using pattern matching rules."
   (loop
     (print 'eliza>)
-    (write (flatten (use-eliza-rules (read))) :pretty t)))
+    (write (flatten (use-eliza-rules (read-input (read-line)))) :pretty t)))
 
 (defun use-eliza-rules (input)
   "Find some rule with which to transform the input."
