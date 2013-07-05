@@ -34,7 +34,7 @@
     (((?* ?x) I feel (?* ?y))
      (Do you often feel ?y ?))
 
-    (((? ?x) I felt (? ?y))
+    (((?* ?x) I felt (?* ?y))
      (What other feelings do you have?))))
 
 (defconstant fail nil
@@ -142,7 +142,7 @@
   "Respond to user input using pattern matching rules."
   (loop
     (print 'eliza>)
-    (write (flatten (use-eliza-rules (read-input (read-line)))) :pretty t)))
+    (format t "~{~a ~}" (flatten (use-eliza-rules (read-input (read-line)))) :pretty t)))
 
 (defun use-eliza-rules (input)
   "Find some rule with which to transform the input."
