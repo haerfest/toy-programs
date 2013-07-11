@@ -114,36 +114,69 @@
   ;; the number of operators.
   (length (setf *ops* oplist)))
 
+;;;
+;;; The Take Boy to School in Car problem.
+;;;
+
 (defparameter *school-ops*
   (list
-    (make-op :action 'ask-phone-number
-             :preconds '(in-communication-with-shop)
-             :add-list '(know-phone-number))
-    (make-op :action 'drive-son-to-school
-             :preconds '(son-at-home car-works)
-             :add-list '(son-at-school)
-             :del-list '(son-at-home))
-    (make-op :action 'shop-installs-battery
-             :preconds '(car-needs-battery shop-knows-problem shop-has-money)
-             :add-list '(car-works))
-    (make-op :action 'tell-shop-problem
-             :preconds '(in-communication-with-shop)
-             :add-list '(shop-knows-problem))
-    (make-op :action 'telephone-shop
-             :preconds '(know-phone-number)
-             :add-list '(in-communication-with-shop))
-    (make-op :action 'look-up-number
-             :preconds '(have-phone-book)
-             :add-list '(know-phone-number))
-    (make-op :action 'give-shop-money
-             :preconds '(have-money)
-             :add-list '(shop-has-money)
-             :del-list '(have-money))))
-
-(mapc #'convert-op *school-ops*)
+    (op 'ask-phone-number
+        :preconds '(in-communication-with-shop)
+        :add-list '(know-phone-number))
+    (op 'drive-son-to-school
+        :preconds '(son-at-home car-works)
+        :add-list '(son-at-school)
+        :del-list '(son-at-home))
+    (op 'shop-installs-battery
+        :preconds '(car-needs-battery shop-knows-problem shop-has-money)
+        :add-list '(car-works))
+    (op 'tell-shop-problem
+        :preconds '(in-communication-with-shop)
+        :add-list '(shop-knows-problem))
+    (op 'telephone-shop
+        :preconds '(know-phone-number)
+        :add-list '(in-communication-with-shop))
+    (op 'look-up-number
+        :preconds '(have-phone-book)
+        :add-list '(know-phone-number))
+    (op 'give-shop-money
+        :preconds '(have-money)
+        :add-list '(shop-has-money)
+        :del-list '(have-money))))
 
 ;;;
-;;; Example problems
+;;; The Monkey and Bananas problem
+;;;
+
+(defparameter *banana-ops*
+  (list
+    (op 'climb-on-chair
+        :preconds '(chair-at-middle-room at-middle-room on-floor)
+        :add-list '(at-bananas on-chair)
+        :del-list '(at-middle-room on-floor))
+    (op 'push-chair-from-door-to-middle-room
+        :preconds '(chair-at-door at-door)
+        :add-list '(chair-at-middle-room at-middle-room)
+        :del-list '(chair-at-door at-door))
+    (op 'walk-from-door-to-middle-room
+        :preconds '(at-door on-floor)
+        :add-list '(at-middle-room)
+        :del-list '(at-door))
+    (op 'grasp-bananas
+        :preconds '(at-bananas empty-handed)
+        :add-list '(has-bananas)
+        :del-list '(empty-handed))
+    (op 'drop-ball
+        :preconds '(has-ball)
+        :add-list '(empty-handed)
+        :del-list '(has-ball))
+    (op 'eat-bananas
+        :preconds '(has-bananas)
+        :add-list '(empty-handed not-hungry)
+        :del-list '(has-bananas hungry))))
+
+;;;
+;;; Examples
 ;;;
 
 (defun example1 ()
@@ -163,15 +196,23 @@
 
 (defun example4 ()
   (gps '(son-at-home car-needs-battery have-money have-phone-book)
-       '(have-money son-at-school)))
+       '(have-money son-at-school)
+       *school-ops*))
 
 (defun example5 ()
   (gps '(son-at-home car-needs-battery have-money have-phone-book)
-       '(son-at-school have-money)))
+       '(son-at-school have-money)
+       *school-ops*))
 
 (defun example6 ()
   (gps '(son-at-home car-needs-battery have-money)
-       '(son-at-school)))
+       '(son-at-school)
+       *school-ops*))
 
 (defun example7 ()
-  (gps '(son-at-home) '(son-at-home)))
+  (gps '(son-at-home) '(son-at-home)
+       *school-ops*))
+
+(defun example8 ()
+  (gps '(at-door on-floor has-ball hungry chair-at-door) '(not-hungry)
+       *banana-ops*))
