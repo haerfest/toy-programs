@@ -1,0 +1,1 @@
+(reduce #(+ %1 (Character/digit %2 10)) 0 (str (nth (iterate #(*' 2 %) 2) 999)))
