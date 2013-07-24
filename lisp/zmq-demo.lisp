@@ -24,9 +24,9 @@
     (zmq-listen endpoint
                 #'(lambda (topic message)
                    (unless (member topic counts :key #'first)
-                     (setf counts (acons topic 0 counts)))
+                     (setf counts (sort (acons topic 0 counts)
+                                        #'string< :key #'first)))
                    (let ((item (assoc topic counts)))
                      (setf (rest item) (1+ (rest item))))
-                   (setf counts (sort counts #'string< :key #'first))
                    (format t "~{~a~^ ~}~C" counts #\return)
                    (finish-output nil)))))
