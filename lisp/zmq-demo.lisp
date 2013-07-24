@@ -27,6 +27,6 @@
                     (setf counts (acons topic 0 counts)))
                   (let ((item (assoc topic counts)))
                     (setf (rest item) (1+ (rest item))))
-                  (format t "~{~a~^ ~}~C" (sort counts #'string< :key #'first)
-                          #\return)
+                  (setf counts (sort counts #'string< :key #'first))
+                  (format t "~{~a~^ ~}~C" counts #\return)
                   (finish-output nil)))))
