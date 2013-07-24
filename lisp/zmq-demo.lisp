@@ -1,27 +1,32 @@
 (ql:quickload "zeromq")
 
-(defun zmq-listen (endpoint)
-  "Subscribe to a ZMQ endpoint and print a count of all topics received."
+(defun zmq-listen (endpoint fn)
+  "Subscribe to a ZMQ endpoint and call fn for every topic + message received."
   (zmq:with-context (ctx 1)
     (zmq:with-socket (s ctx zmq:sub)
       (zmq:connect s endpoint)
       (zmq:setsockopt s zmq:subscribe "")
       
       (let ((msg (make-instance 'zmq:msg)))
-        (loop for topic = (progn
-                            (zmq:recv s msg)
-                            (let ((topic (intern (zmq:msg-data-as-string msg))))
-                              (when (zmq:getsockopt s zmq:rcvmore)
-                                (zmq:recv s msg))
-                              topic))
-                               
-              for counts = '()
-              then (let ((counter (if (member topic counts :key #'first)
-                                      (rest (assoc topic counts))
-                                      0)))
-                     (acons topic (1+ counter)
-                            (remove topic counts :key #'first)))
-              do
-                (format t "~{~a~^ ~}~C" (sort counts #'string< :key #'first)
-                        #\return)
-                (finish-output nil))))))
+        (loop do
+          (zmq:recv s msg)
+          (let ((topic (intern (zmq:msg-data-as-string msg)))
+                (message (if (zmq:getsockopt s zmq:rcvmore)
+                             (progn
+                               (zmq:recv s msg)
+                               (zmq:msg-data-as-is msg))
+                             nil)))
+            (funcall fn topic message)))))))
+
+(defun zmq-count (endpoint)
+  "Counts the number of messages received from a ZMQ endpoint."
+  (let ((counts '()))
+    (zmq-listen endpoint
+                (lambda (topic message)
+                  (unless (member topic counts :key #'first)
+                    (setf counts (acons topic 0 counts)))
+                  (let ((item (assoc topic counts)))
+                    (setf (rest item) (1+ (rest item))))
+                  (format t "~{~a~^ ~}~C" (sort counts #'string< :key #'first)
+                          #\return)
+                  (finish-output nil)))))
