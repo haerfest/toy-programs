@@ -1,13 +1,37 @@
 (load "graph-util")
 
-(defparameter *congestion-city-nodes* nil)
-(defparameter *congestion-city-edges* nil)
-(defparameter *visited-nodes* nil)
-(defparameter *node-num* 30)
-(defparameter *edge-num* 45)
-(defparameter *worm-num* 3)
-(defparameter *cop-odds* 15)
-(defparameter *player-pos* nil)
+(defparameter *congestion-city-nodes* nil
+  "An alist describing the nodes in the city.  Each node's list can carry extra
+  items that indicate what can be seen or heard from that node: 'BLOOD!
+  indicates a blood trail from the Wumpus, indicating the Wumpus is at most two
+  nodes away. 'GLOW-WORM indicates the presence of a glow-worm gang. 'LIGHTS!
+  indicates the presence of a glow-worm gang one node away. 'SIRENS! indicates
+  the presence of a cop on a direct edge.  E.g. '((1 BLOOD!) (2) (3 GLOW-WORM)
+  (4) (5) (6 BLOOD! LIGHTS! SIRENS!) ... (27) (28 BLOOD!) (29 SIRENS!) (30)).")
+  
+(defparameter *congestion-city-edges* nil
+  "An alist describing the edges in the city.  Each edge's list carries each
+  node that is directly reachable as a sublist, and and reachable node's list
+  can contain a second item 'COPS that indicate that that edge has police
+  stationed there.  E.g. '((16 (1) (6 COPS)) (14 (15) (11)) (7 (20)) ...).")
+
+(defparameter *visited-nodes* nil
+  "A list of nodes visited by the player.  E.g. '(30 27).")
+
+(defparameter *node-num* 30
+  "The number of nodes in the city.")
+
+(defparameter *edge-num* 45
+  "The number of edges between nodes.")
+
+(defparameter *worm-num* 3
+  "The number of glow-worms in the city.")
+
+(defparameter *cop-odds* 15
+  "The 1:n odds that an edge has police stationed there.")
+
+(defparameter *player-pos* nil
+  "The node number that the player is currently at.  E.g. 30.")
 
 (defun random-node ()
   "Returns a random node number between 1 and *node-num*."
@@ -150,7 +174,8 @@
   (setf *congestion-city-nodes* (make-city-nodes *congestion-city-edges*))
   (setf *player-pos* (find-empty-node))
   (setf *visited-nodes* (list *player-pos*))
-  (draw-city))
+  (draw-city)
+  (draw-known-city))
 
 (defun find-empty-node ()
   "Returns a node without any occupants."
@@ -162,3 +187,73 @@
 (defun draw-city ()
   "Saves a PNG of the generated city graph."
   (ugraph->png "city" *congestion-city-nodes* *congestion-city-edges*))
+
+(defun known-city-nodes ()
+  "Returns a list with the nodes currently known to the player.  These include
+  the node the player is in, any visited nodes, and neighboring nodes to those.
+  E.g. (known-city-nodes) may yield '((30 *) (27 ?) (26 ?) (29 ?))."
+  (mapcar (lambda (node)
+            (if (member node *visited-nodes*)
+                (let ((n (assoc node *congestion-city-nodes*)))
+                  (if (eql node *player-pos*)
+                      (append n '(*))  ; node containing the player
+                      n))
+                ;; not visited yet
+                (list node '?)))
+          (remove-duplicates
+           (append *visited-nodes*  ; player sees all visited nodes
+                   ;; and all nodes neighboring the ones we visited
+                   (mapcan (lambda (node)
+                             (mapcar #'car
+                                     (cdr (assoc node
+                                                 *congestion-city-edges*))))
+                           *visited-nodes*)))))
+
+(defun known-city-edges ()
+  "Return an alist with the known edges, stripping the cops from any edges we
+  haven't visited yet."
+  (mapcar (lambda (node)
+            (cons node (mapcar (lambda (x)
+                                 (if (member (car x) *visited-nodes*)
+                                     x
+                                     (list (car x))))
+                               (cdr (assoc node *congestion-city-edges*)))))
+          *visited-nodes*))
+
+(defun draw-known-city ()
+  (ugraph->png "known-city" (known-city-nodes) (known-city-edges)))
+
+(defun walk (pos)
+  "Walks the player to a certain node."
+  (handle-direction pos nil))
+
+(defun charge (pos)
+  "Lets the player charge a certain node, presuming the Wumpus is there."
+  (handle-direction pos t))
+
+(defun handle-direction (pos charging)
+  "Handles the player walking or charging (when t) to a certain node."
+  (let ((edge (assoc pos
+                     (cdr (assoc *player-pos* *congestion-city-edges*)))))
+    (if edge
+        (handle-new-place edge pos charging)
+        (princ "That location does not exist!"))))
+
+(defun handle-new-place (edge pos charging)
+  "Handles the player moving to a new node via an edge, either walking there or
+  charging (when t)."
+  (let* ((node (assoc pos *congestion-city-nodes*))
+         (has-worm (and (member 'glow-worm node)
+                        (not (member pos *visited-nodes*)))))
+    (pushnew pos *visited-nodes*)
+    (setf *player-pos* pos)
+    (draw-known-city)
+    (cond ((member 'cops edge) (princ "You ran into the cops. Game Over."))
+          ((member 'wumpus node) (if charging
+                                     (princ "You found the Wumpus!")
+                                     (princ "You ran into the Wumpus.")))
+          (charging (princ "You wasted your last bulle. Game Over."))
+          (has-worm (let ((new-pos (random-node)))
+                      (princ "You ran into a Glow Worm Gang! You're now at ")
+                      (princ new-pos)
+                      (handle-new-place nil new-pos nil))))))
