@@ -252,7 +252,7 @@
           ((member 'wumpus node) (if charging
                                      (princ "You found the Wumpus!")
                                      (princ "You ran into the Wumpus.")))
-          (charging (princ "You wasted your last bulle. Game Over."))
+          (charging (princ "You wasted your last bullet. Game Over."))
           (has-worm (let ((new-pos (random-node)))
                       (princ "You ran into a Glow Worm Gang! You're now at ")
                       (princ new-pos)
