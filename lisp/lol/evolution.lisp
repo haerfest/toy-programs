@@ -4,6 +4,7 @@
 (defparameter *height* 30)
 (defparameter *jungle* '(45 10 10 10))
 (defparameter *plant-energy* 80)
+(defparameter *animal-char* #\A)
 
 (defparameter *plants* (make-hash-table :test #'equal))
 
@@ -15,10 +16,11 @@
   (apply #'random-plant *jungle*)
   (random-plant 0 0 *width* *height*))
 
-(defstruct animal x y energy dir genes)
+(defstruct animal char x y energy dir genes)
 
 (defparameter *animals*
-  (list (make-animal :x      (ash *width* -1)
+  (list (make-animal :char   *animal-char*
+                     :x      (ash *width* -1)
                      :y      (ash *height* -1)
                      :energy 1000
                      :dir    0
@@ -70,7 +72,14 @@
         (setf (nth mutation genes)
               (max 1 (+ (nth mutation genes) (random 3) -1)))
         (setf (animal-genes animal-nu) genes)
+        (setf (animal-char animal-nu) (next-character))
         (push animal-nu *animals*)))))
+
+(defun next-character ()
+  (if (eq *animal-char* #\Z)
+      (setf *animal-char* #\A)
+      (setf *animal-char* (code-char (1+ (char-code *animal-char*)))))
+  *animal-char*)
 
 (defun update-world ()
   (setf *animals* (remove-if (lambda (animal)
@@ -91,13 +100,13 @@
                (princ "|")
                (loop for x
                   below *width*
-                  do (princ (cond ((some (lambda (animal)
-                                           (and (= (animal-x animal) x)
-                                                (= (animal-y animal) y)))
-                                         *animals*)
-                                   #\M)
-                                  ((gethash (cons x y) *plants*) #\*)
-                                  (t #\space))))
+                  do (let ((animal (find-if (lambda (animal)
+                                              (and (= (animal-x animal) x)
+                                                   (= (animal-y animal) y)))
+                                            *animals*)))
+                       (princ (cond (animal (animal-char animal))
+                                    ((gethash (cons x y) *plants*) #\*)
+                                    (t #\space)))))
                (princ "|"))))
 
 (defun evolution ()
