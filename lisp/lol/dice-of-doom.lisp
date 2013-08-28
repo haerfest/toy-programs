@@ -34,7 +34,7 @@
                              (player-letter (first hex))
                              (second hex))))))
 
-(defun game-tree (board player spare-dice first-move)
+(defun game-tree-naive (board player spare-dice first-move)
   "Generates the entire game tree as a nested list, each level representing a
   possible game state: '(player board moves).  Moves is a list of
   '(description game-tree)."
@@ -85,7 +85,7 @@
             (loop for n below *board-hexnum*
                collect n))))
 
-(defun neighbors (pos)
+(defun neighbors-naive (pos)
   "Returns the neighboring hexagons on the game board for a given pos.  A
   hexagon can have up to six neighbors."
   (let ((up   (- pos *board-size*))
@@ -109,17 +109,18 @@
 
 (defun add-new-dice (board player spare-dice)
   "Returns the game board when spare-dice are added for the player."
-  (labels ((f (lst n)
-             (cond ((null lst) nil)
-                   ((zerop n) lst)
+  (labels ((f (lst n acc)
+             (cond ((zerop n) (append (reverse acc) lst))
+                   ((null lst) (reverse acc))
                    (t (let ((cur-player (caar lst))
                             (cur-dice   (cadar lst)))
                         (if (and (eq cur-player player)
                                  (< cur-dice *max-dice*))
-                            (cons (list cur-player (1+ cur-dice))
-                                  (f (cdr lst) (1- n)))
-                            (cons (car lst) (f (cdr lst) n))))))))
-    (board-array (f (coerce board 'list) spare-dice))))
+                            (f (cdr lst)
+                               (1- n)
+                               (cons (list cur-player (1+ cur-dice)) acc))
+                            (f (cdr lst) n (cons (car lst) acc))))))))
+    (board-array (f (coerce board 'list) spare-dice ()))))
 
 (defun play-vs-human (tree)
   "Plays the game against another human player.  Example usage:
@@ -171,3 +172,57 @@
     (if (> (length w) 1)
         (format t "The game is a tie between ~a" (mapcar #'player-letter w))
         (format t "The winner is ~a" (player-letter (car w))))))
+
+(defun rate-position-naive (tree player)
+  "Returns a rating for a player's game position, using the minimax algorithm."
+  (let ((moves (caddr tree)))
+    (if moves
+        (apply (if (eq (car tree) player)
+                   #'max
+                   #'min)
+               (get-ratings tree player))
+        ;; no more moves here
+        (let ((w (winners (cadr tree))))
+          (if (member player w)
+              (/ 1 (length w))
+              0)))))
+
+(defun get-ratings (tree player)
+  "Returns a list with rates for all moves a player can make."
+  (mapcar (lambda (move)
+            (rate-position (cadr move) player))
+          (caddr tree)))
+
+(defun handle-computer (tree)
+  "Let's a computer player select a possible move and returns that move."
+  (let ((ratings (get-ratings tree (car tree))))
+    (cadr (nth (position (apply #'max ratings) ratings) (caddr tree)))))
+
+(defun play-vs-computer (tree)
+  "Plays the game against a computer player.  Example usage:
+  (play-vs-computer (game-tree (gen-board) 0 0 t))."
+  (print-info tree)
+  (cond ((null (caddr tree)) (announce-winner (cadr tree)))
+        ((zerop (car tree)) (play-vs-computer (handle-human tree)))
+        (t (play-vs-computer (handle-computer tree)))))
+
+;;; Memoization
+
+(let ((previous (make-hash-table)))
+  (defun neighbors (pos)
+    (or (gethash pos previous)
+        (setf (gethash pos previous) (neighbors-naive pos)))))
+
+(let ((previous (make-hash-table :test #'equalp)))
+  (defun game-tree (&rest rest)
+    (or (gethash rest previous)
+        (setf (gethash rest previous) (apply #'game-tree-naive rest)))))
+
+(let ((previous (make-hash-table)))
+  (defun rate-position (tree player)
+    (let ((tab (gethash player previous)))
+      (unless tab
+        (setf tab (setf (gethash player previous) (make-hash-table))))
+      (or (gethash tree tab)
+          (setf (gethash tree tab)
+                (rate-position-naive tree player))))))
