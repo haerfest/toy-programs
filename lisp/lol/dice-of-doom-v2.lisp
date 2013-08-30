@@ -1,7 +1,7 @@
 (load "dice-of-doom-v1")
 (load "lazy")
 
-(defparameter *board-size* 4)
+(defparameter *board-size* 5)
 (defparameter *board-hexnum* (* *board-size* *board-size*))
 
 (defun add-passing-move (board player spare-dice first-move moves)
@@ -88,8 +88,10 @@
 
 (defun handle-computer (tree)
   "Let's a computer player select a possible move and returns that move."
-  (let ((ratings (get-ratings (limit-tree-depth tree *ai-level*)
-                              (car tree))))
+  (let ((ratings (ab-get-ratings-max (limit-tree-depth tree *ai-level*)
+                                     (car tree)
+                                     most-positive-fixnum
+                                     most-negative-fixnum)))
     (cadr (lazy-nth (position (apply #'max ratings) ratings)
                     (caddr tree)))))
 
@@ -140,3 +142,40 @@
                (get-ratings tree player))
         (score-board (cadr tree) player))))
 
+(defun ab-get-ratings-max (tree player upper-limit lower-limit)
+  (labels ((f (moves lower-limit)
+             (unless (lazy-null moves)
+               (let ((x (ab-rate-position (cadr (lazy-car moves))
+                                          player
+                                          upper-limit
+                                          lower-limit)))
+                 (if (>= x upper-limit)
+                     (list x)
+                     (cons x (f (lazy-cdr moves) (max x lower-limit))))))))
+    (f (caddr tree) lower-limit)))
+
+(defun ab-get-ratings-min (tree player upper-limit lower-limit)
+  (labels ((f (moves upper-limit)
+             (unless (lazy-null moves)
+               (let ((x (ab-rate-position (cadr (lazy-car moves))
+                                          player
+                                          upper-limit
+                                          lower-limit)))
+                 (if (<= x lower-limit)
+                     (list x)
+                     (cons x (f (lazy-cdr moves) (min x upper-limit))))))))
+    (f (caddr tree) upper-limit)))
+
+(defun ab-rate-position (tree player upper-limit lower-limit)
+  (let ((moves (caddr tree)))
+    (if (not (lazy-null moves))
+        (if (eq (car tree) player)
+            (apply #'max (ab-get-ratings-max tree
+                                             player
+                                             upper-limit
+                                             lower-limit))
+            (apply #'min (ab-get-ratings-min tree
+                                             player
+                                             upper-limit
+                                             lower-limit)))
+        (score-board (cadr tree) player))))
