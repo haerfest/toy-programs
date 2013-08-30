@@ -34,6 +34,18 @@
                              (player-letter (first hex))
                              (second hex))))))
 
+(defun tree-player (tree)
+  "Returns the player at the root of the game tree."
+  (car tree))
+
+(defun tree-board (tree)
+  "Returns the board at the root of the game tree."
+  (cadr tree))
+
+(defun tree-moves (tree)
+  "Returns the possible player moves at the root of the game tree."
+  (caddr tree))
+
 (defun game-tree-naive (board player spare-dice first-move)
   "Generates the entire game tree as a nested list, each level representing a
   possible game state: '(player board moves).  Moves is a list of
@@ -96,7 +108,7 @@
                            (unless (zerop (mod (1+ pos) *board-size*))
                              (list (1+ pos) (1+ down))))
        when (and (>= p 0) (< p *board-hexnum*))
-         collect p)))
+       collect p)))
 
 (defun board-attack (board player src dst dice)
   "Returns the game board in case the player in hexagon src attacks the player
@@ -126,21 +138,21 @@
   "Plays the game against another human player.  Example usage:
   (play-vs-human (game-tree (gen-board) 0 0 t))."
   (print-info tree)
-  (if (caddr tree)
+  (if (tree-moves tree)
       (play-vs-human (handle-human tree))
-      (announce-winner (cadr tree))))
+      (announce-winner (tree-board tree))))
 
 (defun print-info (tree)
   "Prints the player whose turn it is, and the game board."
   (fresh-line)
-  (format t "current player = ~a" (player-letter (car tree)))
-  (draw-board (cadr tree)))
+  (format t "current player = ~a" (player-letter (tree-player tree)))
+  (draw-board (tree-board tree)))
 
 (defun handle-human (tree)
   "Let's a human player select a possible move and returns that move."
   (fresh-line)
   (princ "choose your move:")
-  (let ((moves (caddr tree)))
+  (let ((moves (tree-moves tree)))
     (loop for move in moves
        for n from 1
        do (let ((action (car move)))
@@ -175,14 +187,14 @@
 
 (defun rate-position-naive (tree player)
   "Returns a rating for a player's game position, using the minimax algorithm."
-  (let ((moves (caddr tree)))
+  (let ((moves (tree-moves tree)))
     (if moves
-        (apply (if (eq (car tree) player)
+        (apply (if (eq (tree-player tree) player)
                    #'max
                    #'min)
                (get-ratings tree player))
         ;; no more moves here
-        (let ((w (winners (cadr tree))))
+        (let ((w (winners (tree-board tree))))
           (if (member player w)
               (/ 1 (length w))
               0)))))
@@ -191,19 +203,19 @@
   "Returns a list with rates for all moves a player can make."
   (mapcar (lambda (move)
             (rate-position (cadr move) player))
-          (caddr tree)))
+          (tree-moves tree)))
 
 (defun handle-computer (tree)
   "Let's a computer player select a possible move and returns that move."
-  (let ((ratings (get-ratings tree (car tree))))
-    (cadr (nth (position (apply #'max ratings) ratings) (caddr tree)))))
+  (let ((ratings (get-ratings tree (tree-player tree))))
+    (cadr (nth (position (apply #'max ratings) ratings) (tree-moves tree)))))
 
 (defun play-vs-computer (tree)
   "Plays the game against a computer player.  Example usage:
   (play-vs-computer (game-tree (gen-board) 0 0 t))."
   (print-info tree)
-  (cond ((null (caddr tree)) (announce-winner (cadr tree)))
-        ((zerop (car tree)) (play-vs-computer (handle-human tree)))
+  (cond ((null (tree-moves tree)) (announce-winner (tree-board tree)))
+        ((zerop (tree-player tree)) (play-vs-computer (handle-human tree)))
         (t (play-vs-computer (handle-computer tree)))))
 
 ;;; Memoization
