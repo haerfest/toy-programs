@@ -48,7 +48,7 @@
                                collect n)))))
 
 (defun handle-human (tree)
-  "Let's a human player select a possible move and returns that move."
+  "Lets a human player select a possible move and returns that move."
   (fresh-line)
   (princ "choose your move:")
   (let ((moves (tree-moves tree)))
@@ -88,7 +88,7 @@
 (defparameter *ai-level* 4)
 
 (defun handle-computer (tree)
-  "Let's a computer player select a possible move and returns that move."
+  "Lets a computer player select a possible move and returns that move."
   (let ((ratings (ab-get-ratings-max (limit-tree-depth tree *ai-level*)
                                      (tree-player tree)
                                      most-positive-fixnum
