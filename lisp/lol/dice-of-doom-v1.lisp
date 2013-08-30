@@ -139,7 +139,7 @@
 (defun handle-human (tree)
   "Let's a human player select a possible move and returns that move."
   (fresh-line)
-  (princ "choose your move: ")
+  (princ "choose your move:")
   (let ((moves (caddr tree)))
     (loop for move in moves
        for n from 1
