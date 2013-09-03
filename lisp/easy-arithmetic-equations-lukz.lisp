@@ -32,8 +32,8 @@
 
 (defun give-problem (p &aux (e (evaluate p)))          ; e contains answer
   "Repeatedly prints a random equation and reads in the user's answer.  Repeats
-  the same equation until the user gets it right.  Returns with t when the user
-  inputs q."
+  the same equation until the user gets it right.  Returns with nil when the
+  user inputs q, t when the user answered correctly."
   (do (a)                                              ; variable a
       ((progn (setf a (read (format t "~{~a ~}~%" p))) ; stop condition is...
               (eq a 'q)))                              ; ...(eq a 'q)
