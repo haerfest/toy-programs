@@ -32,8 +32,8 @@
 
 (defun give-problem (p &aux (e (evaluate p)))          ; e contains answer
   "Repeatedly prints a random equation and reads in the user's answer.  Repeats
-  the same equation until the user gets it right.  Returns with nil when the
-  user inputs q, t when the user answered correctly."
+  the same equation until the user gets it right.  Returns nil when the user
+  inputs q, t when the user answered correctly."
   (do (a)                                              ; variable a
       ((progn (setf a (read (format t "~{~a ~}~%" p))) ; stop condition is...
               (eq a 'q)))                              ; ...(eq a 'q)
@@ -41,7 +41,7 @@
     (format t "Incorrect~%")))                         ; ... continued
 
 (defun main (&aux (lo (read)) (hi (read)))             ; read in lo and hi
-  "Reads a lower adn upper bound (inclusive) for generating random numbers and
+  "Reads a lower and upper bound (inclusive) for generating random numbers and
   presents the user with random equations to solve."
   (do ()                                               ; loop until...
-      ((not (give-problem (generate lo hi))))))        ; ...t returned
+      ((not (give-problem (generate lo hi))))))        ; ...nil returned
