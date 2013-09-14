@@ -10,7 +10,7 @@ recursive steps it follows."
              (multiple-value-bind (next-n ms descr fn)
                  ;; NEXT-N is the next value of N to calculate M for, MS is as
                  ;; above, DESCR tells us which path we took, and FN is a
-                 ;; lambda-expression that performs the next recursive step.
+                 ;; lambda expression that performs the next recursive step.
                  (if (> n 100)
                      (values (- n 10)
                              ms
@@ -22,7 +22,7 @@ recursive steps it follows."
                              (lambda ()
                                (iter (iter (+ n 11) (1+ ms))
                                      ms))))
-               ;; Output where we are and what we are doing to do next.
+               ;; Output where we are and what we are going to do next.
                (format t "~{~a~}~a~{~a~} since ~a is ~a than 100~%"
                        (loop repeat ms collect "M(")
                        next-n
@@ -31,5 +31,6 @@ recursive steps it follows."
                        descr)
                ;; Evaluate the next iteration step.
                (funcall fn))))
+    ;; Output where we start from and get going.
     (format t "M(~a)~%" n)
     (iter n 0)))
