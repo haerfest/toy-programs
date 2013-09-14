@@ -3,23 +3,24 @@
 
 (defun m (n)
   (labels ((iter (n level)
-             (let ((next (if (> n 100)
-                             (- n 10)
-                             (+ n 11)))
-                   (ms (if (> n 100)
-                           level
-                           (+ level 2))))
+             (multiple-value-bind (next ms descr fn)
+                 (if (> n 100)
+                     (values (- n 10)
+                             level
+                             "greater"
+                             (lambda () (- n 10)))
+                     (values (+ n 11)
+                             (+ level 2)
+                             "equal to or less"
+                             (lambda ()
+                               (iter (iter (+ n 11) (1+ level))
+                                     level))))
                (format t "~{~a~}~a~{~a~} since ~a is ~a than 100~%"
                        (loop repeat ms collect "M(")
                        next
                        (loop repeat ms collect ")")
                        n
-                       (if (> n 100)
-                           "greater"
-                           "equal to or less"))
-               (if (> n 100)
-                   next
-                   (iter (iter next (1+ level))
-                         level)))))
+                       descr)
+               (funcall fn))))
     (format t "M(~a)~%" n)
     (iter n 0)))
