@@ -34,22 +34,23 @@
 ;;; as a list of strings.
 
 (define (demo)
-  ;; Allocate memory for the structure.  It is garbage-collected so we don't
-  ;; have to (free ptr) it.  We then cast this generic pointer to a pointer
-  ;; to the structure, so that we can pass it on to uname and access its fields.
+  ;; Allocate memory for the structure.  It is garbage-collected so we
+  ;; don't have to (free ptr) it.  We then cast this generic pointer
+  ;; to a pointer to the structure, so that we can pass it on to uname
+  ;; and access its fields.
   (let* ([ptr  (malloc _utsname)]
          [name (cast ptr _pointer _utsname-pointer)])
     ;; Invoke the C function.
     (uname name)
     ;; Return a list of the filled-in fields.
     (map (lambda (get-field-fn)
-           ;; Each field is a null-terminated byte (char) array, which we cast
-           ;; to a Racket string.
+           ;; Each field is a null-terminated byte (char) array, which
+           ;; we cast to a Racket string.
            (cast (array-ptr (get-field-fn name))
                  _pointer
                  _string))
-         ;; These functions are passed on to the lambda above and retrieve the
-         ;; structure's fields.
+         ;; These functions are passed on to the lambda above and
+         ;; retrieve the structure's fields.
          (list utsname-sysname
                utsname-nodename
                utsname-release
