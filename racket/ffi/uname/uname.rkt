@@ -45,7 +45,8 @@
     ;; Return a list of the filled-in fields.
     (map (lambda (get-field-fn)
            ;; Each field is a null-terminated byte (char) array, which
-           ;; we cast to a Racket string.
+           ;; we cast to a C string and which Racket knows how to
+           ;; display.
            (cast (array-ptr (get-field-fn name))
                  _pointer
                  _string))
