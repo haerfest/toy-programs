@@ -3,7 +3,7 @@
 
 ;;; From the man page we learn that uname is defined in libc.
 
-(define-ffi-definer define-uname (ffi-lib "libc"))
+(define-ffi-definer define-libc (ffi-lib "libc"))
 
 ;;; The C structure that uname expects:
 ;;; 
@@ -28,7 +28,7 @@
 ;;; 
 ;;; int uname(struct utsname *name)
 
-(define-uname uname (_fun _utsname-pointer -> _int))
+(define-libc uname (_fun _utsname-pointer -> _int))
 
 ;;; Call the uname() C function and return the structure fields
 ;;; as a list of strings.
