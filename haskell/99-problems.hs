@@ -59,3 +59,24 @@ pack = group
 encode :: Eq a => [a] -> [(Int, a)]
 encode xs = map f $ pack xs
   where f xs = (length xs, head xs)
+
+-- P11. Modified run-length encoding.  Modify the result of problem 10 in such
+--      a way that if an element has no duplicates it is simply copied into the
+--      result list.  Only elements with duplicates are transferred as (N E)
+--      lists.
+data Occ a = Single a | Multiple Int a
+           deriving (Show)
+encodeModified :: Eq a => [a] -> [Occ a]
+encodeModified xs = map f $ pack xs
+  where
+    f [x] = Single x
+    f xs  = Multiple (length xs) (head xs)
+
+-- P12. Decode a run-length encoded list.  Given a run-length code list
+--      generated as specified in problem 11.  Construct its uncompressed
+--      version.
+decodeModified :: [Occ a] -> [a]
+decodeModified xs = concat $ map f xs
+  where
+    f (Single x)     = [x]
+    f (Multiple n x) = take n $ repeat x
