@@ -1,6 +1,8 @@
 {- 99 questions in Haskell
    http://www.haskell.org/haskellwiki/99_questions -}
 
+import Data.List (concat)
+
 -- Q1. Find the last element of a list.
 myLast = last
 
@@ -23,8 +25,8 @@ isPalindrome :: Eq a => [a] -> Bool
 isPalindrome []  = True
 isPalindrome [_] = True
 isPalindrome xs
-  | head xs == last xs = isPalindrome middle
-  | otherwise          = False
+  | head xs == last xs  = isPalindrome middle
+  | otherwise           = False
   where middle = init $ tail xs
 
 -- Q7. Flatten a nested list structure.
@@ -33,5 +35,15 @@ isPalindrome xs
 data NestedList a = Elem a | List [NestedList a]
 flatten :: NestedList a -> [a]
 flatten (Elem x)  = [x]
-flatten (List xs) = foldl (++) [] $ map flatten xs
+flatten (List xs) = concat $ map flatten xs
 
+-- Q8. Eliminate consecutive duplicates of list elements.
+--     If a list contains repeated elements they should be replaced with a
+--     single copy of the element. The order of the elements should not be
+--     changed.
+compress :: Eq a => [a] -> [a]
+compress []  = []
+compress [x] = [x]
+compress (x:y:zs)
+  | x == y     = compress (y:zs)
+  | otherwise  = [x] ++ compress (y:zs)
