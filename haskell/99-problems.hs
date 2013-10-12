@@ -24,9 +24,8 @@ myReverse = reverse
 isPalindrome :: Eq a => [a] -> Bool
 isPalindrome []  = True
 isPalindrome [_] = True
-isPalindrome xs
-  | head xs == last xs  = isPalindrome middle
-  | otherwise           = False
+isPalindrome xs | head xs == last xs  = isPalindrome middle
+                | otherwise           = False
   where middle = init $ tail xs
 
 -- P07. Flatten a nested list structure.  Transform a list, possibly holding
@@ -43,9 +42,8 @@ flatten (List xs) = concat $ map flatten xs
 compress :: Eq a => [a] -> [a]
 compress []  = []
 compress [x] = [x]
-compress (x:y:zs)
-  | x == y     = compress (y:zs)
-  | otherwise  = [x] ++ compress (y:zs)
+compress (x:y:zs) | x == y     = compress (y:zs)
+                  | otherwise  = [x] ++ compress (y:zs)
 
 -- P09. Pack consecutive duplicates of list elements into sublists.  If a list
 --      contains repeated elements they should be placed in separate sublists.
@@ -80,3 +78,18 @@ decodeModified xs = concat $ map f xs
   where
     f (Single x)     = [x]
     f (Multiple n x) = take n $ repeat x
+
+-- P13. Run-length encoding of a list (direct solution).  Implement the
+--      so-called run-length encoding data compression method directly.  I.e.
+--      don't explicitly create the sublists containing the duplicates, as in
+--      problem 9, but only count them.  As in problem P11, simplify the result
+--      list by replacing the singleton lists (1 X) by X.
+encodeDirect :: Eq a => [a] -> [Occ a]
+encodeDirect [] = []
+encodeDirect (x:xs) = f xs (Single x)
+  where
+    f :: Eq a => [a] -> Occ a -> [Occ a]
+    f [] occ                          = [occ]
+    f (x:xs) (Single y)     | x == y  = f xs (Multiple 2 x)
+    f (x:xs) (Multiple n y) | x == y  = f xs (Multiple (n + 1) x)
+    f (x:xs) occ                      = [occ] ++ f xs (Single x)
