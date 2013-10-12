@@ -24,8 +24,8 @@ myReverse = reverse
 isPalindrome :: Eq a => [a] -> Bool
 isPalindrome []  = True
 isPalindrome [_] = True
-isPalindrome xs | head xs == last xs  = isPalindrome middle
-                | otherwise           = False
+isPalindrome xs | head xs == last xs = isPalindrome middle
+                | otherwise          = False
   where middle = init $ tail xs
 
 -- P07. Flatten a nested list structure.  Transform a list, possibly holding
@@ -42,8 +42,8 @@ flatten (List xs) = concat $ map flatten xs
 compress :: Eq a => [a] -> [a]
 compress []  = []
 compress [x] = [x]
-compress (x:y:zs) | x == y     = compress (y:zs)
-                  | otherwise  = [x] ++ compress (y:zs)
+compress (x:y:zs) | x == y    = compress (y:zs)
+                  | otherwise = [x] ++ compress (y:zs)
 
 -- P09. Pack consecutive duplicates of list elements into sublists.  If a list
 --      contains repeated elements they should be placed in separate sublists.
@@ -89,7 +89,27 @@ encodeDirect [] = []
 encodeDirect (x:xs) = f xs (Single x)
   where
     f :: Eq a => [a] -> Occ a -> [Occ a]
-    f [] occ                          = [occ]
-    f (x:xs) (Single y)     | x == y  = f xs (Multiple 2 x)
-    f (x:xs) (Multiple n y) | x == y  = f xs (Multiple (n + 1) x)
-    f (x:xs) occ                      = [occ] ++ f xs (Single x)
+    f [] occ                         = [occ]
+    f (x:xs) (Single y)     | x == y = f xs (Multiple 2 x)
+    f (x:xs) (Multiple n y) | x == y = f xs (Multiple (n + 1) x)
+    f (x:xs) occ                     = [occ] ++ f xs (Single x)
+
+-- P14. Duplicate the elements of a list.
+dupli :: [a] -> [a]
+dupli []  = []
+dupli (x:xs) = x : x : dupli xs
+
+-- P15. Replicate the elements of a list a given number of times.
+repli :: [a] -> Int -> [a]
+repli _ 0  = []
+repli [] _ = []
+repli (x:xs) n | n > 0 = x : repli [x] (n - 1) ++ repli xs n
+
+-- P16. Drop every N'th element from a list.
+dropEvery :: [a] -> Int -> [a]
+dropEvery xs n | n > 0 = f xs n
+  where
+    f :: [a] -> Int -> [a]
+    f [] _ = []
+    f (x:xs) 1 = f xs n
+    f (x:xs) m = x : f xs (m - 1)
