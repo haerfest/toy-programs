@@ -1,4 +1,4 @@
-{- 99 questions in Haskell
+{- 99 problems in Haskell
    http://www.haskell.org/haskellwiki/99_questions -}
 
 import Data.List (concat, group)
