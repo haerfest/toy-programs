@@ -1,7 +1,7 @@
 {- 99 problems in Haskell
    http://www.haskell.org/haskellwiki/99_questions -}
 
-import Data.List (concat, group)
+import Data.List (group)
 
 -- P01. Find the last element of a list.
 myLast = last
