@@ -113,3 +113,25 @@ dropEvery xs n | n > 0 = f xs n
     f [] _ = []
     f (x:xs) 1 = f xs n
     f (x:xs) m = x : f xs (m - 1)
+
+-- P17. Split a list into two parts; the length of the first part is given.  Do
+--      not use any predefined predicates.
+split :: [a] -> Int -> ([a], [a])
+split xs n = splitAt n xs
+
+-- P18. Extract a slice from a list.  Given two indices, i and k, the slice is
+--      the list containing the elements between the i'th and k'th element of
+--      the original list (both limits included). Start counting the elements
+--      with 1.
+slice :: [a] -> Int -> Int -> [a]
+slice xs i k = take (k - i + 1) $ drop (i - 1) xs
+
+-- P19. Rotate a list N places to the left.
+rotate :: [a] -> Int -> [a]
+rotate xs n | n >= 0 = drop n xs ++ take n xs
+            | n < 0  = drop m xs ++ take m xs
+  where m = length xs + n
+
+-- P20. Remove the K'th element from a list.
+removeAt :: Int -> [a] -> (a, [a])
+removeAt n xs = (elementAt xs n, take (n - 1) xs ++ drop n xs)
