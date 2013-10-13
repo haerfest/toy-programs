@@ -2,6 +2,7 @@
    http://www.haskell.org/haskellwiki/99_questions -}
 
 import Data.List (group)
+import System.Random
 
 -- P01. Find the last element of a list.
 myLast = last
@@ -135,3 +136,22 @@ rotate xs n | n >= 0 = drop n xs ++ take n xs
 -- P20. Remove the K'th element from a list.
 removeAt :: Int -> [a] -> (a, [a])
 removeAt n xs = (elementAt xs n, take (n - 1) xs ++ drop n xs)
+
+-- P21. Insert an element at a given position into a list.
+insertAt :: a -> [a] -> Int -> [a]
+insertAt x xs k = take m xs ++ [x] ++ drop m xs
+  where m = k - 1
+
+-- P22. Create a list containing all integers within a given range.
+range :: Int -> Int -> [Int]
+range i k = [i..k]
+
+-- P23. Extract a given number of randomly selected elements from a list.
+rnd_select :: [a] -> Int -> IO [a]
+rnd_select xs n = do
+  gen <- getStdGen
+  return $ f [] n gen
+  where
+    f ys m gen | m == 0 = ys
+               | m > 0  = f (ys ++ [elementAt xs k]) (m - 1) g
+      where (k, g) = randomR (1, length xs) gen
