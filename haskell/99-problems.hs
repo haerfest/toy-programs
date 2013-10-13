@@ -149,9 +149,5 @@ range i k = [i..k]
 -- P23. Extract a given number of randomly selected elements from a list.
 rnd_select :: [a] -> Int -> IO [a]
 rnd_select xs n = do
-  gen <- getStdGen
-  return $ f [] n gen
-  where
-    f ys m gen | m == 0 = ys
-               | m > 0  = f (ys ++ [elementAt xs k]) (m - 1) g
-      where (k, g) = randomR (1, length xs) gen
+  ks <- mapM (\_ -> getStdRandom $ randomR (1, length xs)) [1..n]
+  return $ map (elementAt xs) ks
