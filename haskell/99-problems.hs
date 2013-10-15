@@ -151,10 +151,9 @@ rnd_select :: [a] -> Int -> IO [a]
 rnd_select xs 0 = return []
 rnd_select xs n = do
   idx <- getStdRandom $ randomR (1, length xs)
-  let draw = [elementAt xs idx]
-      rem  = take (idx - 1) xs ++ drop idx xs
+  let (draw, rem) = removeAt idx xs
   draws <- rnd_select rem (n - 1)
-  return $ draw ++ draws
+  return $ [draw] ++ draws
 
 -- P24. Lotto: Draw N different random numbers from the set 1..M.
 diff_select :: Int -> Int -> IO [Int]
