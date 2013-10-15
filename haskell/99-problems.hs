@@ -148,26 +148,23 @@ range i k = [i..k]
 
 -- P23. Extract a given number of randomly selected elements from a list.
 rnd_select :: [a] -> Int -> IO [a]
+rnd_select xs 0 = return []
 rnd_select xs n = do
-  ks <- mapM (\_ -> getStdRandom $ randomR (1, length xs)) [1..n]
-  return $ map (elementAt xs) ks
+  idx <- getStdRandom $ randomR (1, length xs)
+  let draw = [elementAt xs idx]
+      rem  = take (idx - 1) xs ++ drop idx xs
+  draws <- rnd_select rem (n - 1)
+  return $ draw ++ draws
 
 -- P24. Lotto: Draw N different random numbers from the set 1..M.
 diff_select :: Int -> Int -> IO [Int]
-diff_select n m = mapM (\_ -> getStdRandom $ randomR (1, m)) [1..n]
-
+diff_select n m = rnd_select [1..m] n
+      
 -- P25. Generate a random permutation of the elements of a list.
 rnd_permu :: [a] -> IO [a]
-rnd_permu xs = do
-  let perms = permutations xs
-  idx <- getStdRandom $ randomR (1, length perms)
-  return $ elementAt perms idx
+rnd_permu xs = rnd_select xs (length xs)
 
 -- P26. Generate the combinations of K distinct objects chosen from the N
---      elements of a list.  In how many ways can a committee of 3 be chosen
---      from a group of 12 people?  We all know that there are C(12,3) = 220
---      possibilities (C(N,K) denotes the well-known binomial coefficients).
---      For pure mathematicians, this result may be great. But we want to really
---      generate all the possibilities in a list.
+--      elements of a list.
 combinations :: Int -> [a] -> [[a]]
 combinations n xs = filter (\ys -> length ys == n) $ subsequences xs
