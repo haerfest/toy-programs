@@ -5,8 +5,9 @@ import System.ZMQ
 import qualified Data.ByteString.Char8 as B
 
 
-type Topic   = B.ByteString
-type Message = B.ByteString
+type Topic     = B.ByteString
+type Message   = B.ByteString
+type ProcessFn = Topic -> Maybe Message -> IO ()
 
 
 -- |Return a string containing the local time.
@@ -27,8 +28,8 @@ processMsg topic message = do
 
 
 -- |Receive messages from a ZMQ subscription socket and print the topics.
-receiveMsgs :: Socket Sub -> (Topic -> Maybe Message -> IO ()) -> IO ()
-receiveMsgs socket fn = do
+receiveMsgs :: Socket Sub -> ProcessFn -> IO ()
+receiveMsgs socket processFn = do
   topic <- receive socket []
   is_multi <- moreToReceive socket
   msg <- if is_multi then do
@@ -36,8 +37,8 @@ receiveMsgs socket fn = do
            return $ Just msg
          else
            return Nothing
-  fn topic msg
-  receiveMsgs socket fn
+  processFn topic msg
+  receiveMsgs socket processFn
 
 
 -- |Subscribe to a ZMQ endpoint and print the topic of each received message.
