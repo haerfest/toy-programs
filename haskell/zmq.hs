@@ -41,7 +41,7 @@ receiveMsgs socket fn = do
   receiveMsgs socket fn
 
 
--- |Subscribe to a ZMQ endpoint and print the topic of each recevied message.
+-- |Subscribe to a ZMQ endpoint and print the topic of each received message.
 -- The endpoint is a ZMQ endpoint specifier such as "tcp://127.0.0.1:1234".
 listen :: String -> IO ()
 listen endpoint = withContext 1 useContext
