@@ -1,17 +1,45 @@
 import Control.Monad (when)
+import Data.Time
+import System.Locale
 import System.ZMQ
+
 import qualified Data.ByteString.Char8 as B
 
--- |Receive messages from a ZMQ subscription socket and print the topics.
-receiveMsgs :: Socket Sub -> IO ()
-receiveMsgs socket = do
-  topic <- receive socket []
+
+type Topic   = B.ByteString
+type Message = B.ByteString
+
+
+-- |Return a string containing the local time.
+getLocalTime :: IO String
+getLocalTime = do
+  tz <- getCurrentTimeZone
+  now_utc <- getCurrentTime
+  let now_local = utcToLocalTime tz now_utc
+  return $ formatTime defaultTimeLocale "%X.%q" now_local
+
+
+-- |Print the current time and the topic of a received message.
+processMsg :: Topic -> Maybe Message -> IO ()
+processMsg topic message = do
+  now <- getLocalTime
+  putStr (now ++ ": ")
   B.putStrLn topic
+
+
+-- |Receive messages from a ZMQ subscription socket and print the topics.
+receiveMsgs :: Socket Sub -> (Topic -> Maybe Message -> IO ()) -> IO ()
+receiveMsgs socket fn = do
+  topic <- receive socket []
   is_multi <- moreToReceive socket
-  when is_multi $ do
-    _ <- receive socket []
-    return ()
-  receiveMsgs socket
+  msg <- if is_multi then do
+           msg <- receive socket []
+           return $ Just msg
+         else
+           return Nothing
+  fn topic msg
+  receiveMsgs socket fn
+
 
 -- |Subscribe to a ZMQ endpoint and print the topic of each recevied message.
 -- The endpoint is a ZMQ endpoint specifier such as "tcp://127.0.0.1:1234".
@@ -22,4 +50,4 @@ listen endpoint = withContext 1 useContext
     useSocket s = do
       connect s endpoint
       subscribe s ""
-      receiveMsgs s
+      receiveMsgs s processMsg
