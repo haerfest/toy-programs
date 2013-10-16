@@ -1,4 +1,3 @@
-import Control.Monad (when)
 import Data.Time
 import System.Locale
 import System.ZMQ
