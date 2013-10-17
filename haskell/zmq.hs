@@ -1,6 +1,7 @@
-import Data.Time
+import System.Time
 import System.Locale
 import System.ZMQ
+import Text.Printf
 
 import qualified Data.ByteString.Char8 as B
 
@@ -13,11 +14,13 @@ type ProcessFn = Topic -> Maybe Message -> IO ()
 -- |Return a string containing the local time.
 getLocalTime :: IO String
 getLocalTime = do
-  tz <- getCurrentTimeZone
-  now_utc <- getCurrentTime
-  let now_local = utcToLocalTime tz now_utc
-  return $ formatTime defaultTimeLocale "%X.%q" now_local
-
+  now <- getClockTime
+  cal <- toCalendarTime now
+  let hour = ctHour cal
+      min  = ctMin cal
+      sec  = ctSec cal
+      msec = round $ fromIntegral (ctPicosec cal) / 1e9 :: Int
+  return $ printf "%02u:%02u:%02u.%03u" hour min sec msec
 
 -- |Print the current time and the topic of a received message.
 processMsg :: Topic -> Maybe Message -> IO ()
