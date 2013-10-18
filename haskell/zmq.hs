@@ -2,42 +2,43 @@ import System.Time
 import System.Locale
 import System.ZMQ
 import Text.Printf
-
 import qualified Data.ByteString.Char8 as B
 
 
-type Topic     = B.ByteString
-type Message   = B.ByteString
-type ProcessFn = Topic -> Maybe Message -> IO ()
+type Topic   = B.ByteString
+type Message = B.ByteString
+
+
+-- |Used to subscribe to all topics sent by a publisher.
+allTopics :: String
+allTopics = ""
 
 
 -- |Return a string containing the local time.
 getLocalTime :: IO String
 getLocalTime = do
-  now <- getClockTime
-  cal <- toCalendarTime now
+  cal <- getClockTime >>= toCalendarTime
   let hour = ctHour cal
       min  = ctMin cal
       sec  = ctSec cal
       msec = round $ fromIntegral (ctPicosec cal) / 1e9 :: Int
   return $ printf "%02u:%02u:%02u.%03u" hour min sec msec
 
+
 -- |Print the current time and the topic of a received message.
 processMsg :: Topic -> Maybe Message -> IO ()
 processMsg topic message = do
-  now <- getLocalTime
-  putStr (now ++ ": ")
+  getLocalTime >>= return . (++ ": ") >>= putStr
   B.putStrLn topic
 
 
 -- |Receive messages from a ZMQ subscription socket and print the topics.
-receiveMsgs :: Socket Sub -> ProcessFn -> IO ()
+receiveMsgs :: Socket Sub -> (Topic -> Maybe Message -> IO ()) -> IO ()
 receiveMsgs socket processFn = do
   topic <- receive socket []
   is_multi <- moreToReceive socket
   msg <- if is_multi then do
-           msg <- receive socket []
-           return $ Just msg
+           receive socket [] >>= return . Just
          else
            return Nothing
   processFn topic msg
@@ -49,8 +50,8 @@ receiveMsgs socket processFn = do
 listen :: String -> IO ()
 listen endpoint = withContext 1 useContext
   where
-    useContext c = withSocket c Sub useSocket
-    useSocket s = do
-      connect s endpoint
-      subscribe s ""
-      receiveMsgs s processMsg
+    useContext context = withSocket context Sub useSocket
+    useSocket socket = do
+      connect socket endpoint
+      subscribe socket allTopics
+      receiveMsgs socket processMsg
