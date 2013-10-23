@@ -1,5 +1,5 @@
+import Control.Monad
 import System.Time
-import System.Locale
 import System.ZMQ
 import Text.Printf
 import qualified Data.ByteString.Char8 as B
@@ -14,44 +14,46 @@ allTopics :: String
 allTopics = ""
 
 
--- |Return a string containing the local time.
-getLocalTime :: IO String
-getLocalTime = do
-  cal <- getClockTime >>= toCalendarTime
-  let hour = ctHour cal
-      min  = ctMin cal
-      sec  = ctSec cal
-      msec = round $ fromIntegral (ctPicosec cal) / 1e9 :: Int
-  return $ printf "%02u:%02u:%02u.%03u" hour min sec msec
+-- |Convert a calendar time to a time string with a millisecond resolution.
+formatLocalTime :: CalendarTime -> String
+formatLocalTime c = do
+  let hour = ctHour c
+      min  = ctMin c
+      sec  = ctSec c
+      msec = round $ fromIntegral (ctPicosec c) / 1e9 :: Int
+  printf "%02u:%02u:%02u.%03u" hour min sec msec
 
 
--- |Print the current time and the topic of a received message.
-processMsg :: Topic -> Maybe Message -> IO ()
-processMsg topic message = do
-  getLocalTime >>= return . (++ ": ") >>= putStr
-  B.putStrLn topic
+-- |Print the current time, followed by the topic of a received message.
+printTopic :: Topic -> Maybe Message -> IO ()
+printTopic t _ = do
+  c <- toCalendarTime =<< getClockTime
+  putStr $ formatLocalTime c ++ ": "
+  B.putStrLn t
 
 
 -- |Receive messages from a ZMQ subscription socket and print the topics.
 receiveMsgs :: Socket Sub -> (Topic -> Maybe Message -> IO ()) -> IO ()
-receiveMsgs socket processFn = do
-  topic <- receive socket []
-  is_multi <- moreToReceive socket
-  msg <- if is_multi then do
-           receive socket [] >>= return . Just
-         else
-           return Nothing
-  processFn topic msg
-  receiveMsgs socket processFn
+receiveMsgs s f = do
+  topic <- receive s []
+  is_multi <- moreToReceive s
+  if is_multi then
+    f topic =<< liftM Just (receive s [])
+  else
+    f topic Nothing
+  receiveMsgs s f
 
 
 -- |Subscribe to a ZMQ endpoint and print the topic of each received message.
 -- The endpoint is a ZMQ endpoint specifier such as "tcp://127.0.0.1:1234".
 listen :: String -> IO ()
-listen endpoint = withContext 1 useContext
+listen endpoint = withContext 1 f
   where
-    useContext context = withSocket context Sub useSocket
-    useSocket socket = do
-      connect socket endpoint
-      subscribe socket allTopics
-      receiveMsgs socket processMsg
+    f :: Context -> IO ()
+    f c = withSocket c Sub g
+
+    g :: Socket Sub -> IO ()
+    g s = do
+      connect s endpoint
+      subscribe s allTopics
+      receiveMsgs s printTopic
