@@ -2,6 +2,7 @@
 
 module Main where
 import Control.Monad
+import Numeric
 import System.Environment
 import Text.ParserCombinators.Parsec hiding (spaces)
 
@@ -13,6 +14,10 @@ data LispVal = Atom String
              | String String
              | Bool Bool
              deriving (Show)
+
+
+numberRadixes :: String
+numberRadixes = "dox"
 
 
 symbol :: Parser Char
@@ -46,22 +51,48 @@ parseString = do
 parseAtom :: Parser LispVal
 parseAtom = do
   first <- letter <|> symbol
+  second <- noneOf numberRadixes
   rest <- many (letter <|> digit <|> symbol)
-  let atom = first:rest
+  let atom = first:second:rest
   return $ case atom of
     "#t" -> Bool True
     "#f" -> Bool False
     _    -> Atom atom
 
 
+parseDecNumber :: Parser LispVal
+parseDecNumber = liftM (Number . read) (many1 digit)
+
+
+parseOctNumber :: Parser LispVal
+parseOctNumber = liftM (Number . fst . head . readOct) (many1 (oneOf octDigits))
+  where octDigits = "01234567"
+
+
+parseHexNumber :: Parser LispVal
+parseHexNumber = liftM (Number . fst . head . readHex) (many1 (oneOf hexDigits))
+  where hexDigits = "0123456789abcdefABCDEF"
+
+
+parseRadixedNumber :: Parser LispVal
+parseRadixedNumber = do
+  char '#'
+  radix <- oneOf numberRadixes
+  case radix of
+    'd' -> parseDecNumber
+    'o' -> parseOctNumber
+    'x' -> parseHexNumber
+
+
 parseNumber :: Parser LispVal
-parseNumber = return . Number . read =<< many1 digit
+parseNumber = parseDecNumber
+          <|> parseRadixedNumber
 
 
 parseExpr :: Parser LispVal
-parseExpr = parseAtom
-        <|> parseString
-        <|> parseNumber
+parseExpr = try parseAtom
+            <|> parseString
+            <|> parseNumber
 
 
 readExpr :: String -> String
