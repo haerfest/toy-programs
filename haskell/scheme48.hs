@@ -16,10 +16,6 @@ data LispVal = Atom String
              deriving (Show)
 
 
-numberRadixes :: String
-numberRadixes = "dox"
-
-
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 
@@ -51,9 +47,8 @@ parseString = do
 parseAtom :: Parser LispVal
 parseAtom = do
   first <- letter <|> symbol
-  second <- noneOf numberRadixes
   rest <- many (letter <|> digit <|> symbol)
-  let atom = first:second:rest
+  let atom = first:rest
   return $ case atom of
     "#t" -> Bool True
     "#f" -> Bool False
@@ -64,35 +59,26 @@ parseDecNumber :: Parser LispVal
 parseDecNumber = liftM (Number . read) (many1 digit)
 
 
-parseOctNumber :: Parser LispVal
-parseOctNumber = liftM (Number . fst . head . readOct) (many1 (oneOf octDigits))
-  where octDigits = "01234567"
-
-
-parseHexNumber :: Parser LispVal
-parseHexNumber = liftM (Number . fst . head . readHex) (many1 (oneOf hexDigits))
-  where hexDigits = "0123456789abcdefABCDEF"
-
-
 parseRadixedNumber :: Parser LispVal
 parseRadixedNumber = do
   char '#'
-  radix <- oneOf numberRadixes
-  case radix of
-    'd' -> parseDecNumber
-    'o' -> parseOctNumber
-    'x' -> parseHexNumber
+  try (char 'd' >> parseDecNumber) <|>
+      (char 'o' >> parseWith readOct octDigits) <|>
+      (char 'x' >> parseWith readHex hexDigits)
+  where
+    parseWith f digits = liftM (Number . fst . head . f) $ many1 (oneOf digits)
+    octDigits = "01234567"
+    hexDigits = "0123456789abcdefABCDEF"
 
 
 parseNumber :: Parser LispVal
-parseNumber = parseDecNumber
-          <|> parseRadixedNumber
+parseNumber = parseDecNumber <|> parseRadixedNumber
 
 
 parseExpr :: Parser LispVal
-parseExpr = try parseAtom
-            <|> parseString
-            <|> parseNumber
+parseExpr = try parseNumber <|>
+                parseString <|>
+                parseAtom
 
 
 readExpr :: String -> String
