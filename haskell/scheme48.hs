@@ -12,6 +12,7 @@ data LispVal = Atom String
              | Number Integer
              | String String
              | Bool Bool
+             deriving (Show)
 
 
 symbol :: Parser Char
@@ -25,7 +26,7 @@ spaces = skipMany1 space
 parseString :: Parser LispVal
 parseString = do
   char '"'
-  x <- many (noneOf "\"")
+  x <- many (noneOf ['"'])
   char '"'
   return $ String x
 
@@ -42,7 +43,7 @@ parseAtom = do
 
 
 parseNumber :: Parser LispVal
-parseNumber = liftM (Number . read) $ many1 digit
+parseNumber = return . Number . read =<< many1 digit
 
 
 parseExpr :: Parser LispVal
@@ -53,8 +54,8 @@ parseExpr = parseAtom
 
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
-  Left err -> "No match: " ++ show err
-  Right _  -> "Found value"
+  Left err  -> "No match: " ++ show err
+  Right val -> "Found value: " ++ show val
 
 
 main :: IO ()
