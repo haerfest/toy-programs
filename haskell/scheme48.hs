@@ -11,10 +11,8 @@ data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
              | Number Integer
-             | Float Float
              | String String
              | Bool Bool
-             | Character Char
              deriving (Show)
 
 
@@ -57,63 +55,37 @@ parseAtom = do
     _    -> Atom atom
 
 
-parseDecNumber :: Parser LispVal
-parseDecNumber = liftM (Number . read) (many1 digit)
-
-
-parseRadixedNumber :: Parser LispVal
-parseRadixedNumber = do
-  char '#'
-  try (char 'd' >> parseDecNumber) <|>
-      (char 'o' >> parseWith readOct octDigits) <|>
-      (char 'x' >> parseWith readHex hexDigits)
-  where
-    parseWith f digits = liftM (Number . fst . head . f) $ many1 (oneOf digits)
-    octDigits = "01234567"
-    hexDigits = "0123456789abcdefABCDEF"
-
-
 parseNumber :: Parser LispVal
-parseNumber = parseDecNumber <|> parseRadixedNumber
+parseNumber = liftM (Number . read) (many1 digit)
 
 
-parseDecFloat :: Parser LispVal
-parseDecFloat = do
-  x <- many1 digit
-  char '.'
-  y <- many1 digit
-  let float = read (x ++ "." ++ y) :: Float
-  return $ Float float
+parseList :: Parser LispVal
+parseList = liftM List $ sepBy parseExpr spaces
 
 
-parseRadixedFloat :: Parser LispVal
-parseRadixedFloat = do
-  char '#'
-  char 'd'
-  parseDecFloat
+parseDottedList :: Parser LispVal
+parseDottedList = do
+  head <- endBy parseExpr spaces
+  tail <- char '.' >> spaces >> parseExpr
+  return $ DottedList head tail
 
 
-parseFloat :: Parser LispVal
-parseFloat = parseDecFloat <|> parseRadixedFloat
-
-
-parseCharacter :: Parser LispVal
-parseCharacter = do
-  char '#'
-  char '\\'
-  x <- many (letter <|> digit <|> symbol)
-  return $ case x of
-    "space"   -> Character ' '
-    "newline" -> Character '\n'
-    _         -> Character (x !! 0)
+parseQuoted :: Parser LispVal
+parseQuoted = do
+  char '\''
+  x <- parseExpr
+  return $ List [Atom "quote", x]
 
 
 parseExpr :: Parser LispVal
-parseExpr = try parseFloat <|>
-                parseNumber <|>
-                parseCharacter <|> 
-                parseString <|>
-                parseAtom
+parseExpr = parseAtom
+        <|> parseString
+        <|> parseNumber
+        <|> parseQuoted
+        <|> do char '('
+               x <- try parseList <|> parseDottedList
+               char ')'
+               return x
 
 
 readExpr :: String -> String
