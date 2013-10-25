@@ -11,6 +11,7 @@ data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
              | Number Integer
+             | Float Float
              | String String
              | Bool Bool
              | Character Char
@@ -76,6 +77,26 @@ parseNumber :: Parser LispVal
 parseNumber = parseDecNumber <|> parseRadixedNumber
 
 
+parseDecFloat :: Parser LispVal
+parseDecFloat = do
+  x <- many1 digit
+  char '.'
+  y <- many1 digit
+  let float = read (x ++ "." ++ y) :: Float
+  return $ Float float
+
+
+parseRadixedFloat :: Parser LispVal
+parseRadixedFloat = do
+  char '#'
+  char 'd'
+  parseDecFloat
+
+
+parseFloat :: Parser LispVal
+parseFloat = parseDecFloat <|> parseRadixedFloat
+
+
 parseCharacter :: Parser LispVal
 parseCharacter = do
   char '#'
@@ -88,7 +109,8 @@ parseCharacter = do
 
 
 parseExpr :: Parser LispVal
-parseExpr = try parseNumber <|>
+parseExpr = try parseFloat <|>
+                parseNumber <|>
                 parseCharacter <|> 
                 parseString <|>
                 parseAtom
