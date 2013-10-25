@@ -81,11 +81,10 @@ parseCharacter = do
   char '#'
   char '\\'
   x <- many (letter <|> digit <|> symbol)
-  return $ if length x == 1
-           then Character (x !! 0)
-           else case x of
-             "space"   -> Character ' '
-             "newline" -> Character '\n'
+  return $ case x of
+    "space"   -> Character ' '
+    "newline" -> Character '\n'
+    _         -> Character (x !! 0)
 
 
 parseExpr :: Parser LispVal
