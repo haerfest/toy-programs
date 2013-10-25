@@ -13,6 +13,7 @@ data LispVal = Atom String
              | Number Integer
              | String String
              | Bool Bool
+             | Character Char
              deriving (Show)
 
 
@@ -75,8 +76,21 @@ parseNumber :: Parser LispVal
 parseNumber = parseDecNumber <|> parseRadixedNumber
 
 
+parseCharacter :: Parser LispVal
+parseCharacter = do
+  char '#'
+  char '\\'
+  x <- many (letter <|> digit <|> symbol)
+  return $ if length x == 1
+           then Character (x !! 0)
+           else case x of
+             "space"   -> Character ' '
+             "newline" -> Character '\n'
+
+
 parseExpr :: Parser LispVal
 parseExpr = try parseNumber <|>
+                parseCharacter <|> 
                 parseString <|>
                 parseAtom
 
