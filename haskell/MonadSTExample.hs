@@ -2,7 +2,6 @@
 
 module MonadSTExample (main) where
 
-import Control.Monad.IO.Class (liftIO)
 import Control.Monad.ST (runST)
 import Data.STRef (modifySTRef, newSTRef, readSTRef)
 import Control.Monad (forM_)
