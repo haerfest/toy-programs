@@ -41,6 +41,10 @@ app.get("/index.html", function (req, res) {
     returnFile(req.url.substr(1), res, "text/html");
 });
 
+app.get("/sql.html", function (req, res) {
+    returnFile(req.url.substr(1), res, "text/html");
+});
+
 app.get("/style.css", function (req, res) {
     returnFile(req.url.substr(1), res, "text/css");
 });
@@ -149,6 +153,29 @@ app.get("/api/find-regnum", function (req, res) {
     db.all("select rec_time_micros from pdsiitevent where licence_plate = ?", req.query.regnum, function (err, rows) {
         res.writeHead(200, {"Content-Type": "text/json"});
         res.end(JSON.stringify(rows));        
+    });
+});
+
+app.get("/sql.js", function (req, res) {
+    returnFile(req.url.substr(1), res, "text/javascript");
+});
+
+app.get("/api/query", function (req, res) {
+    var query = req.query.query.replace("select ", "select id, ");
+    db.all(query, function (err, rows) {
+        if (err) {
+            console.log(err);
+            res.json(200, [{"Error message": err.toString()}]);
+        } else {
+            res.json(200,
+                     rows.map(function (row) {
+                         var r = row;
+                         if (r.image) {
+                             r.image = r.id;
+                         }
+                         return r;
+                     }));
+        }
     });
 });
 

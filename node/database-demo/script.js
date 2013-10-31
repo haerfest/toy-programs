@@ -16,7 +16,7 @@ $(function () {
         width        = canvas.width,
         height       = canvas.height,
         width_m      = 2 * 25,
-        height_m     = 2 * 12,
+        height_m     = 2 * 15,
         alpr_m       = 12,
         marker_px    = 7,
         triggers     = [],
