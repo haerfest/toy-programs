@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 
+{- http://happstack.com/page/view-page-slug/9/happstack-lite -}
+
 module Main where
 
 import Control.Applicative ((<$>), optional)
