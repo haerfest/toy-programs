@@ -22,6 +22,8 @@ env = 10 :: Env
 
 -- |Print the result of chaining two functions, all of which refer to the same
 -- environment.  The result is env^2 + env.
+-- Its output is:
+-- >110
 main :: IO ()
 main = do
   let result = runReader (squareEnv >>= addToEnv) env
