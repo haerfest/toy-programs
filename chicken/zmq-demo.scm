@@ -19,9 +19,7 @@
 (define (demo)
   (subscribe "tcp://10.18.129.51:55555"
              (lambda (t m)
-               (display (seconds->string (current-seconds)))
-               (display ": ")
-               (display t)
-               (newline))))
-
-(demo)
+               (display (format "~a: ~a (~a bytes)~%"
+                                (seconds->string (current-seconds))
+                                t
+                                (if (blob? m) (blob-size m) 0))))))
