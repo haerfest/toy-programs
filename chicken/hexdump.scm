@@ -22,22 +22,21 @@
           (display (list->string
                     (map (lambda (char)
                            (if (or (char<? char #\space) (char>? char #\~))
-                               #\.
-                               char))
-                         (reverse chars))))
+                               #\. char))
+                         chars)))
           (newline)))
 
 (define (hexdump filename)
-  (let ((width 16))
-    (call-with-input-file filename
-      (lambda (port)
+  (call-with-input-file filename
+    (lambda (port)
+      (let ((width 16))
         (define (iterate count chars)
           (let ((char (read-char port)))
             (if (eof-object? char)
-                (ascii-dump chars width)
+                (ascii-dump (reverse chars) width)
                 (let ((new-line? (zero? (remainder count width))))
                   (when new-line?
-                        (ascii-dump chars width)
+                        (ascii-dump (reverse chars) width)
                         (display-hex count 8)
                         (display " | "))
                   (display-hex (char->integer char) 2)
