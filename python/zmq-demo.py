@@ -16,10 +16,11 @@ class Listener:
             if callback:
                 callback(topic, message)
 
-def print_topic(topic, message):
-    print topic
+if __name__ == "__main__":
+    def print_topic(topic, message):
+        print topic
 
-Listener().listen("tcp://10.18.129.51:55555", print_topic)
+    Listener().listen("tcp://10.18.129.51:55555", print_topic)
 
             
         
