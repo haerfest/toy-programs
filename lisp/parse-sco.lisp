@@ -1,30 +1,29 @@
 (ql:quickload 'cl-ppcre)                ; portable Perl-compatible regular expressions
 
 (defun tokenize (stream)
-  "Tokenizes the characters from a stream.  Example usage:
-(with-input-from-string (s \"target{me=\\\"you\\\"}\") (tokenize s))
-gives:
-((IDENTIFIER . \"target\") OPEN-BRACKET (IDENTIFIER . \"me\") EQUALS (VALUE . \"you\") CLOSE-BRACKET)"
-  (labels ((skip-to (chars &optional (skip-char nil) (skipped nil))
+  "Tokenizes the characters from a stream."
+  (labels ((skip-to (chars &optional (skip-last nil) (skipped nil))
              (let ((c (read-char stream nil)))
-               (cond ((null c) skipped)
+               (cond ((null c) (nreverse skipped))
                      ((member c chars)
-                      (unless skip-char
+                      (unless skip-last
                         (unread-char c stream))
-                      skipped)
-                     (t (skip-to chars skip-char (append skipped (list c)))))))
+                      (nreverse skipped))
+                     (t (skip-to chars skip-last (cons c skipped))))))
            (tok (tokens)
              (let ((c (read-char stream nil)))
                (case c
-                 ((nil) tokens)
+                 ((nil) (nreverse tokens))
                  ((#\space #\tab #\newline #\return) (tok tokens))
                  (#\# (skip-to '(#\newline #\return))
                       (tok tokens))
-                 (#\{ (tok (append tokens '(open-bracket))))
-                 (#\} (tok (append tokens '(close-bracket))))
-                 (#\= (tok (append tokens '(equals))))
-                 (#\" (tok (append tokens (list (cons 'value
-                                                      (coerce (skip-to '(#\") t) 'string))))))
-                 (t (tok (append tokens (list (cons 'identifier
-                                                    (coerce (cons c (skip-to '(#\space #\tab #\newline #\return #\# #\{ #\} #\=))) 'string))))))))))
+                 (#\{ (tok (cons 'block-begin tokens)))
+                 (#\} (tok (cons 'block-end tokens)))
+                 (#\= (tok (cons 'equals tokens)))
+                 (#\" (tok (cons (cons 'value
+                                       (coerce (skip-to '(#\") t) 'string))
+                                 tokens)))
+                 (t (tok (cons (cons 'identifier
+                                     (coerce (cons c (skip-to '(#\space #\tab #\newline #\return #\# #\{ #\} #\=))) 'string))
+                               tokens)))))))
     (tok '())))
