@@ -40,7 +40,7 @@ Examples:
 
  (expect 'foo 'foo) => NIL
  (expect '?x 'foo) => ((X . FOO))
- (expect '(name ?name age ?age) '(name \"John\" age \"25\"))
+ (expect '(name ?name age ?age) '(name \"John\" age 25))
  => ((AGE . 25) (NAME . \"John\"))
   (expect 'foo 'bar) => ERROR"
   (labels ((iter (expectations tokens ids)
