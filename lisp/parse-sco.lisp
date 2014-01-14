@@ -31,10 +31,10 @@
     (tok '())))
 
 (defun expect (expectations tokens)
-  "Matches (a list of) SCO tokens to (a list of) expectations.  An expectation
-can be a ?VARIABLE, which will be returned as a (VARIABLE . value) ALIST.
-Returns two values, the first indicating success (T) or not (NIL), the second
-a possible variable ALIST."
+  "Matches (a list of) expectations to (a list of) SCO tokens.  An expectation
+can be a ?VARIABLE, which, when matched, will be returned as an ALIST of
+(VARIABLE . value) pairs.  Returns two values, the first indicating success, the
+second is a possible ALIST of variable matches."
   (labels ((iter (expectations tokens ids)
              (cond ((null expectations) ids) ; all expectations met
                    ((null tokens) 'fail)     ; no more tokens, but still expectations
@@ -57,3 +57,18 @@ a possible variable ALIST."
       (if (eq result 'fail)
           (values nil nil)
           (values t result)))))
+
+(defun demo ()
+  (let* ((sco          (format nil "foo~%{~%  bar = \"b.a.r.\"  # comment~%  baz~%  {~%    bax = \"b.a.x.\"  }~%}~%"))
+         (tokens       (with-input-from-string (stream sco)
+                         (tokenize stream)))
+         (expectations '((identifier . ?foo)
+                         block-begin
+                         (identifier . ?bar) equals (value . ?bar-val)
+                         (identifier . ?baz)
+                         block-begin
+                         (identifier . ?bax) equals (value . ?bax-val)
+                         block-end
+                         block-end)))
+    (princ tokens)
+    (expect expectations tokens)))
