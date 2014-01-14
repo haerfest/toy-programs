@@ -1,8 +1,7 @@
 (ql:quickload 'cl-ppcre)                ; portable Perl-compatible regular expressions
 
 (defun tokenize (stream)
-  "Returns a list with the tokens read from a stream containing a specification
-in the SCO format."
+  "Returns a list of SCO tokens, as read from a stream."
   (labels ((skip-to (chars &optional (skip-last nil) (skipped nil))
              (let ((c (read-char stream nil)))
                (cond ((null c) (nreverse skipped))
@@ -14,74 +13,47 @@ in the SCO format."
            (tok (tokens)
              (let ((c (read-char stream nil)))
                (case c
-                 ((nil) (nreverse tokens))
-                 ((#\space #\tab #\newline #\return) (tok tokens))
-                 (#\# (skip-to '(#\newline #\return))
+                 ((nil) (nreverse tokens)) ; reached end of stream
+                 ((#\space #\tab #\newline #\return) (tok tokens)) ; skip whitespace and line endings
+                 (#\# (skip-to '(#\newline #\return)) ; skip comment to end of line
                       (tok tokens))
                  (#\{ (tok (cons 'block-begin tokens)))
                  (#\} (tok (cons 'block-end tokens)))
                  (#\= (tok (cons 'equals tokens)))
                  (#\" (tok (cons (cons 'value
                                        (coerce (skip-to '(#\") t) 'string))
-                                 tokens)))
+                                 tokens))) ; read string until next double quote
                  (t (tok (cons (cons 'identifier
                                      (coerce (cons c
                                                    (skip-to '(#\space #\tab #\newline #\return #\# #\{ #\} #\=)))
                                              'string))
-                               tokens)))))))
+                               tokens))))))) ; read identifier until whitepsace, line endings or other tokens
     (tok '())))
 
 (defun expect (expectations tokens)
-  "Matches tokens to expectations.  Throws an error upon failure to match.
-Upon a successful match, returns an ALIST of matching variables, or NIL if no
-variables were specified.
-
-Examples:
-
- (expect 'foo 'foo) => NIL
- (expect '?x 'foo) => ((X . FOO))
- (expect '(name ?name age ?age) '(name \"John\" age 25))
- => ((AGE . 25) (NAME . \"John\"))
-  (expect 'foo 'bar) => ERROR"
+  "Matches (a list of) SCO tokens to (a list of) expectations.  An expectation
+can be a ?VARIABLE, which will be returned as a (VARIABLE . value) ALIST.
+Returns two values, the first indicating success (T) or not (NIL), the second
+a possible variable ALIST."
   (labels ((iter (expectations tokens ids)
-             (cond ((null expectations) ids)
-                   ((null tokens) (error 'no-more-tokens))
+             (cond ((null expectations) ids) ; all expectations met
+                   ((null tokens) 'fail)     ; no more tokens, but still expectations
                    ((and (atom expectations)
                          (atom tokens))
-                    ;; two atoms are equal or the expectation is a variable
-                    (cond ((equal expectations tokens) ids)
-                          ((and (symbolp expectations)
+                    (cond ((equal expectations tokens) ids) ; two equal atoms
+                          ((and (symbolp expectations)      ; we expect a ?variable
                                 (eq #\? (char (symbol-name expectations) 0)))
                            (cons (cons (intern (subseq (symbol-name expectations) 1))
                                        tokens)
                                  ids))
-                          (t (error 'unmet-atomic-expectation))))
-                   ((and (listp expectations)
-                         (listp tokens))
+                          (t 'fail)))   ; atoms don't match
+                   ((and (consp expectations) ; match cons's recursively
+                         (consp tokens))
                     (iter (cdr expectations)
                           (cdr tokens)
                           (iter (car expectations) (car tokens) ids)))
-                   (t (error 'cannot-match-atoms-to-lists)))))
-    (iter expectations tokens '())))
-
-(defparameter *sco*
-  (format nil "foo~%{~%  bar = \"rab\"  # comment~%  baz = \"zab\"~%}")
-  "Example SCO input:
-
-   foo
-   {
-     bar = \"rab\"  # comment
-     baz = \"zab\"
-   }")
-
-(defparameter *expectation*
-  '((IDENTIFIER . "foo")
-    BLOCK-BEGIN
-    (IDENTIFIER . ?a) EQUALS (VALUE . ?a-value)
-    (IDENTIFIER . ?b) EQUALS (VALUE . ?b-value)
-    BLOCK-END))
-
-(defun demo ()
-  "Returns ((B-VALUE . \"zab\") (B . \"baz\") (A-VALUE . \"rab\") (A . \"bar\"))"
-  (with-input-from-string (stream *sco*)
-    (expect *expectation* (tokenize stream))))
+                   (t 'fail))))         ; atom and cons don't match
+    (let ((result (iter expectations tokens '())))
+      (if (eq result 'fail)
+          (values nil nil)
+          (values t result)))))
