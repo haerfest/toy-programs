@@ -31,32 +31,27 @@
     (tok '())))
 
 (defun expect (expectations tokens)
-  "Matches (a list of) expectations to (a list of) SCO tokens.  An expectation
-can be a ?VARIABLE, which, when matched, will be returned as an ALIST of
-(VARIABLE . value) pairs.  Returns two values, the first indicating success, the
-second is a possible ALIST of variable matches."
   (labels ((iter (expectations tokens ids)
-             (cond ((null expectations) ids) ; all expectations met
-                   ((null tokens) 'fail)     ; no more tokens, but still expectations
+             (cond ((null expectations) (values t tokens ids)) ; all expectations met
+                   ((null tokens) (values nil nil ids)) ; no more tokens, but still expectations
                    ((and (atom expectations)
                          (atom tokens))
-                    (cond ((equal expectations tokens) ids) ; two equal atoms
-                          ((and (symbolp expectations)      ; we expect a ?variable
+                    (cond ((equal expectations tokens) (values t '() ids)) ; two equal atoms
+                          ((and (symbolp expectations) ; we expect a ?variable
                                 (eq #\? (char (symbol-name expectations) 0)))
-                           (cons (cons (intern (subseq (symbol-name expectations) 1))
-                                       tokens)
-                                 ids))
-                          (t 'fail)))   ; atoms don't match
+                           (values t '() (cons (cons (intern (subseq (symbol-name expectations) 1))
+                                                     tokens)
+                                               ids)))
+                          (t (values nil tokens ids)))) ; atoms don't match
                    ((and (consp expectations) ; match cons's recursively
                          (consp tokens))
-                    (iter (cdr expectations)
-                          (cdr tokens)
-                          (iter (car expectations) (car tokens) ids)))
-                   (t 'fail))))         ; atom and cons don't match
-    (let ((result (iter expectations tokens '())))
-      (if (eq result 'fail)
-          (values nil nil)
-          (values t result)))))
+                    (multiple-value-bind (success _ ids) (iter (car expectations) (car tokens) ids)
+                      (declare (ignore _))
+                      (if success
+                          (iter (cdr expectations) (cdr tokens) ids)
+                          (values nil tokens ids)))) ; cons's don't match
+                   (t (values nil tokens ids))))) ; atom and cons don't match
+    (iter expectations tokens '())))
 
 (defun demo ()
   (let* ((sco          (format nil "foo~%{~%  bar = \"b.a.r.\"  # comment~%  baz~%  {~%    bax = \"b.a.x.\"  }~%}~%"))
