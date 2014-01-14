@@ -45,9 +45,8 @@
                           (t (values nil tokens ids)))) ; atoms don't match
                    ((and (consp expectations) ; match cons's recursively
                          (consp tokens))
-                    (multiple-value-bind (success _ ids) (iter (car expectations) (car tokens) ids)
-                      (declare (ignore _))
-                      (if success
+                    (multiple-value-bind (success remaining-tokens ids) (iter (car expectations) (car tokens) ids)
+                      (if (and success (null remaining-tokens))
                           (iter (cdr expectations) (cdr tokens) ids)
                           (values nil tokens ids)))) ; cons's don't match
                    (t (values nil tokens ids))))) ; atom and cons don't match
