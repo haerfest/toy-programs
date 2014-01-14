@@ -31,15 +31,20 @@
     (tok '())))
 
 (defun expect (expectations tokens)
-  (labels ((iter (expectations tokens ids)
+  "Matches expectations to tokens. Returns three values: success, remaining tokens, variables."
+  (labels ((variablep (thing)
+             (and (symbolp thing)
+                  (eq #\? (char (symbol-name thing) 0))))
+           (var-name (var)
+             (intern (subseq (symbol-name var) 1)))
+           (iter (expectations tokens ids)
              (cond ((null expectations) (values t tokens ids)) ; all expectations met
                    ((null tokens) (values nil nil ids)) ; no more tokens, but still expectations
                    ((and (atom expectations)
                          (atom tokens))
                     (cond ((equal expectations tokens) (values t '() ids)) ; two equal atoms
-                          ((and (symbolp expectations) ; we expect a ?variable
-                                (eq #\? (char (symbol-name expectations) 0)))
-                           (values t '() (cons (cons (intern (subseq (symbol-name expectations) 1))
+                          ((variablep expectations) ; variable matches any atom
+                           (values t '() (cons (cons (var-name expectations)
                                                      tokens)
                                                ids)))
                           (t (values nil tokens ids)))) ; atoms don't match
