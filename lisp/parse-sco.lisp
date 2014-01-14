@@ -30,30 +30,29 @@
                                tokens))))))) ; read identifier until whitepsace, line endings or other tokens
     (tok '())))
 
-(defun expect (expectations tokens &optional (ids '()))
-  "Matches expectations to tokens. Returns three values: success, remaining tokens, variables."
+(defun lookahead (expectations tokens)
   (labels ((variablep (thing)
-             (and (symbolp thing)
-                  (eq #\? (char (symbol-name thing) 0))))
+             (and (symbolp thing) (eq #\? (char (symbol-name thing) 0))))
            (var-name (var)
              (intern (subseq (symbol-name var) 1)))
            (iter (expectations tokens ids)
-             (cond ((null expectations) (values t tokens ids)) ; all expectations met
-                   ((null tokens) (values nil nil ids)) ; no more tokens, but still expectations
+             (cond ((null expectations) ; all expectations met
+                    (if (null ids) t ids))
+                   ((null tokens) nil) ; no more tokens, but still expectations
                    ((and (atom expectations)
                          (atom tokens))
-                    (cond ((equalp expectations tokens) (values t '() ids)) ; two equal atoms
-                          ((variablep expectations) ; variable matches any atom
-                           (values t '() (cons (cons (var-name expectations)
-                                                     tokens)
-                                               ids)))
-                          (t (values nil tokens ids)))) ; atoms don't match
+                    (cond ((variablep expectations) ; variable matches any atom
+                           (cons (cons (var-name expectations)
+                                       tokens)
+                                 ids))
+                          ((equalp expectations tokens) ; two equal atoms
+                           (if (null ids) t ids))))
                    ((and (consp expectations) ; match cons's recursively
                          (consp tokens))
-                    (multiple-value-bind (success remaining-tokens ids) (iter (car expectations) (car tokens) ids)
-                      (if (and success (null remaining-tokens))
-                          (iter (cdr expectations) (cdr tokens) ids)
-                          (values nil tokens ids)))) ; cons's don't match
-                   (t (values nil tokens ids))))) ; atom and cons don't match
-    (iter expectations tokens ids)))
-
+                    (let ((ids (iter (car expectations) (car tokens) ids)))
+                      (if (null ids)
+                          nil
+                          (iter (cdr expectations)
+                                (cdr tokens)
+                                (if (consp ids) ids '()))))))))
+    (iter expectations tokens '())))
