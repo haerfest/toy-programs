@@ -1,33 +1,41 @@
 (ql:quickload 'cl-ppcre)                ; portable Perl-compatible regular expressions
 
 (defun tokenize (stream)
-  "Returns a list of SCO tokens, as read from a stream."
-  (labels ((skip-to (chars &optional (skip-last nil) (skipped nil))
+  (labels ((skip-to (chars &optional (skip-over nil) (skipped nil))
              (let ((c (read-char stream nil)))
-               (cond ((null c) (nreverse skipped))
-                     ((member c chars)
-                      (unless skip-last
-                        (unread-char c stream))
-                      (nreverse skipped))
-                     (t (skip-to chars skip-last (cons c skipped))))))
+               (cond
+                 ;; end of stream
+                 ((null c) (nreverse skipped))
+                 ;; skip to or over this char
+                 ((member c chars) (unless skip-over
+                                     (unread-char c stream))
+                                   (nreverse skipped))
+                 ;; skip over this char
+                 (t (skip-to chars skip-over (cons c skipped))))))
            (tok (tokens)
              (let ((c (read-char stream nil)))
                (case c
-                 ((nil) (nreverse tokens)) ; reached end of stream
-                 ((#\space #\tab #\newline #\return) (tok tokens)) ; skip whitespace and line endings
-                 (#\# (skip-to '(#\newline #\return)) ; skip comment to end of line
+                 ;; end of stream
+                 ((nil) (nreverse tokens))
+                 ;; skip whitespace and line ends
+                 ((#\space #\tab #\newline #\return) (tok tokens))
+                 ;; skip comment to line end
+                 (#\# (skip-to '(#\newline #\return))
                       (tok tokens))
+                 ;; special tokens
                  (#\{ (tok (cons 'begin tokens)))
                  (#\} (tok (cons 'end tokens)))
                  (#\= (tok (cons 'equals tokens)))
+                 ;; read string until next "
                  (#\" (tok (cons (cons 'val
                                        (coerce (skip-to '(#\") t) 'string))
-                                 tokens))) ; read string until next double quote
+                                 tokens)))
+                 ;; read identifier until whitespace, line end, or token
                  (t (tok (cons (cons 'id
                                      (coerce (cons c
                                                    (skip-to '(#\space #\tab #\newline #\return #\# #\{ #\} #\=)))
                                              'string))
-                               tokens))))))) ; read identifier until whitepsace, line endings or other tokens
+                               tokens)))))))
     (tok '())))
 
 (defun lookahead (expectations tokens)
