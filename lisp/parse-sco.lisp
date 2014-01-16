@@ -31,28 +31,38 @@
     (tok '())))
 
 (defun lookahead (expectations tokens)
-  (labels ((variablep (thing)
-             (and (symbolp thing) (eq #\? (char (symbol-name thing) 0))))
+  (labels ((varp (thing)
+             (and (symbolp thing)
+                  (eq #\? (char (symbol-name thing) 0))))
            (var-name (var)
              (intern (subseq (symbol-name var) 1)))
            (iter (expectations tokens ids)
-             (cond ((null expectations) ; all expectations met
-                    (if (null ids) t ids))
-                   ((null tokens) nil) ; no more tokens, but still expectations
-                   ((and (atom expectations)
-                         (atom tokens))
-                    (cond ((variablep expectations) ; variable matches any atom
-                           (cons (cons (var-name expectations)
-                                       tokens)
-                                 ids))
-                          ((equalp expectations tokens) ; two equal atoms
-                           (if (null ids) t ids))))
-                   ((and (consp expectations) ; match cons's recursively
-                         (consp tokens))
-                    (let ((ids (iter (car expectations) (car tokens) ids)))
-                      (if (null ids)
-                          nil
-                          (iter (cdr expectations)
-                                (cdr tokens)
-                                (if (consp ids) ids '()))))))))
+             (cond
+               ;; all expectations met
+               ((null expectations) (if (null ids)
+                                        t
+                                        ids))
+               ;; no more tokens, but still expectations
+               ((null tokens) nil)
+               ;; two atoms
+               ((and (atom expectations)
+                     (atom tokens))
+                (cond
+                  ;; a variable matches any atom
+                  ((varp expectations) (cons (cons (var-name expectations)
+                                                   tokens)
+                                             ids))
+                  ;; two equal atoms
+                  ((equalp expectations tokens) (if (null ids)
+                                                    t
+                                                    ids))))
+               ;; two conses: match recursively
+               ((and (consp expectations)
+                     (consp tokens))
+                (let ((ids (iter (car expectations) (car tokens) ids)))
+                  (if (null ids)
+                      nil
+                      (iter (cdr expectations) (cdr tokens) (if (consp ids)
+                                                                ids
+                                                                '()))))))))
     (iter expectations tokens '())))
