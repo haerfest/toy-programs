@@ -1,0 +1,40 @@
+(ql:quickload :png)
+
+(defparameter *in-filename* "/home/who/Downloads/Up_in_the_air.png")
+
+(defun save-plane (image color plane)
+  (let* ((filename (format nil "~a-plane-~a.png" color plane))
+         (rows      (png:image-height image))
+         (cols      (png:image-width  image))
+         (plane-img (png:make-image rows cols 1 8))
+         (mask      (ash 1 plane)))
+    (dotimes (row rows)
+      (dotimes (col cols)
+        (let* ((input-px  (aref image row col 0))
+               (output-px (if (zerop (logand input-px mask))
+                              255
+                              0)))
+          (setf (aref plane-img row col 0) output-px))))
+    (with-open-file (stream filename :element-type '(unsigned-byte 8) :direction :output :if-exists :supersede)
+      (png:encode plane-img stream))))
+
+(defun test ()
+  (with-open-file (stream *in-filename* :element-type '(unsigned-byte 8))
+    (let* ((input-img (png:decode stream))
+           (rows      (png:image-height input-img))
+           (cols      (png:image-width  input-img))
+           (r-img     (png:make-image rows cols 1 8))
+           (g-img     (png:make-image rows cols 1 8))
+           (b-img     (png:make-image rows cols 1 8)))
+      (dotimes (row rows)
+        (dotimes (col cols)
+          (setf (aref r-img row col 0) (aref input-img row col 0))
+          (setf (aref g-img row col 0) (aref input-img row col 1))
+          (setf (aref b-img row col 0) (aref input-img row col 2))))
+      (dotimes (plane 8)
+        (save-plane r-img "r" plane)
+        (save-plane g-img "g" plane)
+        (save-plane b-img "b" plane)))))
+          
+      
+          
