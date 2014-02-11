@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import logging
 import zmq
@@ -18,7 +18,7 @@ class Listener:
 
 if __name__ == "__main__":
     def print_topic(topic, message):
-        print topic
+        print(topic)
 
     Listener().listen("tcp://10.18.129.51:55555", print_topic)
 
