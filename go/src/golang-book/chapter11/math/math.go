@@ -8,24 +8,32 @@ func Average(xs []float64) float64 {
 	return total / float64(len(xs))
 }
 
-func Min(xs []float64) float64 {
-	min := xs[0]
-	for _, x := range xs {
-		if x < min {
-			min = x
-		}
-	}
+type reduceFunc func(float64, float64) float64
 
-	return min
+func reduce(xs []float64, reducer reduceFunc) float64 {
+	reduction := xs[0]
+	for _, x := range xs {
+		reduction = reducer(reduction, x)
+	}
+	return reduction
+}
+
+func Min(xs []float64) float64 {
+	reducer := func(reduction, x float64) float64 {
+		if x < reduction {
+			return x
+		}
+		return reduction
+	}
+	return reduce(xs, reducer)
 }
 
 func Max(xs []float64) float64 {
-	max := xs[0]
-	for _, x := range xs {
-		if x > max {
-			max = x
+	reducer := func(reduction, x float64) float64 {
+		if x > reduction {
+			return x
 		}
+		return reduction
 	}
-
-	return max
+	return reduce(xs, reducer)
 }
