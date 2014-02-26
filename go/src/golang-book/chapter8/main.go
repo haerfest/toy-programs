@@ -3,9 +3,7 @@ package main
 import "fmt"
 
 func swap(x *int, y *int) {
-	z := *x
-	*x = *y
-	*y = z
+	*x, *y = *y, *x
 }
 
 func main() {
