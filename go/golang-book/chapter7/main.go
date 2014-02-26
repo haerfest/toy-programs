@@ -2,20 +2,21 @@ package main
 
 import "fmt"
 
-func fac(n uint64) uint64 {
-	if n == 0 {
-		return 1
+func Divide(numerator int, divisor int) float64 {
+	if divisor == 0 {
+		panic("division by zero")
 	}
 
-	return n * fac(n - 1)
+	return float64(numerator) / float64(divisor)
 }
 
 func main() {
-	fmt.Print("Enter number: ")
+	defer func() {
+		s := recover()
+		fmt.Println("Panic:", s)
+	}()
 
-	var n uint64
-	fmt.Scanf("%d", &n)
-
-	fmt.Printf("%d! = %d\n", n, fac(n))
+	fmt.Println("10 / 3 =", Divide(10, 3))
+	fmt.Println("10 / 0 =", Divide(10, 0))
 }
 	
