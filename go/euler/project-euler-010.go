@@ -2,16 +2,16 @@ package main
 
 import "fmt"
 
-func Sieve(upperLimit uint64) uint64 {
+func Sieve(upperLimit uint) uint {
 	marked := make([]bool, upperLimit)
 
-	markMultiplesOf := func(n uint64) {
+	markMultiplesOf := func(n uint) {
 		for number := n * n; number < upperLimit; number += n {
 			marked[number] = true
 		}
 	}
 
-	findNextNumberToMark := func(candidate uint64) uint64 {
+	findNextNumberToMark := func(candidate uint) uint {
 		for candidate * candidate < upperLimit && marked[candidate] {
 			candidate++
 		}
@@ -23,9 +23,9 @@ func Sieve(upperLimit uint64) uint64 {
 		return 0
 	}
 
-	sumPrimes := func() uint64 {
-		sum := uint64(0)
-		for number := uint64(2); number < upperLimit; number++ {
+	sumPrimes := func() uint {
+		sum := uint(0)
+		for number := uint(2); number < upperLimit; number++ {
 			if !marked[number] {
 				sum += number
 			}
@@ -34,7 +34,7 @@ func Sieve(upperLimit uint64) uint64 {
 		return sum
 	}
 
-	for number := uint64(2); number != 0; number = findNextNumberToMark(number + 1) {
+	for number := uint(2); number != 0; number = findNextNumberToMark(number + 1) {
 		markMultiplesOf(number)
 	}
 
