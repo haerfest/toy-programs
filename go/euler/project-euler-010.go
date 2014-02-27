@@ -24,10 +24,8 @@ func Sieve(upperLimit uint64) uint64 {
 	}
 
 	sumPrimes := func() uint64 {
-		var sum uint64 = 0
-		var number uint64
-
-		for number = 2; number < upperLimit; number++ {
+		sum := uint64(0)
+		for number := uint64(2); number < upperLimit; number++ {
 			if !marked[number] {
 				sum += number
 			}
@@ -36,8 +34,7 @@ func Sieve(upperLimit uint64) uint64 {
 		return sum
 	}
 
-	var number uint64
-	for number = 2; number != 0; number = findNextNumberToMark(number + 1) {
+	for number := uint64(2); number != 0; number = findNextNumberToMark(number + 1) {
 		markMultiplesOf(number)
 	}
 
