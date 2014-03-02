@@ -18,12 +18,6 @@
  * of two abundant numbers.
  */
 
-/* http://primes.utm.edu/glossary/xpage/AbundantNumber.html
- *
- * Every proper multiple of a perfect number, and every multiple of an abundant
- * number, is abundant.
- */
-
 package main
 
 import (
@@ -55,10 +49,16 @@ func markMultiplesOf(n int) {
 
 func markAbundantNumbers() {
 	for n := 2; n < limit; n++ {
+		if isAbundant[n] {
+			// we've already found this one and its multiples
+			continue
+		}
 		sum := sumOfProperDivisors(n)
 		if sum == n {
+			// a perfect number: its multiples are abundants
 			markMultiplesOf(n)
 		} else if sum > n {
+			// an abundant number: its multiples are abundants too
 			isAbundant[n] = true
 			markMultiplesOf(n)
 		}
