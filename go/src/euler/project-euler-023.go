@@ -29,10 +29,11 @@ package main
 import (
 	"fmt"
 	"math"
+	"sort"
 )
 
 const limit = 28124 
-var isAbundant = make([]bool, limit)
+var isAbundant = make(map[int]bool)
 var isSumOfTwo = make([]bool, limit)
 
 func sumOfProperDivisors(n int) int {
@@ -64,14 +65,24 @@ func markAbundantNumbers() {
 	}
 }
 
+func extractAbundantNumbersSorted() []int {
+	abundants := make([]int, len(isAbundant))
+	i := 0
+	for a := range isAbundant {
+		abundants[i] = a
+		i++
+	}
+	sort.Ints(abundants)
+	return abundants
+}
+
 func markSumsOfTwoAbundantNumbers() {
-	for a := 0; a < limit; a++ {
-		if !isAbundant[a] {
-			continue
-		}
-		for b := a; a + b < limit; b++ {
-			if !isAbundant[b] {
-				continue
+	abundants := extractAbundantNumbersSorted()
+	for i, a := range abundants {
+		for j := i; j < len(abundants); j++ {
+			b := abundants[j]
+			if a + b >= limit {
+				break
 			}
 			isSumOfTwo[a + b] = true
 		}
@@ -91,5 +102,5 @@ func sumAllNonSumsOfTwoAbundantNumbers() int {
 func main() {
 	markAbundantNumbers()
 	markSumsOfTwoAbundantNumbers()
-	fmt.Println(sumAllNonSumsOfTwoAbundantNumbers())
+	fmt.Println(sumAllNonSumsOfTwoAbundantNumbers())  // => 4179871
 }
