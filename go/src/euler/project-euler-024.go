@@ -1,62 +1,47 @@
 package main
 
-import (
-	"fmt"
-	"sort"
-)
+import "fmt"
 
-type permutations [][]int
+// http://en.wikipedia.org/wiki/Permutation#Generation_in_lexicographic_order
+func permute(a []int, remaining int) []int {
+	for remaining > 0 {
 
-var digits = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-var perms = make(permutations, 0, 3628800)
+		// 1. find the largest index k such that a[k] < a[k + 1]
+		k := len(a) - 2
+		for k >= 0 && a[k] >= a[k + 1] {
+			k--
+		}
 
-func (this permutations) Len() int {
-	return len(this)
-}
+		// if no such index exists, the permutation is the last permutation
+		if k < 0 {
+			return a
+		}
 
-func (this permutations) Less(i, j int) bool {
-	return value(this[i]) < value(this[j])
-}
+		// 2. find the largest index l such that a[k] < a[l]
+		l := len(a) - 1
+		for l >= 0 && a[k] >= a[l] {
+			l--
+		}
 
-func (this permutations) Swap(i, j int) {
-	this[i], this[j] = this[j], this[i]
-}
+		// 3. swap the value of a[k] with that of a[l]
+		a[k], a[l] = a[l], a[k]
 
-func value(xs []int) int {
-	v := 0
-	for _, digit := range xs {
-		v = v * 10 + digit
-	}
-	return v
-}
+		// 4. reverse the sequence from a[k + 1] up to and including the final element a[n]
+		i := k + 1
+		j := len(a) - 1
+		for j > i {
+			a[i], a[j] = a[j], a[i]
+			i++
+			j--
+		}
 
-func copyXs(xs []int) []int {
-	ys := make([]int, len(xs))
-	copy(ys, xs)
-	return ys
-}
-
-func add(xs []int) {
-	i := len(perms)
-	perms = perms[:i+1]
-	perms[i] = copyXs(xs)
-}
-
-func permute(xs []int, start int) {
-	if start == len(xs) - 1 {
-		add(xs)
+		remaining--
 	}
 
-	for i := start; i < len(xs); i++ {
-		xs[start], xs[i] = xs[i], xs[start]
-		permute(xs, start + 1)
-		xs[start], xs[i] = xs[i], xs[start]
-	}
+	return a
 }
 
 
 func main() {
-	permute(digits, 0)
-	sort.Sort(perms)
-	fmt.Println(perms[999999])  // => [2 7 8 3 9 1 5 4 6 0]
+	fmt.Println(permute([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 999999))  // => [2 7 8 3 9 1 5 4 6 0]
 }
