@@ -58,5 +58,5 @@ func permute(xs []int, start int) {
 func main() {
 	permute(digits, 0)
 	sort.Sort(perms)
-	fmt.Println(perms[999999])  // => {[2 7 8 3 9 1 5 4 6 0]}
+	fmt.Println(perms[999999])  // => [2 7 8 3 9 1 5 4 6 0]
 }
