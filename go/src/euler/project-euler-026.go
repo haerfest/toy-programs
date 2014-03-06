@@ -1,42 +1,51 @@
+// Solution to Project Euler 26 in ugly Go... :(
+//
+// Explanation of the math behind it found at [1].  Styled after another
+// user's very elegant Haskell solution which follows the same logic.
+//
+// [1] http://answers.yahoo.com/question/index?qid=20060812092021AAetJwP
+
 package main
 
 import (
 	"fmt"
 	"math/big"
-	"strings"
 )
 
-const precision = 2000
-
-func maxRecurringCycleLength(x *big.Rat) int {
-	fraction := x.FloatString(precision)[2:]
-	
-	for i := 0; i < len(fraction); i++ {
-		for j := i + 1; j < len(fraction); j++ {
-			cycle := fraction[i:j]
-			n := len(fraction[j:]) / len(cycle)			
-			if n > 0 {
-				repeated := strings.Repeat(cycle, n)
-				if fraction[j:j+n*(j-i)] == repeated {
-					return j - i
-				}
-			}
-		}
-	}
-	
-	return 0
-}
-
 func main() {
-	max, d := 0, 0
+	one  := big.NewInt(1)
+	zero := big.NewInt(0)
+	ten  := big.NewInt(10)
 
-	for i := 2; i < 1000; i++ {
-		x := big.NewRat(1, int64(i))
-		length := maxRecurringCycleLength(x)
+	var a, pow, bigP big.Int
+	var n int
+	
+	maxRecurringCycleLength := func (p int) int {
+		bigP.SetInt64(int64(p))
+
+		n = 1
+		pow.SetInt64(int64(1))
+		
+		for a.Mod(a.Sub(&pow, one), &bigP).Cmp(zero) > 0 {
+			n++
+			pow.Mul(&pow, ten)
+		}
+
+		return n
+	}
+
+	max, dmax := 0, 0
+
+	for d := 3; d < 1000; d += 2 {
+		if d % 5 == 0 {
+			continue
+		}
+
+		length := maxRecurringCycleLength(d)
 		if length > max {
-			max, d = length, i
+			max, dmax = length, d
 		}
 	}
 
-	fmt.Println(d)  // => 983
+	fmt.Println(dmax)  // => 983
 }
