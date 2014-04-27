@@ -45,7 +45,7 @@
   (loop for row from 1 to 8 do
        (format t "~&  ~d " (* 10 row))
        (loop for col from 1 to 8
-             for piece = (bref board (+ col (* 10 row)))
+          for piece = (bref board (+ col (* 10 row)))
           do (format t "~c " (name-of piece))))
   (format t "~2&"))
 
@@ -77,8 +77,8 @@
   "Make any flips in the given direction."
   (let ((bracketer (would-flip? move player board dir)))
     (when bracketer
-      (loop for c from (+ move dir) by dir until (eql c bracketer)
-            do (setf (bref board c) player)))))
+      (loop for c = (+ move dir) then (+ c dir) until (eql c bracketer)
+         do (setf (bref board c) player)))))
 
 (defun would-flip? (move player board dir)
   "Would this move result in any flips in this direction?
@@ -102,12 +102,12 @@
   difference means black (the first player) wins."
   (let ((board (initial-board)))
     (loop for player = black
-          then (next-to-play board player print)
-          for strategy = (if (eql player black)
-                             bl-strategy
-                             wh-strategy)
-         until (null player)
-         do (get-move strategy player board print))
+       then (next-to-play board player print)
+       for strategy = (if (eql player black)
+                          bl-strategy
+                          wh-strategy)
+       until (null player)
+       do (get-move strategy player board print))
     (when print
       (format t "~&The game is over.  Final result:")
       (print-board board))
@@ -155,8 +155,66 @@
 (defun legal-moves (player board)
   "Returns a list of legal moves for player."
   (loop for move in all-squares
-        when (legal-p move player board) collect move))
+     when (legal-p move player board) collect move))
 
 (defun random-elt (choices)
   "Choose an element from a list at random."
   (elt choices (random (length choices))))
+
+(defun maximize-difference (player board)
+  "A strategy that maximizes the difference in pieces."
+  (funcall (maximizer #'count-difference) player board))
+
+(defun maximizer (eval-fn)
+  "Return a strategy that will consider every legal move,
+  apply EVAL-FN to each resulting board, and choose
+  the move for which EVAL-FN returns the best score.
+  FN takes two arguments: the player-to-move and board."
+  #'(lambda (player board)
+      (let* ((moves (legal-moves player board))
+             (scores (mapcar #'(lambda (move)
+                                 (funcall
+                                  eval-fn
+                                  player
+                                  (make-move move player
+                                             (copy-board board))))
+                             moves))
+             (best (apply #'max scores)))
+        (elt moves (position best scores)))))
+
+(defun ex-18-1 ()
+  "Exercise 18.1: Play some games with maximize-difference against
+  random-strategy and humn.  How good is maximize-difference?"
+  (evaluate-strategies #'maximize-difference #'random-strategy))
+
+(defun evaluate-strategies (a b)
+  (loop repeat 100
+     for score = (othello a b nil)
+     sum score))
+
+(defparameter *weights*
+  '#(0   0   0  0  0  0  0   0   0 0
+     0 120 -20 20  5  5 20 -20 120 0
+     0 -20 -40 -5 -5 -5 -5 -40 -20 0
+     0  20  -5 15  3  3 15  -5  20 0
+     0   5  -5  3  3  3  3  -5   5 0
+     0   5  -5  3  3  3  3  -5   5 0
+     0  20  -5 15  3  3 15  -5  20 0
+     0 -20 -40 -5 -5 -5 -5 -40 -20 0
+     0 120 -20 20  5  5 20 -20 120 0
+     0   0   0  0  0  0  0   0   0 0))
+
+(defun weighted-squares (player board)
+  "Sum of the weights of a player's squares minus opponent's."
+  (let ((opp (opponent player)))
+    (loop for i in all-squares
+       when (eql (bref board i) player)
+       sum (aref *weights* i)
+       when (eql (bref board i) opp)
+       sum (- (aref *weights* i)))))
+
+(defun ex-18-2 ()
+  (values (evaluate-strategies (maximizer #'weighted-squares)
+                               (maximizer #'count-difference))
+          (evaluate-strategies (maximizer #'count-difference)
+                               (maximizer #'weighted-squares))))
