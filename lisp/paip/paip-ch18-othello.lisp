@@ -62,7 +62,7 @@
   "A Legal move must be into an empty square, and it must
   flip at least one opponent piece."
   (and (eql (bref board move) empty)
-       (some #'(lambda (dir) (would-flip? move player board dir))
+       (some (lambda (dir) (would-flip? move player board dir))
              all-directions)))
 
 (defun make-move (move player board)
@@ -126,7 +126,7 @@
 
 (defun any-legal-move? (player board)
   "Does player have any legal moves in this position?"
-  (some #'(lambda (move) (legal-p move player board))
+  (some (lambda (move) (legal-p move player board))
         all-squares))
 
 (defun get-move (strategy player board print)
@@ -170,17 +170,17 @@
   apply EVAL-FN to each resulting board, and choose
   the move for which EVAL-FN returns the best score.
   FN takes two arguments: the player-to-move and board."
-  #'(lambda (player board)
-      (let* ((moves (legal-moves player board))
-             (scores (mapcar #'(lambda (move)
-                                 (funcall
-                                  eval-fn
-                                  player
-                                  (make-move move player
-                                             (copy-board board))))
-                             moves))
-             (best (apply #'max scores)))
-        (elt moves (position best scores)))))
+  (lambda (player board)
+    (let* ((moves (legal-moves player board))
+           (scores (mapcar #'(lambda (move)
+                               (funcall
+                                eval-fn
+                                player
+                                (make-move move player
+                                           (copy-board board))))
+                           moves))
+           (best (apply #'max scores)))
+      (elt moves (position best scores)))))
 
 (defun ex-18-1 ()
   "Exercise 18.1: Play some games with maximize-difference against
@@ -218,3 +218,80 @@
                                (maximizer #'count-difference))
           (evaluate-strategies (maximizer #'count-difference)
                                (maximizer #'weighted-squares))))
+
+(defconstant winning-value most-positive-fixnum)
+(defconstant losing-value  most-negative-fixnum)
+
+(defun final-value (player board)
+  "Is this a win, loss, or draw for player?"
+  (case (signum (count-difference player board))
+    (-1 losing-value)
+    ( 0 0)
+    (+1 winning-value)))
+
+(defun minimax (player board ply eval-fn)
+  "Find the best move, for PLAYER, according to EVAL-FN,
+  searching PLY levels deep and backing up values."
+  (if (= ply 0)
+      (funcall eval-fn player board)
+      (let ((moves (legal-moves player board)))
+        (if (null moves)
+            (if (any-legal-move? (opponent player) board)
+                (- (minimax (opponent player) board
+                            (- ply 1) eval-fn))
+                (final-value player board))
+            (let ((best-move nil)
+                  (best-val nil))
+              (dolist (move moves)
+                (let* ((board2 (make-move move player
+                                          (copy-board board)))
+                       (val (- (minimax (opponent player) board2
+                                        (- ply 1) eval-fn))))
+                  (when (or (null best-val)
+                            (> val best-val))
+                    (setf best-val val)
+                    (setf best-move move))))
+              (values best-val best-move))))))
+
+(defun minimax-searcher (ply eval-fn)
+  "A strategy that searches PLY levels and then uses EVAL-FN."
+  (lambda (player board)
+    (multiple-value-bind (value move)
+        (minimax player board ply eval-fn)
+      (declare (ignore value))
+      move)))
+
+(defun alpha-beta (player board achievable cutoff ply eval-fn)
+  "Find the best move, for PLAYER, according to EVAL-FN,
+  searching PLY levels deep and backing up values,
+  using cutoffs whenever possible."
+  (if (= ply 0)
+      (funcall eval-fn player board)
+      (let ((moves (legal-moves player board)))
+        (if (null moves)
+            (if (any-legal-move? (opponent player) board)
+                (- (alpha-beta (opponent player) board
+                               (- cutoff) (- achievable)
+                               (- ply 1) eval-fn))
+                (final-value player board))
+            (let ((best-move (first moves)))
+              (loop for move in moves
+                 do (let* ((board2 (make-move move player
+                                              (copy-board board)))
+                           (val (- (alpha-beta (opponent player) board2
+                                               (- cutoff) (- achievable)
+                                               (- ply 1) eval-fn))))
+                      (when (> val achievable)
+                        (setf achievable val)
+                        (setf best-move move)))
+                 until (>= achievable cutoff))
+              (values achievable best-move))))))
+
+(defun alpha-beta-searcher (depth eval-fn)
+  "A strategy that searches to DEPTH and then uses EVAL-FN."
+  (lambda (player board)
+    (multiple-value-bind (value move)
+        (alpha-beta player board losing-value winning-value
+                    depth eval-fn)
+      (declare (ignore value))
+      move)))
