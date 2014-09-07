@@ -1,6 +1,6 @@
 -module(messenger).
 -export([start_server/0,
-         server/1,
+         server/0,
          logon/1,
          logoff/0,
          message/2,
@@ -10,13 +10,17 @@
 server_node() ->
     messenger@kilkerran.
 
+server() ->
+    process_flag(trap_exit, true),
+    server([]).
+
 %% Server message loop.
 server(User_List) ->
     receive
         {From, logon, Name} ->
             New_User_List = server_logon(From, Name, User_List),
             server(New_User_List);
-        {From, logoff} ->
+        {'EXIT', From, _} ->
             New_User_List = server_logoff(From, User_List),
             server(New_User_List);
         {From, message_to, To, Message} ->
@@ -27,7 +31,7 @@ server(User_List) ->
 
 %% Starts a server.
 start_server() ->
-    register(messenger, spawn(messenger, server, [[]])).
+    register(messenger, spawn(messenger, server, [])).
 
 %% Registers a new client at the server.
 server_logon(From, Name, User_List) ->
@@ -37,6 +41,7 @@ server_logon(From, Name, User_List) ->
             User_List;
         false ->
             From ! {messenger, logged_on},
+            link(From),
             [{From, Name} | User_List]
     end.
 
@@ -97,7 +102,6 @@ client(Server_Node, Name) ->
 client(Server_Node) ->
     receive
         logoff ->
-            {messenger, Server_Node} ! {self(), logoff},
             exit(normal);
         {message_to, ToName, Message} ->
             {messenger, Server_Node} ! {self(), message_to, ToName, Message},
@@ -115,4 +119,7 @@ await_result() ->
             exit(normal);
         {messenger, What} ->
             io:format("~p~n", [What])
+    after 5000 ->
+            io:format("no response from server~n", []),
+            exit(timeout)
     end.
