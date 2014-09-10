@@ -3,7 +3,4 @@
 -import(lists, [map/2, sum/1]).
 
 total(L) ->
-    sum(map(fun({What, N}) ->
-                    shop:cost(What) * N
-            end,
-            L)).
+    sum([shop:cost(What) * N || {What, N} <- L]).
