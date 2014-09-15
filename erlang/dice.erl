@@ -1,5 +1,5 @@
 -module(dice).
--export([start/1, stop/1, roll/1, roll/2, loop/0]).
+-export([start/1, stop/1, roll/1, roll/2, histogram/1, probabilities/1, loop/0]).
 
 loop() ->
     {A1, A2, A3} = now(),
@@ -31,3 +31,15 @@ roll(Server, N) ->
         {Server, Rolls} ->
                 Rolls
     end.
+
+histogram(Rolls) ->
+    histogram(Rolls, [0, 0, 0, 0, 0, 0]).
+histogram([Roll|Rest], Histo) ->
+    Histo2 = lists:sublist(Histo, Roll-1) ++ [lists:nth(Roll, Histo)+1] ++ lists:nthtail(Roll, Histo),
+    histogram(Rest, Histo2);
+histogram([], Histo) ->
+    Histo.
+
+probabilities(Rolls) ->
+    Sum = lists:sum(Rolls),
+    lists:map(fun(X) -> X/Sum end, Rolls).
