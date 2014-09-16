@@ -33,13 +33,15 @@ roll(Server, N) ->
     end.
 
 histogram(Rolls) ->
-    histogram(Rolls, [0, 0, 0, 0, 0, 0]).
+    histogram(Rolls, #{1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0}).
 histogram([Roll|Rest], Histo) ->
-    Histo2 = lists:sublist(Histo, Roll-1) ++ [lists:nth(Roll, Histo)+1] ++ lists:nthtail(Roll, Histo),
+    {ok, Count} = maps:find(Roll, Histo),
+    Histo2 = maps:update(Roll, Count+1, Histo),
     histogram(Rest, Histo2);
 histogram([], Histo) ->
     Histo.
 
-probabilities(Rolls) ->
-    Sum = lists:sum(Rolls),
-    lists:map(fun(X) -> X/Sum end, Rolls).
+probabilities(Histo) ->
+    Rolls = lists:sum(maps:values(Histo)),
+    maps:map(fun(_,V) -> V/Rolls end, Histo).
+                     
