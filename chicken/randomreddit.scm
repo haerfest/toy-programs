@@ -9,3 +9,9 @@
   (when (> n 0)
         (random-reddit)
         (random-reddits (- n 1))))
+
+(define (main args)
+  (unless (null? args)
+          (random-reddits (string->number (car args)))))
+
+(main (command-line-arguments))
