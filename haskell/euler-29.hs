@@ -7,3 +7,5 @@ nub (x:xs) = x : nub rest
     rest = dropWhile ((==) x) xs
 
 answer n = length $ nub $ sort [a^b | a <- [2..n], b <- [2..n]]
+
+main = putStrLn $ show $ answer 100
