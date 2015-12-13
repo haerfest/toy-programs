@@ -9,7 +9,7 @@
 %%
 %% > timer:tc(fibonacci, memoized, [40]).
 %% {480,165580141}
-%% 2> timer:tc(fibonacci, memoized, [40]).
+%% > timer:tc(fibonacci, memoized, [40]).
 %% {6,165580141}
 %% ----------------------------------------------------------------------------
 
