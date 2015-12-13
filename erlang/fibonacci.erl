@@ -22,14 +22,14 @@ recursive(N) when N > 1 ->
 
 %% ----------------------------------------------------------------------------
 %%  Memoized version.  It spawns a separate process to maintain the state,
-%%  i.e. the N => fibonacci(N) tuples we have calculated so far.
+%%  i.e. the (N, fib(N)) tuples we have calculated so far.
 %% ----------------------------------------------------------------------------
 
 memoized(N) when N >= 0 ->
     Memory = spawn(fun memory/0),
-    store(Memory, 0, 1),
-    store(Memory, 1, 1),
-    M = helper(N, Memory),
+    store(Memory, 0, 1),  % the two base
+    store(Memory, 1, 1),  % cases
+    M = fib(N, Memory),
     stop(Memory),
     M.
 
@@ -38,10 +38,10 @@ memoized(N) when N >= 0 ->
 %%  fibonacci(N) only once for a given N.
 %% ----------------------------------------------------------------------------
 
-helper(N, Memory) ->
+fib(N, Memory) ->
     case retrieve(Memory, N) of
         undefined ->
-            M = helper(N - 1, Memory) + helper(N - 2, Memory),
+            M = fib(N - 1, Memory) + fib(N - 2, Memory),
             store(Memory, N, M),
             M;
         M ->
