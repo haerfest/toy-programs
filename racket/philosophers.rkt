@@ -1,6 +1,6 @@
 #lang racket
 
-(provide dine)
+(provide dine main)
 
 (define *dinner-table* '((plato . (red-fork blue-fork))
                          (confucius . (blue-fork green-fork))
@@ -10,11 +10,20 @@
 
 (define *threads* '())
 
+(define (main . args)
+  "Run from command-line: $ racket -tm philosophers.rkt"
+  (dine))
+
+;; -----------------------------------------------------------------------------
+;;  Dining.
+;; -----------------------------------------------------------------------------
+
 (define (dine)
   (random-seed (current-seconds))
   (create-logger)
   (create-forks)
-  (create-philosophers))
+  (create-philosophers)
+  (read))  ; to allow ^C to interrupt
 
 ;; -----------------------------------------------------------------------------
 ;;  Philosophers.
