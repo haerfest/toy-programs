@@ -7,7 +7,7 @@ import time
 # time elapsed: 0.0000679493 seconds
 # 165580141
 
-class Fibonacci:
+class Fibonacci(object):
     def __init__(self):
         self.memory = {0: 1, 1: 1}
 
@@ -27,8 +27,13 @@ class Fibonacci:
             self.memory[n] = m
             return m
 
-def timer(f):
-    t0 = time.time()
-    result = f()
-    print("time elapsed: %.10f seconds" % (time.time() - t0))
-    return result
+class Timer(object):
+    @staticmethod
+    def time(f):
+        t0 = time.time()
+        result = f()
+        print("time elapsed: %.10f seconds" % (time.time() - t0))
+        return result
+
+if __name__ == "__main__":
+    print(Timer.time(lambda: Fibonacci().recursive(40)))
