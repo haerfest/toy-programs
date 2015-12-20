@@ -1,8 +1,8 @@
 function fib(n)
     if n == 0 || n == 1
-        return 1
+        1
     else
-        return fib(n - 2) + fib(n - 1)
+        fib(n - 2) + fib(n - 1)
     end
 end
 
@@ -13,10 +13,10 @@ function memoizedfib(n)
         if !haskey(memory, n)
             memory[n] = fib(n - 2) + fib(n - 1)
         end
-        return memory[n]
+        memory[n]
     end
 
-    return internal(n)
+    internal(n)
 end
 
 # julia> include("fibonacci.jl")
