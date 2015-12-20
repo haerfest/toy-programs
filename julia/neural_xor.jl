@@ -8,7 +8,7 @@ import BackpropNeuralNet
 function train(net, epochs, samples)
     @printf "training for %u epochs...\n" epochs
     @time for epoch in 1:epochs
-        for (input, desired) in shuffle(trainingsamples)
+        for (input, desired) in shuffle(samples)
             BackpropNeuralNet.train(net, input, desired)
         end
     end
@@ -27,11 +27,14 @@ end
 
 # Prints how the neural network performs on test samples.
 function show(net, samples)
-    @printf "mean squared error: %.5f\n" mse(net, samples)
+    mse = 0.0
     for (input, desired) in samples
         output = BackpropNeuralNet.net_eval(net, input)
-        @printf "input: %s  expected:%s  output: %s\n" input desired output
+        mse += sum(desired - output) ^ 2
+        @printf "input: %s  expected: %s  output: %s\n" input desired output
     end
+    mse *= 0.5
+    @printf "mean squared error: %.5f\n" mse
 end
 
 # Training set for learning the XOR function ($ in Julia).
@@ -53,33 +56,25 @@ epochs = 10_000
 net = BackpropNeuralNet.init_network([2, 2, 1])
 
 # Train the network.
-train(net, epochs, trainingsamples)
+train(net, epochs, trainingset)
 
 # Show how the net performs on the testset.
 show(net, testset)
 
 # Example runs:
 #
-# training for 100 epochs...
-#   0.002291 seconds (42.10 k allocations: 1.010 MB)
-# mean squared error: 0.50039
-# input: [0.0,0.0]  expected:[0.0]  output: [0.496763805773074]
-# input: [0.0,1.0]  expected:[1.0]  output: [0.49636216254953347]
-# input: [1.0,0.0]  expected:[1.0]  output: [0.5154420613227905]
-# input: [1.0,1.0]  expected:[0.0]  output: [0.5153317963633542]
-#
-# training for 1000 epochs...
-#   0.043723 seconds (421.00 k allocations: 10.101 MB, 19.64% gc time)
-# mean squared error: 0.28638
-# input: [0.0,0.0]  expected:[0.0]  output: [0.3864448795724854]
-# input: [0.0,1.0]  expected:[1.0]  output: [0.5385946568998659]
-# input: [1.0,0.0]  expected:[1.0]  output: [0.6878421616932553]
-# input: [1.0,1.0]  expected:[0.0]  output: [0.3362890996690191]
+# training for 10000 epochs...
+#   0.312623 seconds (4.10 M allocations: 99.007 MB, 2.85% gc time)
+# input: [0.0,0.0]  expected: [0.0]  output: [0.5013614681298871]
+# input: [0.0,1.0]  expected: [1.0]  output: [0.497504113990461]
+# input: [1.0,0.0]  expected: [1.0]  output: [0.9725400358585657]
+# input: [1.0,1.0]  expected: [0.0]  output: [0.03535333579622352]
+# mean squared error: 0.25293
 #
 # training for 10000 epochs...
-#   0.244605 seconds (4.21 M allocations: 101.013 MB, 4.84% gc time)
-# mean squared error: 0.00094
-# input: [0.0,0.0]  expected:[0.0]  output: [0.01965052373124125]
-# input: [0.0,1.0]  expected:[1.0]  output: [0.9773738046631867]
-# input: [1.0,0.0]  expected:[1.0]  output: [0.9773747516783217]
-# input: [1.0,1.0]  expected:[0.0]  output: [0.021649070817093864]
+#   0.281678 seconds (4.10 M allocations: 99.007 MB, 3.16% gc time)
+# input: [0.0,0.0]  expected: [0.0]  output: [0.02148932340391705]
+# input: [0.0,1.0]  expected: [1.0]  output: [0.9800237406902774]
+# input: [1.0,0.0]  expected: [1.0]  output: [0.9754353635330041]
+# input: [1.0,1.0]  expected: [0.0]  output: [0.019038310651601782]
+# mean squared error: 0.00091
