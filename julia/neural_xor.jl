@@ -2,65 +2,73 @@
 #
 # julia> Pkg.clone("https://github.com/TotalVerb/BackpropNeuralNet.jl.git")
 # julia> Pkg.checkout("BackpropNeuralNet", "patch-1")
-import BackpropNeuralNet
+using BackpropNeuralNet
 
-# Train a neural network for #epochs on training samples.
-function train(net, epochs, samples)
+# Represents a single sample to feed to the network.
+type Sample
+    input :: Array{Float64,1}     # input vector
+    expected :: Array{Float64,1}  # expected output vector
+end
+
+"""
+Trains a neural network for #epochs using the samples.
+"""
+function train(net :: NeuralNetwork, epochs :: Int, samples :: Array{Sample,1})
     @printf "training for %u epochs...\n" epochs
     @time for epoch in 1:epochs
-        for (input, desired) in shuffle(samples)
-            BackpropNeuralNet.train(net, input, desired)
+        for sample in shuffle(samples)
+            BackpropNeuralNet.train(net, sample.input, sample.expected)
         end
     end
 end
 
-# Calculate the mean squared error of a neural network on test samples.
-function mse(net, samples)
-    function error(acc, sample)
-        input, desired = sample
-        output = BackpropNeuralNet.net_eval(net, input)
-        error = desired - output
-        return acc + sum(error) ^ 2
-    end
-    return 0.5 * reduce(error, 0.0, samples)
-end
-
-# Prints how the neural network performs on test samples.
-function show(net, samples)
+"""
+Outputs how the neural network performs on test samples. Returns the mean
+squared error.
+"""
+function show(net :: NeuralNetwork, samples :: Array{Sample,1})
     mse = 0.0
-    for (input, desired) in samples
-        output = BackpropNeuralNet.net_eval(net, input)
-        error = desired - output
+    for sample in samples
+        output = net_eval(net, sample.input)
+        error = sample.expected - output
         mse += sum(error) ^ 2
-        @printf "input: %s  expected: %s  output: %s\n" input desired output
+        @printf "input: %s  expected: %s  output: %s\n" sample.input sample.expected output
     end
     mse *= 0.5
     @printf "mean squared error: %.5f\n" mse
+    mse
 end
 
-# Training set for learning the XOR function ($ in Julia).
-trainingset = [
-    ([0.0, 0.0], [0.0]),  # 0 $ 0 = 0
-    ([0.0, 1.0], [1.0]),  # 0 $ 1 = 1
-    ([1.0, 0.0], [1.0]),  # 1 $ 0 = 1
-    ([1.0, 1.0], [0.0])   # 1 $ 1 = 0
-]
+"""
+Demonstrates training and using a neural network to implement the XOR function.
+"""
+function demo()
+    # Train for this many epochs by default.
+    demo(10_000)
+end
 
-# Test set.
-testset = trainingset
+function demo(epochs :: Int)
+    # Training set for learning the XOR function.
+    trainingset = [
+        Sample([0.0, 0.0], [0.0]),  # 0 xor 0 = 0
+        Sample([0.0, 1.0], [1.0]),  # 0 xor 1 = 1
+        Sample([1.0, 0.0], [1.0]),  # 1 xor 0 = 1
+        Sample([1.0, 1.0], [0.0])   # 1 xor 1 = 0
+    ]
 
-# Train for this many epochs.
-epochs = 10_000
+    # For this simple function the testset equals the trainingset.
+    testset = trainingset
 
-# Build a neural network with two input neurons, one hidden layer with also two
-# neurons, and an output layer consisting of one neuron.
-net = BackpropNeuralNet.init_network([2, 2, 1])
+    # Build a neural network with two input neurons, one hidden layer with also two
+    # neurons, and an output layer consisting of one neuron.
+    net = init_network([2, 2, 1])
 
-# Train the network.
-train(net, epochs, trainingset)
+    # Train the network.
+    train(net, epochs, trainingset)
 
-# Show how the net performs on the testset.
-show(net, testset)
+    # Show how the net performs on the testset.
+    show(net, testset)
+end
 
 # Example runs:
 #
