@@ -23,20 +23,17 @@ function train(net :: NeuralNetwork, epochs :: Int, samples :: Array{Sample,1})
 end
 
 """
-Outputs how the neural network performs on test samples. Returns the mean
-squared error.
+Tests how the neural network performs on test samples.
 """
-function show(net :: NeuralNetwork, samples :: Array{Sample,1})
-    mse = 0.0
-    for sample in samples
+function test(net :: NeuralNetwork, samples :: Array{Sample,1})
+    function f(mse :: Float64, sample :: Sample)
         output = net_eval(net, sample.input)
         error = sample.expected - output
-        mse += sum(error) ^ 2
         @printf "input: %s  expected: %s  output: %s\n" sample.input sample.expected output
+        mse + sum(error) ^ 2
     end
-    mse *= 0.5
+    mse = 0.5 * reduce(f, 0.0, samples)
     @printf "mean squared error: %.5f\n" mse
-    mse
 end
 
 """
@@ -59,15 +56,15 @@ function demo(epochs :: Int)
     # For this simple function the testset equals the trainingset.
     testset = trainingset
 
-    # Build a neural network with two input neurons, one hidden layer with also two
-    # neurons, and an output layer consisting of one neuron.
+    # Build a neural network with two input neurons, one hidden layer with also
+    # two neurons, and an output layer consisting of one neuron.
     net = init_network([2, 2, 1])
 
     # Train the network.
     train(net, epochs, trainingset)
 
-    # Show how the net performs on the testset.
-    show(net, testset)
+    # Test how the net performs on the testset.
+    test(net, testset)
 end
 
 # Example runs:
