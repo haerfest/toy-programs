@@ -17,7 +17,7 @@ end
 # Calculate the mean squared error of a neural network on test samples.
 function mse(net, samples)
     function error(acc, sample)
-        (input, desired) = sample
+        input, desired = sample
         output = BackpropNeuralNet.net_eval(net, input)
         error = desired - output
         return acc + sum(error) ^ 2
@@ -30,7 +30,8 @@ function show(net, samples)
     mse = 0.0
     for (input, desired) in samples
         output = BackpropNeuralNet.net_eval(net, input)
-        mse += sum(desired - output) ^ 2
+        error = desired - output
+        mse += sum(error) ^ 2
         @printf "input: %s  expected: %s  output: %s\n" input desired output
     end
     mse *= 0.5
