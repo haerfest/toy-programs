@@ -9,24 +9,28 @@ end
 function memoizedfib(n)
     memory = Dict{Int,Int}()
 
+    memory[0] = 1
+    memory[1] = 1
+
     function internal(n)
         if !haskey(memory, n)
-            memory[n] = fib(n - 2) + fib(n - 1)
+            memory[n] = internal(n - 2) + internal(n - 1)
+        else
+            memory[n]
         end
-        memory[n]
     end
 
     internal(n)
 end
 
 # julia> include("fibonacci.jl")
-#   0.988681 seconds (1.15 k allocations: 58.018 KB)
-# 165580141
-#   0.990496 seconds (2.48 k allocations: 126.052 KB)
-# 165580141
+# recursive ... 165580141
+#   0.986287 seconds (1.17 k allocations: 58.486 KB)
+# memoized .... 165580141
+#   0.009025 seconds (2.80 k allocations: 142.588 KB)
 
-@time n = fib(40)
-println(n)
+print("recursive ... ")
+@time println(fib(40))
 
-@time n = memoizedfib(40)
-println(n)
+print("memoized .... ")
+@time println(memoizedfib(40))
