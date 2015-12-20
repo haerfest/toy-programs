@@ -24,6 +24,9 @@ function busy()
 end
 
 function philosopher(name, leftfork, rightfork)
+    if rand() < 0.5
+        think(name)
+    end
     while true
         take(leftfork)
         take(rightfork)
@@ -41,3 +44,5 @@ srand()
 for (name, leftfork, rightfork) in zip(philosophers, forks, circshift(forks, 1))
     @schedule philosopher(name, leftfork, rightfork)
 end
+
+readline()
