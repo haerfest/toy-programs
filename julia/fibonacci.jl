@@ -1,4 +1,7 @@
-function fib(n)
+"""
+Recursive implementation of the Fibonacci sequence.
+"""
+function fib(n :: Int)
     if n == 0 || n == 1
         1
     else
@@ -6,7 +9,10 @@ function fib(n)
     end
 end
 
-function memoizedfib(n)
+"""
+Memoized implementation of the Fibonacci sequence.
+"""
+function memoizedfib(n :: Int)
     memory = Dict{Int,Int}()
 
     memory[0] = 1
@@ -23,14 +29,20 @@ function memoizedfib(n)
     internal(n)
 end
 
-# julia> include("fibonacci.jl")
+"""
+Demonstrates the speed difference between the recursive and memoized Fibonacci
+sequence implementations.
+"""
+function demo()
+    print("recursive ... ")
+    @time println(fib(40))
+
+    print("memoized .... ")
+    @time println(memoizedfib(40))
+end
+
+# julia> demo()
 # recursive ... 165580141
-#   0.986287 seconds (1.17 k allocations: 58.486 KB)
+#   1.154707 seconds (15 allocations: 496 bytes)
 # memoized .... 165580141
-#   0.009025 seconds (2.80 k allocations: 142.588 KB)
-
-print("recursive ... ")
-@time println(fib(40))
-
-print("memoized .... ")
-@time println(memoizedfib(40))
+#   0.000079 seconds (93 allocations: 3.938 KB)
