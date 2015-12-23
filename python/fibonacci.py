@@ -19,28 +19,27 @@ class Fibonacci(object):
         self.memory = {0: 1, 1: 1}
 
     def recursive(self, n):
-        """Trivial recursive fibonacci function"""
+        """Naive recursive implementation"""
         if n == 0 or n == 1:
             return 1
         else:
             return self.recursive(n - 1) + self.recursive(n - 2)
 
     def memoized(self, n):
-        """Memoized fibonacci function"""
-        if n in self.memory:
-            return self.memory[n]
-        else:
-            m = self.memoized(n - 1) + self.memoized(n - 2)
-            self.memory[n] = m
-            return m
+        """Memoized implementation"""
+        if not (n in self.memory):
+            self.memory[n] = self.memoized(n - 1) + self.memoized(n - 2)
+        return self.memory[n]
 
     def loopy(self, n):
+        """Python-esque looping implementation"""
         a, b = 1, 1
         for _ in range(n - 1):
             a, b = a + b, a
         return a
 
     def benet(self, n):
+        """Benet's formula"""
         root = sqrt(5)
         return int(round((((1 + root) / 2) ** (n + 1)) / root))
 
