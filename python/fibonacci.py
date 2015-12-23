@@ -1,3 +1,4 @@
+from math import sqrt
 import time
 
 # >>> timer(lambda: Fibonacci().recursive(40))
@@ -8,6 +9,9 @@ import time
 # 165580141
 # >>> timer(lambda: Fibonacci().loopy(40))
 # time elapsed: 0.0000169277 seconds
+# 165580141
+# >>> timer(lambda: Fibonacci().benet(40))
+# time elapsed: 0.0000159740 seconds
 # 165580141
 
 class Fibonacci(object):
@@ -36,6 +40,10 @@ class Fibonacci(object):
             a, b = a + b, a
         return a
 
+    def benet(self, n):
+        root = sqrt(5)
+        return int(round((((1 + root) / 2) ** (n + 1)) / root))
+
 class Timer(object):
     @staticmethod
     def time(f):
@@ -45,4 +53,4 @@ class Timer(object):
         return result
 
 if __name__ == "__main__":
-    print(Timer.time(lambda: Fibonacci().loopy(40)))
+    print(Timer.time(lambda: Fibonacci().benet(40)))
