@@ -6,6 +6,9 @@ import time
 # >>> timer(lambda: Fibonacci().memoized(40))
 # time elapsed: 0.0000679493 seconds
 # 165580141
+# >>> timer(lambda: Fibonacci().loopy(40))
+# time elapsed: 0.0000169277 seconds
+# 165580141
 
 class Fibonacci(object):
     def __init__(self):
@@ -27,6 +30,12 @@ class Fibonacci(object):
             self.memory[n] = m
             return m
 
+    def loopy(self, n):
+        a, b = 1, 1
+        for _ in range(n - 1):
+            a, b = a + b, a
+        return a
+
 class Timer(object):
     @staticmethod
     def time(f):
@@ -36,4 +45,4 @@ class Timer(object):
         return result
 
 if __name__ == "__main__":
-    print(Timer.time(lambda: Fibonacci().recursive(40)))
+    print(Timer.time(lambda: Fibonacci().loopy(40)))
