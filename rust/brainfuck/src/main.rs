@@ -1,7 +1,7 @@
 use std::io::Read;
 
 struct Machine {
-    mem: [i32; 30000],
+    mem: [u8; 30000],
     dp: usize,
     code: String,
     pc: usize
@@ -38,8 +38,7 @@ fn execute(m: &mut Machine) {
                 let input = stdin
                     .bytes()
                     .next()
-                    .and_then(|result| result.ok())
-                    .map(|byte| byte as i32);
+                    .and_then(|result| result.ok());
                 match input {
                     Some(x) => m.mem[m.dp] = x,
                     None => {},
