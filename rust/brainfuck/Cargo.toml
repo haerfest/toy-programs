@@ -1,0 +1,6 @@
+[package]
+name = "brainfuck"
+version = "0.1.0"
+authors = ["haerfest <wouter.hobers+github@gmail.com>"]
+
+[dependencies]
