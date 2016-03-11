@@ -34,14 +34,10 @@ fn execute(m: &mut Machine) {
                 m.pc += 1;
             },
             b',' => {
-                let stdin = std::io::stdin();
-                let input = stdin
-                    .bytes()
-                    .next()
-                    .and_then(|result| result.ok());
+                let input = std::io::stdin().bytes().next().and_then(|result| result.ok());
                 match input {
                     Some(x) => m.mem[m.dp] = x,
-                    None => {},
+                    None => panic!("error reading input")
                 };
                 m.pc += 1;
             },
