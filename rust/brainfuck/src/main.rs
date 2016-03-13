@@ -7,21 +7,25 @@ struct Machine<'a> {
     pc: usize
 }
 
-fn find(m: &mut Machine, needle: u8, skip: u8, forwards: bool) {
+fn find(m: &Machine, needle: u8, skip: u8, forwards: bool) -> usize {
+    let mut pc = m.pc;
     let mut depth = 0;
-    while !(m.code[m.pc] == needle && depth == 0) {
-        if m.code[m.pc] == needle {
+
+    while !(m.code[pc] == needle && depth == 0) {
+        if m.code[pc] == needle {
             depth -= 1;
-        } else if m.code[m.pc] == skip {
+        } else if m.code[pc] == skip {
             depth += 1;
         }
 
         if forwards {
-            m.pc += 1;
+            pc += 1;
         } else {
-            m.pc -= 1;
+            pc -= 1;
         }
     }
+
+    return pc;
 }
 
 fn execute(m: &mut Machine) {
@@ -59,7 +63,7 @@ fn execute(m: &mut Machine) {
             b'[' => {
                 if m.mem[m.dp] == 0 {
                     m.pc += 1;
-                    find(m, b']', b'[', true);
+                    m.pc = find(m, b']', b'[', true);
                 } else {
                     m.pc += 1;
                 }
@@ -69,7 +73,7 @@ fn execute(m: &mut Machine) {
                     m.pc += 1;
                 } else {
                     m.pc -= 1;
-                    find(m, b'[', b']', false);
+                    m.pc = find(m, b'[', b']', false);
                 }
             },
             _ =>
