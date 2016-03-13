@@ -45,7 +45,7 @@ fn execute(m: &mut Machine) {
                 m.pc += 1;
             },
             b'.' => {
-                print!("{:?}", m.mem[m.dp]);
+                print!("{:?}", m.mem[m.dp] as char);
                 m.pc += 1;
             },
             b',' => {
