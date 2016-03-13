@@ -8,9 +8,11 @@ type machine struct {
 	dp, pc int
 }
 
-func find(m *machine, needle byte, skip byte, depth int, forwards bool) {
-	for !(m.code[m.pc] == needle && depth == 0) {
-		switch m.code[m.pc] {
+func find(m *machine, needle byte, skip byte, forwards bool) int {
+	pc := m.pc
+	depth := 0
+	for !(m.code[pc] == needle && depth == 0) {
+		switch m.code[pc] {
 		case needle:
 			depth--
 		case skip:
@@ -18,11 +20,13 @@ func find(m *machine, needle byte, skip byte, depth int, forwards bool) {
 		}
 
 		if forwards {
-			m.pc++
+			pc++
 		} else {
-			m.pc--
+			pc--
 		}
 	}
+
+	return pc
 }
 
 func execute(m *machine) {
@@ -49,7 +53,7 @@ func execute(m *machine) {
 		case '[':
 			if m.mem[m.dp] == 0 {
 				m.pc++
-				find(m, ']', '[', 0, true)
+				m.pc = find(m, ']', '[', true)
 			} else {
 				m.pc++
 			}
@@ -58,7 +62,7 @@ func execute(m *machine) {
 				m.pc++
 			} else {
 				m.pc--
-				find(m, '[', ']', 0, false)
+				m.pc = find(m, '[', ']', false)
 			}
 		}
 	}
