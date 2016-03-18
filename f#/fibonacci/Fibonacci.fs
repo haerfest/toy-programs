@@ -9,4 +9,3 @@ let timeIt f =
 
 let main () =
     timeIt (fun () -> fib 40)
-
