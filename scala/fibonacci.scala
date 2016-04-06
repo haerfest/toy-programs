@@ -1,4 +1,4 @@
-object Application {
+object Fibonacci {
 
   def fib(n: Int): Int = {
     def inner(n: Int, a: Int, b: Int): Int = {
