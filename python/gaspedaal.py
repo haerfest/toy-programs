@@ -5,25 +5,53 @@ import requests
 
 class Scraper:
 
-    def scrape(self, brand, model, **kwargs):
+    def __init__(self, brand, model, **kwargs):
         """
-        Scrapes gaspedaal.nl for all ads for a particular car brand and model.
-        The search can be narrowed down by **kwargs. Cars found are returned as
-        a list of dictionaries.
+        Scrapes a popular Dutch car website for all ads for a particular brand
+        and model. The search can be narrowed down by **kwargs.
         """
-        url = 'http://www.gaspedaal.nl/{0}/{1}/'.format(q(brand), q(model))
+        self.brand = brand
+        self.model = model
+        self.parameters = kwargs
+        self.soup = None
+        self.page = 0
 
-        if len(kwargs) > 0:
+    @property
+    def url(self):
+        """
+        The URL representing the search request.
+        """
+        url = 'http://www.gaspedaal.nl/{0}/{1}/?srt=df&p={2}'.format(
+            q(self.brand), q(self.model), self.page)
+
+        if len(self.parameters) > 0:
             pairs = ['{0}={1}'.format(q(k), q(str(v)))
-                     for k, v in kwargs.items()]
-            url += '?' + '&'.join(pairs)
+                     for k, v in self.parameters.items()]
+            url += '&' + '&'.join(pairs)
 
-        r = requests.get(url)
+        return url
+
+    @property
+    def has_next_page(self):
+        """
+        Returns whether there is another page with search results.
+        """
+        if self.soup is None:
+            return True          # makes iteration easy
+
+        return self.soup.find('li', 'volgende') is not None
+
+    def next_page(self):
+        """
+        Scrapes a page and returns the vehicles found as a list of dicts.
+        """
+        self.page += 1
+        r = requests.get(self.url)
         if not r.status_code == 200:
             raise Exception('HTTP status code {}'.format(r.status_code))
 
-        soup = BeautifulSoup(r.text, 'html.parser')
-        cars = soup.find_all('div', 'item-desktop')
+        self.soup = BeautifulSoup(r.text, 'html.parser')
+        cars = self.soup.find_all('div', 'item-desktop')
 
         return filter(lambda car: car is not None, map(self.extract, cars))
 
@@ -47,7 +75,9 @@ class Scraper:
 
 
 if __name__ == '__main__':
-    scraper = Scraper()
-    for car in scraper.scrape('Mazda', 'MX-5', pmax=20000, kmax=80000,
-                              bmin=2005, trns='Handgeschakeld'):
-        print(car)
+    scraper = Scraper('Mazda', 'MX-5', pmax=20000, kmax=80000,
+                      bmin=2005, trns='Handgeschakeld')
+
+    while scraper.has_next_page:
+        for car in scraper.next_page():
+            print(car)
