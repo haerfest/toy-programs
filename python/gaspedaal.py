@@ -55,6 +55,14 @@ class Scraper:
 
         return filter(lambda car: car is not None, map(self.extract, cars))
 
+    def iter(self):
+        """
+        Generator interface.
+        """
+        while self.has_next_page:
+            for car in self.next_page():
+                yield car
+
     def extract(self, soup):
         """
         Extract a single car's information from HTML soup. Returns None if no
@@ -78,6 +86,5 @@ if __name__ == '__main__':
     scraper = Scraper('Mazda', 'MX-5', pmax=20000, kmax=80000,
                       bmin=2005, trns='Handgeschakeld')
 
-    while scraper.has_next_page:
-        for car in scraper.next_page():
-            print(car)
+    for car in scraper.iter():
+        print(car)
