@@ -75,3 +75,32 @@
   (when (game-stored? name)
     (vote-for (game-from-name name)))
   (redirect "/retro-games"))
+
+(define-easy-handler (new-game :uri "/new-game") ()
+  (standard-page (:title "Add a new game")
+    (:h1 "Add a new game to the chart")
+    (:form :action "/game-added" :method "post" :id "addform"
+           (:p "What is the name of the game?" (:br)
+               (:input :type "text" :name "name" :class "txt"))
+           (:p (:input :type "submit" :value "Add" :class "btn")))))
+
+(define-easy-handler (game-added :uri "/game-added") (name)
+  (unless (or (null name) (zerop (length name)))
+    (add-game name))
+  (redirect "/retro-games"))
+
+(ps
+
+  (defvar add-form nil)
+  
+  (defun validate-game-name (evt)
+    (when (= (@ add-form name value) "")
+      (chain evt (prevent-default))
+      (alert "Please enter a name.")))
+
+  (defun init ()
+    (setf add-form (chain document (get-element-by-id "addform")))
+    (chain add-form (add-event-listener "submit"
+                                        validate-game-name false)))
+
+  (setf (chain window onload) init))
