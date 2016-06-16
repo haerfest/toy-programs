@@ -1,0 +1,49 @@
+body {
+    font-family: sans-serif;
+}
+
+#header {
+    border-bottom: 1px solid lightgray;
+}
+
+.logo {
+    vertical-align: middle;
+}
+
+.strapline {
+    font-family: serif;
+    font-size: 3em;
+    color: #9999BB;
+    margin-left: 50pt;
+}
+
+#chart li {
+    margin-bottom: 0.5em;
+}
+
+#chart li a {
+    background-color: #CCDDFF;
+    border-left: 2px solid white;
+    border-top: 2px solid white;
+    border-right: 2px solid gray;
+    border-bottom: 2px solid gray;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    margin-right: 0.5em;
+}
+
+#chart li a:link {
+    text-decoration: none;
+}
+
+#chart li a:visited {
+    text-decoration: none;
+}
+
+#chart li a:hover {
+    text-decoration: underline;
+}
+
+#chart li a:active {
+    text-decoration: underline;
+}

@@ -70,6 +70,11 @@
     (with-slots (name votes) object
       (format stream "name: ~s with ~d votes" name votes))))
 
+;; When :indent is t (see STANDARD-PAGE), then CL-WHO adds a newline before
+;; a closing tag.  This results in an additional space in <a>...</a> contents,
+;; so we tell it not to indent links.
+(push :a *html-no-indent-tags*)
+
 (defmacro standard-page ((&key title script) &body body)
   `(with-html-output-to-string
        (*standard-output* nil :prologue t :indent t)
@@ -92,8 +97,15 @@
                           "Vote on your favourite Retro Game"))
              ,@body))))
 
+(defvar *server*)
+
 (defun start-server (port)
-  (start (make-instance 'easy-acceptor :port port)))
+  (setf *server* (make-instance 'easy-acceptor :port port))
+  (setf (acceptor-document-root *server*) ".")
+  (start *server*))
+
+(defun stop-server ()
+  (stop *server*))
 
 (define-easy-handler (retro-games :uri "/retro-games") ()
   (standard-page (:title "Retro Games")
