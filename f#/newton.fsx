@@ -6,15 +6,15 @@ let newtonSqrt n =
     let f' x = 2.0 * x     // its derivative
     let eps = 0.001        // the desired accuracy
 
-    let rec inner guess =
+    let rec check guess =
         let diff = abs (f guess)
         if diff < eps then
             guess
         else
             let improvedGuess = guess - (f guess) / (f' guess)
-            inner improvedGuess
+            check improvedGuess
 
-    inner initialGuess
+    check initialGuess
 
 (* Example session:
  *
