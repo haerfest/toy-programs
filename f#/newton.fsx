@@ -1,23 +1,23 @@
-(* Computes the square root of a number using the Newton-Raphson method *)
+(* Computes the root of a function using the Newton-Raphson method *)
 
-let newtonSqrt n =
-    let initialGuess = 1.0
-    let f x = x * x - n    // the fn to find the root of
-    let f' x = 2.0 * x     // its derivative
-    let eps = 0.001        // the desired accuracy
+let newton f initialGuess =
+    let dx = 0.001
+    let f' x = f x / dx
+    let eps = 0.001
 
     let rec check guess =
         let diff = abs (f guess)
         if diff < eps then
             guess
         else
-            let improvedGuess = guess - (f guess) / (f' guess)
+            let improvedGuess = guess + (f guess) / (f' guess)
             check improvedGuess
 
     check initialGuess
 
-(* Example session:
- *
- * > newtonSqrt 2.0;;
- * val it : float = 1.414215686
- *)
+let newtonSqrt n =
+    newton (fun (x) -> x * x - n) 1.0
+
+// Example session:
+// > newtonSqrt 9.0 ;;
+// val it : float = 3.0
