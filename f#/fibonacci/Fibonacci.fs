@@ -17,7 +17,7 @@ let fibImperative n =
         a <- b
         b <- c
     a
-    
+
 let timeIt f =
     let stopwatch = Stopwatch.StartNew()
     let result = f()
