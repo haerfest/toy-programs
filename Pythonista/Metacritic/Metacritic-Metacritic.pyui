@@ -1,0 +1,97 @@
+[
+  {
+    "selected" : false,
+    "frame" : "{{0, 0}, {320, 480}}",
+    "class" : "View",
+    "nodes" : [
+      {
+        "selected" : false,
+        "frame" : "{{6, 46}, {220, 32}}",
+        "class" : "TextField",
+        "nodes" : [
+
+        ],
+        "attributes" : {
+          "uuid" : "7D33BEAB-5A4D-41F5-95A9-29A5BEAE5C69",
+          "flex" : "W",
+          "frame" : "{{60, 224}, {200, 32}}",
+          "custom_attributes" : "{'clear_button_mode': 'always'}",
+          "alignment" : "left",
+          "autocorrection_type" : "default",
+          "text" : "",
+          "placeholder" : "Fallout 4",
+          "font_name" : "<System>",
+          "spellchecking_type" : "default",
+          "class" : "TextField",
+          "name" : "searchTextField",
+          "font_size" : 17
+        }
+      },
+      {
+        "selected" : true,
+        "frame" : "{{0, 86}, {320, 394}}",
+        "class" : "TableView",
+        "nodes" : [
+
+        ],
+        "attributes" : {
+          "uuid" : "67B6E80D-D8FF-4F64-84AD-5C7622AC9520",
+          "editing" : false,
+          "background_color" : "RGBA(1.0, 1.0, 1.0, 1.0)",
+          "frame" : "{{60, 140}, {200, 200}}",
+          "data_source_items" : "",
+          "data_source_number_of_lines" : 1,
+          "data_source_delete_enabled" : false,
+          "data_source_font_size" : 18,
+          "row_height" : 44,
+          "class" : "TableView",
+          "name" : "scoresTableView",
+          "flex" : "WH"
+        }
+      },
+      {
+        "selected" : false,
+        "frame" : "{{6, 6}, {308, 32}}",
+        "class" : "Label",
+        "nodes" : [
+
+        ],
+        "attributes" : {
+          "flex" : "W",
+          "font_size" : 18,
+          "frame" : "{{85, 224}, {150, 32}}",
+          "uuid" : "F3105AFC-A6E2-4C2E-A088-D35D4CF57673",
+          "text" : "Metacritic Game Scores",
+          "alignment" : "center",
+          "class" : "Label",
+          "name" : "label1",
+          "font_name" : "<System>"
+        }
+      },
+      {
+        "selected" : false,
+        "frame" : "{{234, 46}, {80, 32}}",
+        "class" : "Button",
+        "nodes" : [
+
+        ],
+        "attributes" : {
+          "flex" : "L",
+          "frame" : "{{120, 224}, {80, 32}}",
+          "title" : "Search",
+          "class" : "Button",
+          "uuid" : "D8BA62EB-12AC-4421-BC08-E1482B85218B",
+          "font_size" : 17,
+          "name" : "searchButton"
+        }
+      }
+    ],
+    "attributes" : {
+      "enabled" : true,
+      "background_color" : "RGBA(1.000000,1.000000,1.000000,1.000000)",
+      "tint_color" : "RGBA(0.000000,0.478000,1.000000,1.000000)",
+      "border_color" : "RGBA(0.000000,0.000000,0.000000,1.000000)",
+      "flex" : ""
+    }
+  }
+]
