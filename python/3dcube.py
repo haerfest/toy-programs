@@ -7,6 +7,8 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+import random
+
 
 # These vertices describe the points of a cube.
 vertices = (
@@ -36,14 +38,29 @@ edges = (
     (5, 7)
 )
 
+surfaces = (
+    (0, 1, 2, 3),               # surface between vertices 0, 1, 2 and 3
+    (3, 2, 7, 6),               # and so on
+    (6, 7, 5, 4),
+    (4, 5, 1, 0),
+    (1, 5, 7, 2),
+    (4, 0, 3, 6)
+)
+
+
+# Each surface will get a random color.
+colors = [(random.uniform(0.5, 1),
+           random.uniform(0.5, 1),
+           random.uniform(0.5, 1)) for _ in range(len(surfaces))]
+
 
 def Cube():
-    # Tell OpenGL that it should draw lines between the vertices we give it.
-    glBegin(GL_LINES)
+    # Tell OpenGL that it should draw quads between the vertices we give it.
+    glBegin(GL_QUADS)
 
-    # Give it the vertices in the order as specified by the edges.
-    for edge in edges:
-        for vertex in edge:
+    for i, surface in enumerate(surfaces):
+        glColor3fv(colors[i])
+        for vertex in surface:
             glVertex3fv(vertices[vertex])
     glEnd()
 
@@ -60,6 +77,9 @@ def main():
 
     # Place ourselves at some z distance, or we'd end up inside the cube.
     glTranslatef(0.0, 0.0, -5)
+
+    # Without this some surfaces will not appear solid.
+    glEnable(GL_DEPTH_TEST)
 
     while True:
         for event in pygame.event.get():
