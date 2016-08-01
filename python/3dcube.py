@@ -48,21 +48,25 @@ surfaces = (
 )
 
 
-# Each surface will get a random color.
-colors = [(random.uniform(0.5, 1),
-           random.uniform(0.5, 1),
-           random.uniform(0.5, 1)) for _ in range(len(surfaces))]
+class Cube:
+    def __init__(self):
+        # Each surface will get a random color.
+        self.colors = [
+            (random.uniform(0.5, 1),
+             random.uniform(0.5, 1),
+             random.uniform(0.5, 1)) for _ in range(len(surfaces))
+        ]
 
+    def draw(self):
+        # Tell OpenGL that it should draw quads between the vertices we
+        # give it.
+        glBegin(GL_QUADS)
 
-def Cube():
-    # Tell OpenGL that it should draw quads between the vertices we give it.
-    glBegin(GL_QUADS)
-
-    for i, surface in enumerate(surfaces):
-        glColor3fv(colors[i])
-        for vertex in surface:
-            glVertex3fv(vertices[vertex])
-    glEnd()
+        for i, surface in enumerate(surfaces):
+            glColor3fv(self.colors[i])
+            for vertex in surface:
+                glVertex3fv(vertices[vertex])
+        glEnd()
 
 
 def main():
@@ -76,16 +80,14 @@ def main():
     gluPerspective(fovy, aspect, zNear, zFar)
 
     # Place ourselves at some z distance, or we'd end up inside the cube.
-    glTranslatef(0.0, 0.0, -10)
-
-    # Rotate around the (2,1,0) vector for a nice spinning effect.
-    angle = 25
-    glRotatef(angle, 2, 1, 0)
+    glTranslatef(0.0, 0.0, -40)
 
     # Without this some surfaces will not appear solid.
     glEnable(GL_DEPTH_TEST)
 
-    while True:
+    cube = Cube()
+    cube_passed = False
+    while not cube_passed:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -93,24 +95,33 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    glTranslatef(-0.5, 0, 0)
-                if event.key == pygame.K_RIGHT:
                     glTranslatef(0.5, 0, 0)
+                if event.key == pygame.K_RIGHT:
+                    glTranslatef(-0.5, 0, 0)
 
                 if event.key == pygame.K_UP:
-                    glTranslatef(0, 1, 0)
-                if event.key == pygame.K_DOWN:
                     glTranslatef(0, -1, 0)
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 4:
-                    glTranslatef(0, 0, 1)
-                if event.button == 5:
-                    glTranslatef(0, 0, -1)
+                if event.key == pygame.K_DOWN:
+                    glTranslatef(0, 1, 0)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        Cube()
+
+        # Stop when the cube has passed us.
+        camera_z = glGetDoublev(GL_MODELVIEW_MATRIX)[3][2]
+        cube_passed = camera_z < 1
+
+        # The cubes will move towards us each frame (or really: we will
+        # move towards the cubes).
+        glTranslate(0, 0, 0.5)
+
+        cube.draw()
+
         pygame.display.flip()
         pygame.time.wait(10)
 
-main()
+# Show 10 cubes, one after the other.
+for x in range(10):
+    main()
+
+pygame.quit()
+quit()
