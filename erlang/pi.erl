@@ -9,9 +9,38 @@
 %  1> c(pi).
 %  2> pi:estimate(100000000).
 %  3.14172076
+%
+% To time (Core i5, 2 cores + hyper-threading):
+%  3> pi:time(fun() -> pi:estimate(10000000, 1) end).
+%  runtime ...... 5642000 usec
+%  wall_clock ... 5754000 usec
+%  3.1422768
+%  4> pi:time(fun() -> pi:estimate(10000000, 2) end).
+%  runtime ...... 5648000 usec
+%  wall_clock ... 2894000 usec
+%  3.1416596
+%  5> pi:time(fun() -> pi:estimate(10000000, 4) end).
+%  runtime ...... 11322000 usec
+%  wall_clock ... 2953000 usec
+%  3.1410572
 
 -module(pi).
--export([estimate/1, estimate/2, thrower/2]).
+-export([estimate/1, estimate/2, time/1, thrower/2]).
+
+time(Function) ->
+  statistics(runtime),
+  statistics(wall_clock),
+
+  Result = Function(),
+
+  {_, Time1} = statistics(runtime),
+  {_, Time2} = statistics(wall_clock),
+  U1 = Time1 * 1000,
+  U2 = Time2 * 1000,
+  io:format("runtime ...... ~p usec~n", [U1]),
+  io:format("wall_clock ... ~p usec~n", [U2]),
+
+  Result.
 
 thrower(ThrowCount, Requestor) ->
   % A thrower is modelled as an Erlang process.
@@ -56,6 +85,7 @@ estimate(ThrowCount, ThrowerCount) ->
   estimate(ThrowCount, ThrowCount, ThrowsPerThrower, []).
 
 estimate(Count, Remaining, PerThrower, Throwers) ->
+  % Spawn throwers to throw darts and wait for them to complete.
   if
     Remaining == 0 ->
       % All darts thrown.
@@ -65,7 +95,7 @@ estimate(Count, Remaining, PerThrower, Throwers) ->
       Thrower = spawn(?MODULE, thrower, [PerThrower, self()]),
       estimate(Count, Remaining - PerThrower, PerThrower, [Thrower|Throwers]);
     true ->
-      % Final thrower may have fewer darts Remaining to throw.
+      % Final thrower may have fewer darts left to throw.
       Thrower = spawn(?MODULE, thrower, [Remaining, self()]),
       estimate(Count, 0, PerThrower, [Thrower|Throwers])
   end.
