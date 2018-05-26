@@ -11,13 +11,13 @@ import webbrowser
 BASE_URL = 'http://www.metacritic.com'
 
 HEADERS = {
-		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
-	}
+	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
+}
 
 PAGE_LIMIT = 10
 
 def normalize(s):
-		return ''.join([ch for ch in s if str.isalnum(ch)]) if s else ''
+	return ''.join([ch for ch in s if str.isalnum(ch)]) if s else ''
 
 class TableViewHelper(object):
 	def __init__(self):
@@ -39,9 +39,9 @@ class TableViewHelper(object):
 			sort_score = 100
 
 		return (
-				normalize(x['title']),
-				sort_score,
-				x['platform']
+			normalize(x['title']),
+			sort_score,
+			x['platform']
 		)
 
 	def tableview_number_of_sections(self, tableview):
