@@ -58,11 +58,11 @@
   t)
 
 (defun remove-choice (digit cell)
-  "Removes a DIGIT from the list of possibilities at CELL. Returns NIL if the
-   CELL was already fixed at a digit other than DIGIT, T otherwise."
+  "Removes a DIGIT from the list of possibilities at CELL. If CELL is already
+  fixed to a digit, it cannot be our DIGIT. Returns T upon success."
   (if (atom cell)
       (not (= digit cell))
-      (setf cell (delete digit cell))))
+      (setf cell (remove digit cell))))
 
 (defun remove-choice-from-row (digit row sudoku)
   "Removes DIGIT as a choice from the entire ROW in SUDOKU. Returns T upon
