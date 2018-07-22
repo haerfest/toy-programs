@@ -9,7 +9,7 @@
                          8 - 5 - - 2 6 1 -))
 
 ;; Example usage:
-;; 
+;;
 ;; > (pprint (solve (as-matrix *sudoku*)))
 ;; #2A((3 9 6 7 1 4 5 2 8)
 ;;     (5 1 7 2 8 3 4 9 6)
@@ -36,7 +36,7 @@
                 (if (eq '- char)
                     (list 1 2 3 4 5 6 7 8 9) ; all digits are possible
                     char)))))                ; cell is fixed on this digit
-    a))       
+    a))
 
 (defun copy-sudoku (a)
   "Returns a copy of sudoku matrix A."
@@ -57,31 +57,33 @@
           (return-from visit-while nil)))))
   t)
 
-(defun remove-digit (digit cell)
+(defun remove-choice (digit cell)
   "Removes a DIGIT from the list of possibilities at CELL. Returns NIL if the
    CELL was already fixed at a digit other than DIGIT, T otherwise."
   (if (atom cell)
       (not (= digit cell))
-      (setf cell (remove digit cell))))
-   
-(defun clear-row (digit row sudoku)
-  "Removes DIGIT from the entire ROW in SUDOKU. Returns T upon success."
-  (visit-while sudoku row 0 1 *cols* (lambda (cell)
-                                       (remove-digit digit cell))))
+      (setf cell (delete digit cell))))
 
-(defun clear-col (digit col sudoku)
-  "Removes DIGIT from the entire COLumn in SUDOKU. Returns T upon success."
+(defun remove-choice-from-row (digit row sudoku)
+  "Removes DIGIT as a choice from the entire ROW in SUDOKU. Returns T upon
+  success."
+  (visit-while sudoku row 0 1 *cols* (lambda (cell)
+                                       (remove-choice digit cell))))
+
+(defun remove-choice-from-col (digit col sudoku)
+  "Removes DIGIT as a choice from the entire COLumn in SUDOKU. Returns T
+  upon success."
   (visit-while sudoku 0 col *rows* 1 (lambda (cell)
-                                       (remove-digit digit cell))))
-                 
-(defun clear-block (digit row col sudoku)
-  "Removes DIGIT from the entire 3x3 block in SUDOKU which contains (ROW, COL).
-  Returns T upon success."
+                                       (remove-choice digit cell))))
+
+(defun remove-choice-from-block (digit row col sudoku)
+  "Removes DIGIT as a choice from the 3x3 block in SUDOKU which contains
+  (ROW, COL). Returns T upon success."
   (let ((block-row (* 3 (truncate (/ row 3))))
         (block-col (* 3 (truncate (/ col 3)))))
     (visit-while sudoku block-row block-col 3 3
                  (lambda (cell)
-                   (remove-digit digit cell)))))
+                   (remove-choice digit cell)))))
 
 (defun solve (sudoku &optional (row 0) (col 0))
   "Recursively solves the SUDOKU starting from (ROW, COL). Returns a solution
@@ -98,9 +100,9 @@
              (let ((sudoku* (copy-sudoku sudoku)))
                ;; verify that placing the digit does not give a conflict in the
                ;; same row, column, or block
-               (when (and (clear-row digit row sudoku*)
-                          (clear-col digit col sudoku*)
-                          (clear-block digit row col sudoku*))
+               (when (and (remove-choice-from-row digit row sudoku*)
+                          (remove-choice-from-col digit col sudoku*)
+                          (remove-choice-from-block digit row col sudoku*))
                  ;; we're good to go, place the digit and solve from there
                  (setf (aref sudoku* row col) digit)
                  (let ((solution (solve sudoku* row (+ col 1))))
