@@ -1,17 +1,17 @@
 ;; Adapted from Artificial Intelligence A Modern Approach, ch. 18.7.4.
 ;;
 ;; Example:
-;; 
-;; CL-USER> (train xor-samples xor-network :learning-rate 0.5 :epochs 1000000)
-;; 4.3219616e-6
+;;
+;; CL-USER> (train xor-samples xor-network :learning-rate 0.5 :epochs 100000)
+;; 5.292373e-6
 ;; CL-USER> (infer xor-network #(0 0))
-;; (0.0021414205)
+;; (0.010024827)
 ;; CL-USER> (infer xor-network #(0 1))
-;; (0.99683446)
+;; (0.99231297)
 ;; CL-USER> (infer xor-network #(1 0))
-;; (0.99683267)
+;; (0.992284)
 ;; CL-USER> (infer xor-network #(1 1))
-;; (0.0029395432)
+;; (0.0032533524)
 
 (defun sigmoid (x)
   (/ 1.0 (+ 1.0 (exp (- x)))))
@@ -31,7 +31,7 @@
 (defstruct layer
   neurons
   weights
-  bias)
+  (bias 1.0))
 
 (defstruct network
   layers)
@@ -55,11 +55,9 @@
 (defparameter xor-network
   (make-network :layers (vector (make-layer :neurons (vector (make-neuron) (make-neuron)))
                                 (make-layer :neurons (vector (make-neuron) (make-neuron) (make-neuron))
-                                            :weights (make-array '(2 3))
-                                            :bias 1.0)
+                                            :weights (make-array '(2 3)))
                                 (make-layer :neurons (vector (make-neuron))
-                                            :weights (make-array '(3 1))
-                                            :bias 1.0))))
+                                            :weights (make-array '(3 1))))))
 
 (defparameter xor-samples '((#(0 0) #(0))
                             (#(0 1) #(1))
