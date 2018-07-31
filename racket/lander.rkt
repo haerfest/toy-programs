@@ -6,8 +6,8 @@
 
 (define ship-x 100)
 (define ship-y 100)
-(define ship-orientation-angle 0)
-(define ship-movement-angle 0)
+(define ship-orientation-angle (- (/ pi 2)))
+(define ship-movement-angle ship-orientation-angle)
 (define ship-speed 0.5)
 
 (define turn-left? #f)
@@ -87,20 +87,22 @@
 
   (let* ([delta-time (/ 1000.0 frame-rate-hz)]
          [gravity-dx 0]
-         [gravity-dy 0.01]
+         [gravity-dy 0.02]
          [movement-dx (* ship-speed (cos ship-movement-angle))]
          [movement-dy (* ship-speed (sin ship-movement-angle))]
-         [friction-dx (* 0.01 ship-speed ship-speed (- (cos ship-movement-angle)))]
-         [friction-dy (* 0.01 ship-speed ship-speed (- (sin ship-movement-angle)))]
-         [thrust-dx (if thrust? (* 0.1 (cos ship-orientation-angle)) 0)]
-         [thrust-dy (if thrust? (* 0.1 (sin ship-orientation-angle)) 0)]
-         [dx (+ movement-dx thrust-dx friction-dx gravity-dx)]
-         [dy (+ movement-dy thrust-dy friction-dy gravity-dy)])
+         [thrust-dx (if thrust? (* 0.25 (cos ship-orientation-angle)) 0)]
+         [thrust-dy (if thrust? (* 0.25 (sin ship-orientation-angle)) 0)]
+         [dx (+ movement-dx thrust-dx gravity-dx)]
+         [dy (+ movement-dy thrust-dy gravity-dy)])
     (set! ship-movement-angle (atan dy dx))
     (set! ship-speed (sqrt (+ (* dx dx) (* dy dy)))))
 
   (set! ship-x (+ ship-x (* ship-speed (cos ship-movement-angle))))
   (set! ship-y (+ ship-y (* ship-speed (sin ship-movement-angle))))
+
+  (send speed-message set-label (~r #:precision 3 ship-speed))
+  (send direction-message set-label (~r #:precision 3 ship-movement-angle))
+  
   (send canvas refresh-now))
 
 (define (paint-scene canvas dc)
@@ -108,6 +110,15 @@
   (draw-ship ship-x ship-y ship-orientation-angle dc))
 
 (define frame (new my-frame% [label "Lander"]))
+
+(define speed-message (new message%
+                           [parent frame]
+                           [label "No speed"]))
+
+(define direction-message (new message%
+                               [parent frame]
+                               [label "No direction"]))
+                               
 
 (define canvas (new my-canvas%
                     [parent frame]
