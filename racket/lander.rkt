@@ -8,7 +8,7 @@
 (define ship-y 100)
 (define ship-orientation-angle 0)
 (define ship-movement-angle 0)
-(define ship-speed 0)
+(define ship-speed 0.5)
 
 (define turn-left? #f)
 (define turn-right? #f)
@@ -84,24 +84,23 @@
     (set! ship-orientation-angle (- ship-orientation-angle delta-angle)))
   (when turn-right?
     (set! ship-orientation-angle (+ ship-orientation-angle delta-angle)))
-  (when thrust?
-    (let* ([delta-time (/ 1000.0 frame-rate-hz)]
-           [movement-dx (* ship-speed (cos ship-movement-angle))]
-           [movement-dy (* ship-speed (sin ship-movement-angle))]
-           [thrust-dx (* 0.1 (cos ship-orientation-angle))]
-           [thrust-dy (* 0.1 (sin ship-orientation-angle))]
-           [dx (+ movement-dx thrust-dx)]
-           [dy (+ movement-dy thrust-dy)])
-      (set! ship-movement-angle (atan dy dx))
-      (set! ship-speed (+ ship-speed
-                          (sqrt (+ (* dx dx) (* dy dy)))))
-      (display (format "ship-orientation: ~a rad\n" ship-orientation-angle))
-      (display (format "dx=~a dy=~a\n" dx dy))
-      (display (format "ship-movement ~a rad\n" ship-movement-angle))))
-  
+
+  (let* ([delta-time (/ 1000.0 frame-rate-hz)]
+         [gravity-dx 0]
+         [gravity-dy 0.01]
+         [movement-dx (* ship-speed (cos ship-movement-angle))]
+         [movement-dy (* ship-speed (sin ship-movement-angle))]
+         [friction-dx (* 0.01 ship-speed ship-speed (- (cos ship-movement-angle)))]
+         [friction-dy (* 0.01 ship-speed ship-speed (- (sin ship-movement-angle)))]
+         [thrust-dx (if thrust? (* 0.1 (cos ship-orientation-angle)) 0)]
+         [thrust-dy (if thrust? (* 0.1 (sin ship-orientation-angle)) 0)]
+         [dx (+ movement-dx thrust-dx friction-dx gravity-dx)]
+         [dy (+ movement-dy thrust-dy friction-dy gravity-dy)])
+    (set! ship-movement-angle (atan dy dx))
+    (set! ship-speed (sqrt (+ (* dx dx) (* dy dy)))))
+
   (set! ship-x (+ ship-x (* ship-speed (cos ship-movement-angle))))
   (set! ship-y (+ ship-y (* ship-speed (sin ship-movement-angle))))
-  
   (send canvas refresh-now))
 
 (define (paint-scene canvas dc)
