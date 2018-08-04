@@ -28,47 +28,45 @@
 (define turn-right? #f)  ; Will be #t when the user presses right.
 (define thrust? #f)      ; Will be #t when the user presses shift.
 
-(define (draw-ship x y angle dc)
-  (let ([ship-height 30]
-        [ship-width  20])
-    (define (to-origin p)
-      (list (- (first p)  (/ ship-height 2))
-            (- (second p) (/ ship-width  2))))
-    (define (from-origin p)
-      (list (+ (first p)  (/ ship-height 2))
-            (+ (second p) (/ ship-width  2))))
-    (define (translate p)
-      (list (+ (first p) x)
-            (+ (second p) y)))
-    (define (rotate p)
-      (let ([x (first p)]
-            [y (second p)])
-        (list (- (* (cos angle) x) (* (sin angle) y))
-              (+ (* (sin angle) x) (* (cos angle) y)))))
-    (define (transform p)
-      (translate (from-origin (rotate (to-origin p)))))
+(define (draw-ship x y angle thrust? dc)
+  (define (translate p)
+    (cons (+ (car p) x)
+          (+ (cdr p) y)))
+  (define (rotate p)
+    (let ([x (car p)]
+          [y (cdr p)])
+      (cons (- (* (cos angle) x) (* (sin angle) y))
+            (+ (* (sin angle) x) (* (cos angle) y)))))
+  (define (transform p)
+    (translate (rotate p)))
 
-    ; The outline of the ship is specified in coordinates that make
-    ; the ship point to an angle of zero radians (i.e. pointing right).
-    ; It fits inside a 31x21 grid.
-    (let ([outline (new dc-path%)]
-          [points '((30 10)
-                    (25 5) (20 5) (15 0) (0 0) (5 5)
-                    (5 15)
-                    (0 20) (15 20) (20 15) (25 15))])
-      ; Move to the first point.
-      (apply (lambda (x y)
-               (send outline move-to x y))
-             (transform (first points)))
-      ; And draw the ship's outline as a path from there.
-      (for [(point (in-list (rest points)))]
-        (apply (lambda (x y)
-                 (send outline line-to x y))
-               (transform point)))
-      (send outline close)
-      (send dc set-pen "white" 1 'solid)
-      (send dc set-brush "white" 'transparent)
-      (send dc draw-path outline))))
+  (send dc set-pen "white" 1 'solid)
+  (send dc set-brush "white" 'transparent)
+
+  ; The outline of the ship is specified in coordinates that make
+  ; the ship point to an angle of zero radians (i.e. pointing right).
+  ; It fits inside a 31x21 grid.
+  (let ([outline (new dc-path%)]
+        [points '((15 . 0)
+                  (10 . -5) (5 . -5) (0 . -10) (-15 . -10) (-10 . -5)
+                  (-10 . 5)
+                  (-15 . 10) (0 . 10) (5 . 5) (10 . 5))])
+    ; Move to the first point.
+    (let ([p (transform (first points))])
+      (send outline move-to (car p) (cdr p)))
+    ; And draw the ship's outline as a path from there.
+    (for [(point (in-list (rest points)))]
+      (let [(p (transform point))]
+        (send outline line-to (car p) (cdr p))))
+    (send outline close)
+    (send dc draw-path outline))
+
+  ; Draw three horizontal lines when thrust is applied.
+  (when thrust?
+    (for [(y '(-4 0 4))]
+      (let ([p1 (transform (cons -15 y))]
+            [p2 (transform (cons -11 y))])
+        (send dc draw-line (car p1) (cdr p1) (car p2) (cdr p2))))))
 
 (define (draw-trail trail dc)
   (send dc set-pen "white" 1 'solid)
@@ -137,7 +135,7 @@
 
 (define (paint-scene canvas dc)
   (send canvas set-canvas-background (send the-color-database find-color "black"))
-  (draw-ship ship-x ship-y ship-orientation-angle dc)
+  (draw-ship ship-x ship-y ship-orientation-angle thrust? dc)
   (draw-trail ship-trail dc))
 
 (define frame (new my-frame% [label "Lander"]))
