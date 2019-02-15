@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bouncing Ball</title>
+    <style type="text/css">
+      #playfield {
+          width: 400px;
+          height: 200px;
+          background-color: black;
+      }
+
+      #ball {
+          width: 10px;
+          height: 10px;
+          background-color: white;
+          position: relative;
+          border-radius: 5px;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <div id="playfield">
+      <div id="ball"/>
+    </div>
+
+    <script language="javascript">
+      function animate() {
+          var ball = document.getElementById('ball');
+          var x    = 0;
+          var dx   = 2;
+
+          var interval = setInterval(frame, 40);
+
+          function frame() {
+              if (x < 0 || x > 400 - 10) {
+                  dx = -dx;
+              }
+
+              x += dx;
+              var y = 100 + 50 * Math.sin(x / 10);
+              
+              ball.style.left = x + "px";
+              ball.style.top  = y + "px";
+          }
+      }
+
+      document.addEventListener('DOMContentLoaded', animate);
+    </script>
+  </body>
+</html>
