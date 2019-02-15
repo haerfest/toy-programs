@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+
+    <div id="div-surface"></div>
+
+    <script>
+      function plotStuff() {
+          trace = {
+              x: [1, 2, 3, 4],
+              y: [-2, -1],
+              //   x=1 x=2 x=3 x=4
+              z: [[ 3,  5,  7,  9],  // y=-2
+                  [21, 13,  8,  5]], // y=-1
+              type: 'surface',
+              colorscale: 'Viridis'
+          };
+          layout = {
+              title: '3D Surface Plot',
+              autosize: false,
+              width: 1000,
+              height: 600,
+              scene: {
+                  xaxis: {title: {text: 'foos'}},
+                  yaxis: {title: {text: 'bars'}},
+                  zaxis: {title: {text: 'bazs'}, range: [0, 25]}
+              }
+          };
+          Plotly.newPlot("div-surface", [trace], layout);
+      }
+
+      document.addEventListener('DOMContentLoaded', plotStuff);
+    </script>
+  </body>
+</html>
