@@ -16,11 +16,11 @@ import random
 from tqdm import tqdm
 
 
-def train(env, qtable, episodes=50000, steps=100, eps=1.0, min_eps=0.01, max_eps=1.0, lr=0.7, gamma=0.6, decay_rate=0.01):
+def train(env, qtable, episodes=5000, max_steps=100, eps=1.0, min_eps=0.01, max_eps=1.0, lr=0.7, gamma=0.6, decay_rate=0.01):
     for episode in tqdm(range(episodes), 'Training'):
         state = env.reset()
 
-        for _ in range(steps):
+        for _ in range(max_steps):
             # Choose between exploitation and exploration.
             if random.uniform(0, 1) > eps:
                 action = np.argmax(qtable[state, :])
@@ -43,14 +43,14 @@ def train(env, qtable, episodes=50000, steps=100, eps=1.0, min_eps=0.01, max_eps
         eps = min_eps + (max_eps - min_eps) * np.exp(-decay_rate * episode)
 
 
-def test(env, qtable, episodes=100, steps=100):
+def test(env, qtable, episodes=100, max_steps=100):
     rewards = []
 
     for _ in tqdm(range(episodes), 'Testing'):
         state = env.reset()
 
         rewards.append(0)
-        for _ in range(steps):
+        for _ in range(max_steps):
             # Choose action that gives the highest reward.
             action = np.argmax(qtable[state, :])
 
@@ -63,12 +63,12 @@ def test(env, qtable, episodes=100, steps=100):
     print(f'Average test score over {episodes} episodes: {np.average(rewards)}')
 
 
-def play(env, qtable, steps=100):
+def play(env, qtable, max_steps=100):
     state = env.reset()
     env.render()
 
     score = 0
-    for step in range(steps):
+    for step in range(max_steps):
         # Choose action that gives the highest reward.
         action = np.argmax(qtable[state, :])
 
@@ -83,6 +83,8 @@ def play(env, qtable, steps=100):
 
 
 def main():
+    random.seed()
+
     with gym.make('Taxi-v2') as env:
         qtable = np.zeros((env.observation_space.n, env.action_space.n))
 
@@ -91,8 +93,6 @@ def main():
 
         while input('Show an example game? [Y/n] ') in ['y', 'Y', '']:
             play(env, qtable)
-
-        env.close()
 
 
 if __name__ == '__main__':
