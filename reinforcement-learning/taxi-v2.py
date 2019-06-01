@@ -83,7 +83,7 @@ def train(env, qtable, episodes=5000, max_steps=100, eps=1.0, min_eps=0.01, max_
             new_state, reward, done, _ = env.step(action)
 
             # Bellman equation.
-            qtable[state, action] = lr * (reward + gamma * np.max(qtable[new_state, :]) + (1 - lr) * qtable[state, action])
+            qtable[state, action] = lr * (reward + gamma * np.max(qtable[new_state, :])) + (1 - lr) * qtable[state, action]
 
             if done:
                 break
