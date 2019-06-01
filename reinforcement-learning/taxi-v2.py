@@ -13,10 +13,63 @@ import gym
 import numpy as np
 import random
 
-from tqdm import tqdm
+from tqdm import tqdm           # Provides a progress bar.
 
 
 def train(env, qtable, episodes=5000, max_steps=100, eps=1.0, min_eps=0.01, max_eps=1.0, lr=0.7, gamma=0.6, decay_rate=0.01):
+    '''
+    Trains the computer to play the taxi game, by building a table that lists
+    for all possible environment states (rows) and all possible actions that
+    the computer can take (columns), which future reward can be expected.
+    Initially the computer knows nothing about this, but as it takes random
+    steps (exploration), it discovers what rewards each action brings. Over
+    time it will explore less, and exploit this knowledge more, thereby
+    becoming better at playing the game.
+
+    Parameters:
+
+        env
+            The game environment.
+
+        qtable
+            The #states x #actions table.
+
+        episodes
+            The number of episodes to train for.
+
+        max_steps
+            The maximum number of steps allowed to finish an episode.
+
+        eps
+            A threshold between 0 and 1 that governs whether the computer will
+            take a random action (exploration) or utilize the information in
+            the table as learned so far (exploitation). A value closer to one
+            favors exploration, a value closer to zero exploitation.
+
+        min_eps
+            The minimum value allowed for eps.
+
+        max_eps
+            The maximumv value allowed for eps.
+
+        lr
+            A learning rate between 0 and 1 that governs how quickly the
+            computer blends in the reward from an action it takes, into what it
+            has learned so far. A value of zero means it does not take heed of
+            any new rewards, so in effect does not learn anything. A value of
+            one means that with every step it forgets what it has learned and
+            completely follows the rewards it gets.
+
+        gamma
+            A value between 0 and 1 that governs how much of future expected
+            rewards is taken into account. A value of zero means only the
+            immediate reward given by an action is used.
+
+        decay_rate
+            A value between 0 and 1 that governs how quickly the eps parameter
+            is reduced to min_eps. In effect it controls how quickly the
+            computer switches from exploration to exploitation.
+    '''
     for episode in tqdm(range(episodes), 'Training'):
         state = env.reset()
 
@@ -30,9 +83,7 @@ def train(env, qtable, episodes=5000, max_steps=100, eps=1.0, min_eps=0.01, max_
             new_state, reward, done, _ = env.step(action)
 
             # Bellman equation.
-            qtable[state, action] += lr * \
-                (reward + gamma *
-                 np.max(qtable[new_state, :]) - qtable[state, action])
+            qtable[state, action] = lr * (reward + gamma * np.max(qtable[new_state, :]) + (1 - lr) * qtable[state, action])
 
             if done:
                 break
@@ -44,6 +95,12 @@ def train(env, qtable, episodes=5000, max_steps=100, eps=1.0, min_eps=0.01, max_
 
 
 def test(env, qtable, episodes=100, max_steps=100):
+    '''
+    Plays a few episodes of the taxi game and outputs how well the computer did
+    on average.
+
+    Parameters: see the train() function.
+    '''
     rewards = []
 
     for _ in tqdm(range(episodes), 'Testing'):
@@ -64,6 +121,12 @@ def test(env, qtable, episodes=100, max_steps=100):
 
 
 def play(env, qtable, max_steps=100):
+    '''
+    Plays a single episode of the taxi game and outputs how well the computer
+    did.
+
+    Parameters: see the train() function.
+    '''
     state = env.reset()
     env.render()
 
