@@ -34,7 +34,7 @@ def sine_wave_3hz(t):
 def fourier(signal, test_frequency, listen_duration=1, sample_count=1000):
     # ----------------------------------------------------------
     # This is literally the Fourier transformation formula:
-    #   F(f) = integrate f(t) * e^(0 + -2*pi*f*t*i)
+    #   F(f) = integrate g(t) * e^(0 + -2*pi*f*t*i)
     # ----------------------------------------------------------
     return sum(
         signal(t) * cmath.exp(complex(0, -2 * math.pi * test_frequency * t))
