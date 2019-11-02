@@ -4,17 +4,22 @@
 ;; (ql:quickload :do-urlencode)
 
 (defun parse-platform (node)
+  "Returns a game's platform."
   (plump:text (elt (clss:select "span.platform" node) 0)))
 
 (defun parse-title (node)
+  "Returns a game's title."
   (string-trim '(#\Space #\t #\newline)
-               (plump:text (elt (clss:select "h3.product_title a" node) 0))))
+               (plump:text (elt (clss:select "h3.product_title a" node)
+                                0))))
 
 (defun parse-score (node)
+  "Returns a game's review score as an integer or NIL." 
   (let ((score (plump:text (elt (clss:select "span.metascore_w" node) 0))))
     (parse-integer score :junk-allowed t)))
 
 (defun parse-page-count (dom)
+  "Returns the total number of search result pages."
   (loop
      for tag in '(a span)
      for selector = (concatenate 'string
@@ -26,7 +31,11 @@
      return (parse-integer (plump:text (elt nodes 0)))
      finally (return 1)))
 
-(defun get-scores (title &optional (page 1))
+(defun get-scores (title &key (page 1))
+  "Fetches game review scores for game TITLE from the Metacritic webpage for a
+   single PAGE number. Returns multiple values: the search results as a list of
+   (PLATFORM TITLE SCORE), with score being NIL when not available, and the
+   total number of search result pages."
   (let* ((url (concatenate 'string
                            "https://www.metacritic.com/search/game/"
                            (do-urlencode:urlencode title)
