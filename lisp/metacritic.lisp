@@ -14,7 +14,7 @@
   (let ((score (plump:text (elt (clss:select "span.metascore_w" node) 0))))
     (parse-integer score :junk-allowed t)))
 
-(defun parse-pages (dom)
+(defun parse-page-count (dom)
   (loop
      for tag in '(a span)
      for selector = (concatenate 'string
@@ -39,5 +39,5 @@
                      collect (list (parse-platform node)
                                    (parse-title node)
                                    (parse-score node))))
-         (pages (parse-pages dom)))
-    (values results pages)))
+         (count (parse-page-count dom)))
+    (values results count)))
