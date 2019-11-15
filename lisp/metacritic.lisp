@@ -3,6 +3,12 @@
 
 (use-package :parse-float)
 
+(defstruct result
+  platform
+  title
+  score
+  user-score)
+
 (defun parse-platform (node)
   "Returns a game's platform."
   (plump:text (elt (clss:select "span.platform" node) 0)))
@@ -63,17 +69,24 @@
          (count   (parse-page-count dom))
          (nodes   (clss:select "li.result" dom))
          (results (loop for node across nodes
-                     collect (list (parse-platform node)
-                                   (parse-title node)
-                                   (parse-score node)
-                                   (parse-details-link node)))))
+                     ;; temporarily store the details url as the user-score
+                     collect (make-result :platform   (parse-platform node)
+                                          :title      (parse-title node)
+                                          :score      (parse-score node)
+                                          :user-score (parse-details-link node)))))
+    ;; spawn an army of threads to fetch user scores in parallel; since each
+    ;; thread is working on its own entry in the list, no locking is necessary
     (let ((threads (loop for index below (length results)
-                      collect (bordeaux-threads:make-thread (lambda ()
-                                                              (let ((url (nth 3 (nth index results))))
-                                                                (setf (nth 3 (nth index results))
-                                                                      (if user-scores
-                                                                          (get-user-score url)
-                                                                          nil))))))))
+                      collect (bordeaux-threads:make-thread
+                               (lambda ()
+                                 ;; replace the temporary url in user-score by the
+                                 ;; actual user-score
+                                 (let ((url (result-user-score (nth index results))))
+                                   (setf (result-user-score (nth index results))
+                                         (if user-scores
+                                             (get-user-score url)
+                                             nil))))))))
+      ;; wait for all threads to finish
       (loop for thread in threads
          do (bordeaux-threads:join-thread thread)))
     (values results count)))
