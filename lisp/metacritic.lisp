@@ -1,7 +1,7 @@
-;; (ql:quickload :drakma)
-;; (ql:quickload :plump)
-;; (ql:quickload :clss)
-;; (ql:quickload :do-urlencode)
+(dolist (package '("drakma" "plump" "clss" "do-urlencode" "parse-float"))
+  (ql:quickload package))
+
+(use-package :parse-float)
 
 (defun parse-platform (node)
   "Returns a game's platform."
@@ -18,6 +18,19 @@
   (let ((score (plump:text (elt (clss:select "span.metascore_w" node) 0))))
     (parse-integer score :junk-allowed t)))
 
+(defun parse-user-score (node)
+  (let* ((links (clss:select "h3.basic_stat a" node))
+         (url   (concatenate 'string
+                             "https://www.metacritic.com"
+                             (plump:attribute (elt links 0) "href")))
+         (body  (drakma:http-request url :user-agent :explorer))
+         (dom   (plump:parse body))
+         (nodes (clss:select "div.user" dom)))
+    (if (zerop (length nodes))
+        nil
+        (let ((score (plump:text (elt nodes 0))))
+          (parse-float score :junk-allowed t)))))
+
 (defun parse-page-count (dom)
   "Returns the total number of search result pages."
   (loop
@@ -27,15 +40,16 @@
                                  (write-to-string tag :case :downcase)
                                  ".page_num")
      for nodes = (clss:select selector dom)
-     when (> (length nodes) 0)
+     when (not (zerop (length nodes)))
      return (parse-integer (plump:text (elt nodes 0)))
      finally (return 1)))
 
-(defun get-scores (title &key (page 1))
+(defun get-scores (title &key (page 1) (user-scores nil))
   "Fetches game review scores for game TITLE from the Metacritic webpage for a
-   single PAGE number. Returns multiple values: the search results as a list of
-   (PLATFORM TITLE SCORE), with score being NIL when not available, and the
-   total number of search result pages."
+   single PAGE number. When USER-SCORES is non-NIL, also fetches user scores.
+   Returns multiple values: the search results as a list of (PLATFORM TITLE
+   SCORE USER-SCORE), and the total number of search result pages. SCORE and
+   USER-SCORE can be NIL when not available or not fetched."
   (let* ((url (concatenate 'string
                            "https://www.metacritic.com/search/game/"
                            (do-urlencode:urlencode title)
@@ -47,6 +61,9 @@
          (results (loop for node across nodes
                      collect (list (parse-platform node)
                                    (parse-title node)
-                                   (parse-score node))))
+                                   (parse-score node)
+                                   (if (null user-scores)
+                                       nil
+                                       (parse-user-score node)))))
          (count (parse-page-count dom)))
     (values results count)))
