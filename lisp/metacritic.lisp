@@ -18,12 +18,13 @@
   (let ((score (plump:text (elt (clss:select "span.metascore_w" node) 0))))
     (parse-integer score :junk-allowed t)))
 
-(defun parse-user-score (node)
+(defun parse-user-score (node stream)
+  "Returns a game's user score as a float or NIL." 
   (let* ((links (clss:select "h3.basic_stat a" node))
          (url   (concatenate 'string
                              "https://www.metacritic.com"
                              (plump:attribute (elt links 0) "href")))
-         (body  (drakma:http-request url :user-agent :explorer))
+         (body  (drakma:http-request url :user-agent :explorer :stream stream :close nil))
          (dom   (plump:parse body))
          (nodes (clss:select "div.user" dom)))
     (if (zerop (length nodes))
@@ -50,20 +51,22 @@
    Returns multiple values: the search results as a list of (PLATFORM TITLE
    SCORE USER-SCORE), and the total number of search result pages. SCORE and
    USER-SCORE can be NIL when not available or not fetched."
-  (let* ((url (concatenate 'string
-                           "https://www.metacritic.com/search/game/"
-                           (do-urlencode:urlencode title)
-                           "/results?page="
-                           (write-to-string (1- page))))
-         (body (drakma:http-request url :user-agent :explorer))
-         (dom (plump:parse body))
-         (nodes (clss:select "li.result" dom))
-         (results (loop for node across nodes
-                     collect (list (parse-platform node)
-                                   (parse-title node)
-                                   (parse-score node)
-                                   (if (null user-scores)
-                                       nil
-                                       (parse-user-score node)))))
-         (count (parse-page-count dom)))
-    (values results count)))
+  (let ((url (concatenate 'string
+                          "https://www.metacritic.com/search/game/"
+                          (do-urlencode:urlencode title)
+                          "/results?page="
+                          (write-to-string (1- page)))))
+    (multiple-value-bind (body status-code headers uri stream) (drakma:http-request url :user-agent :explorer :close nil)
+      (declare (ignore status-code headers uri))
+      (let* ((dom     (plump:parse body))
+             (count   (parse-page-count dom))
+             (nodes   (clss:select "li.result" dom))
+             (results (loop for node across nodes
+                         collect (list (parse-platform node)
+                                       (parse-title node)
+                                       (parse-score node)
+                                       (if (null user-scores)
+                                           nil
+                                           (parse-user-score node stream))))))
+        (close stream)
+        (values results count)))))
