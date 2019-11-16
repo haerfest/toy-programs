@@ -30,16 +30,6 @@
                "https://www.metacritic.com"
                (plump:attribute (elt (clss:select "h3.basic_stat a" node) 0) "href")))
 
-(defun get-user-score (url)
-  "Returns a game's user score as a float or NIL." 
-  (let* ((body  (drakma:http-request url :user-agent :explorer))
-         (dom   (plump:parse body))
-         (nodes (clss:select "div.user" dom)))
-    (if (zerop (length nodes))
-        nil
-        (let ((score (plump:text (elt nodes 0))))
-          (parse-float score :junk-allowed t)))))
-
 (defun parse-page-count (dom)
   "Returns the total number of search result pages."
   (loop
@@ -53,12 +43,30 @@
      return (parse-integer (plump:text (elt nodes 0)))
      finally (return 1)))
 
+(defun get-user-score (url)
+  "Returns a game's user score as a float or NIL." 
+  (let* ((body  (drakma:http-request url :user-agent :explorer))
+         (dom   (plump:parse body))
+         (nodes (clss:select "div.user" dom)))
+    (if (zerop (length nodes))
+        nil
+        (let ((score (plump:text (elt nodes 0))))
+          (parse-float score :junk-allowed t)))))
+
+(defun get-user-scores (results urls)
+  (let ((threads (loop for index below (length results)
+                    collect (bordeaux-threads:make-thread
+                             (lambda ()
+                               (setf (result-user-score (nth index results))
+                                     (get-user-score (nth index urls))))))))
+    (loop for thread in threads
+       do (bordeaux-threads:join-thread thread))))
+
 (defun get-scores (title &key (page 1) (user-scores nil))
   "Fetches game review scores for game TITLE from the Metacritic webpage for a
    single PAGE number. When USER-SCORES is non-NIL, also fetches user scores.
-   Returns multiple values: the search results as a list of (PLATFORM TITLE
-   SCORE USER-SCORE), and the total number of search result pages. SCORE and
-   USER-SCORE can be NIL when not available or not fetched."
+   Returns two values: the search results as a list of RESULTs, and the total
+   number of search result pages."
   (let* ((url     (concatenate 'string
                                "https://www.metacritic.com/search/game/"
                                (do-urlencode:urlencode title)
@@ -67,26 +75,23 @@
          (body    (drakma:http-request url :user-agent :explorer))
          (dom     (plump:parse body))
          (count   (parse-page-count dom))
-         (nodes   (clss:select "li.result" dom))
-         (results (loop for node across nodes
-                     ;; temporarily store the details url as the user-score
-                     collect (make-result :platform   (parse-platform node)
-                                          :title      (parse-title node)
-                                          :score      (parse-score node)
-                                          :user-score (parse-details-link node)))))
-    ;; spawn an army of threads to fetch user scores in parallel; since each
-    ;; thread is working on its own entry in the list, no locking is necessary
-    (let ((threads (loop for index below (length results)
-                      collect (bordeaux-threads:make-thread
-                               (lambda ()
-                                 ;; replace the temporary url in user-score by the
-                                 ;; actual user-score
-                                 (let ((url (result-user-score (nth index results))))
-                                   (setf (result-user-score (nth index results))
-                                         (if user-scores
-                                             (get-user-score url)
-                                             nil))))))))
-      ;; wait for all threads to finish
-      (loop for thread in threads
-         do (bordeaux-threads:join-thread thread)))
-    (values results count)))
+         (nodes   (clss:select "li.result" dom)))
+    (multiple-value-bind (results urls)
+        (loop for node across nodes
+           collect (make-result :platform   (parse-platform node)
+                                :title      (parse-title node)
+                                :score      (parse-score node))
+           into results
+           collect (parse-details-link node)
+           into urls
+           finally (return (values results urls)))
+      (when user-scores
+        (get-user-scores results urls))
+      (values results count))))
+
+;; Example, finding reviews of Breath of the Wild for Switch only:
+;; 
+;; (remove "Switch"
+;;         (get-scores "breath of the wild")
+;;         :key #'result-platform
+;;         :test-not #'equal)
