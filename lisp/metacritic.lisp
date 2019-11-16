@@ -67,20 +67,20 @@
    single PAGE number. When USER-SCORES is non-NIL, also fetches user scores.
    Returns two values: the search results as a list of RESULTs, and the total
    number of search result pages."
-  (let* ((url     (concatenate 'string
-                               "https://www.metacritic.com/search/game/"
-                               (do-urlencode:urlencode title)
-                               "/results?page="
-                               (write-to-string (1- page))))
-         (body    (drakma:http-request url :user-agent :explorer))
-         (dom     (plump:parse body))
-         (count   (parse-page-count dom))
-         (nodes   (clss:select "li.result" dom)))
+  (let* ((url   (concatenate 'string
+                             "https://www.metacritic.com/search/game/"
+                             (do-urlencode:urlencode title)
+                             "/results?page="
+                             (write-to-string (1- page))))
+         (body  (drakma:http-request url :user-agent :explorer))
+         (dom   (plump:parse body))
+         (count (parse-page-count dom))
+         (nodes (clss:select "li.result" dom)))
     (multiple-value-bind (results urls)
         (loop for node across nodes
-           collect (make-result :platform   (parse-platform node)
-                                :title      (parse-title node)
-                                :score      (parse-score node))
+           collect (make-result :platform (parse-platform node)
+                                :title    (parse-title node)
+                                :score    (parse-score node))
            into results
            collect (parse-details-link node)
            into urls
