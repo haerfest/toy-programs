@@ -56,13 +56,14 @@
 (defun get-user-scores (results urls)
   "Launches an army of threads to retrieve user scores from URLS, filling in
    the RESULT-USER-SCORE of each entry in RESULTS."
-  (let ((threads (loop for index below (length results)
-                    collect (bordeaux-threads:make-thread
-                             (lambda ()
-                               (setf (result-user-score (nth index results))
-                                     (get-user-score (nth index urls))))))))
-    (loop for thread in threads
-       do (bordeaux-threads:join-thread thread))))
+  (loop for index below (length results)
+     collect (bordeaux-threads:make-thread
+              (lambda ()
+                (setf (result-user-score (nth index results))
+                      (get-user-score (nth index urls)))))
+     into threads
+     finally (loop for thread in threads
+                do (bordeaux-threads:join-thread thread))))
 
 (defun get-scores (title &key (page 1) (user-scores nil))
   "Fetches game review scores for game TITLE from the Metacritic webpage for a
