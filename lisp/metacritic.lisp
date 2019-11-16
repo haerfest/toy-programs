@@ -54,6 +54,8 @@
           (parse-float score :junk-allowed t)))))
 
 (defun get-user-scores (results urls)
+  "Launches an army of threads to retrieve user scores from URLS, filling in
+   the RESULT-USER-SCORE of each entry in RESULTS."
   (let ((threads (loop for index below (length results)
                     collect (bordeaux-threads:make-thread
                              (lambda ()
