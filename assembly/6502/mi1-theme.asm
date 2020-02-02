@@ -44,7 +44,7 @@
   ;; >           printf("  .byte %5d  ; %u hz\n", s_capped, log_notes.hz);
   ;; >           printf("  .word %5u  ; ms\n", msecs);
   ;; > 
-  ;; >           // Rememember the new note's frequency and when it started.
+  ;; >           // Remember the new note's frequency and when it started.
   ;; >           log_notes.hz   = hz;
   ;; >           log_notes.tick = PIC_Ticks;
   ;; >         }
