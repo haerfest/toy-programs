@@ -4,52 +4,52 @@
   ;;
   ;; 191a192,206
   ;; > #define LOG_NOTES
-	;; > #ifdef LOG_NOTES
-	;; > 
-	;; > #define SILENCE 0  // 62 kHz, inaudible
-	;; > 
-	;; > static struct {
-	;; >   unsigned int  hz;
-	;; >   unsigned long tick;
-	;; >   float         timer_hz;
-	;; > } log_notes = {
-	;; >   PIT_TICK_RATE, 0, 1.f
-	;; > };
-	;; > 
-	;; > #endif
-	;; > 
-	;; 237a253,258
-	;; > #ifdef LOG_NOTES
-	;; >       if (p->mode == 3) {
-	;; >         // PC speaker is governed by this timer.
-	;; >         log_notes.timer_hz = 1000 / p->delay;
-	;; >       }
-	;; > #endif
-	;; 240a262,285
-	;; > #ifdef LOG_NOTES
-	;; >       if (p->mode == 3) {
-	;; >         // Square wave.
-	;; >         const unsigned hz = unsigned(PIT_TICK_RATE / (double) p->cntr);
-	;; >         if (hz != log_notes.hz) {
-	;; >           // Note changed: output previous note + duration.
-	;; >           const unsigned long ticks    = PIC_Ticks - log_notes.tick;
-	;; >           const unsigned int  msecs    = (unsigned int) (1000 * ticks / log_notes.timer_hz);
-	;; > 
-	;; >           // Acorn Electron specific.
-	;; >           const int           s_value  = 1000000 / (16 * log_notes.hz) - 1;
-	;; >           const int           s_capped = (s_value < 0)   ? SILENCE
-	;; >                                        : (s_value > 255) ? SILENCE
-	;; >                                        : s_value;
-	;; > 
-	;; >           printf("  .byte %5d  ; %u hz\n", s_capped, log_notes.hz);
-	;; >           printf("  .word %5u  ; ms\n", msecs);
-	;; > 
-	;; >           // Rememember the new note's frequency and when it started.
-	;; >           log_notes.hz   = hz;
-	;; >           log_notes.tick = PIC_Ticks;
-	;; >         }
-	;; >       }
-	;; > #endif
+  ;; > #ifdef LOG_NOTES
+  ;; > 
+  ;; > #define SILENCE 0  // 62 kHz, inaudible
+  ;; > 
+  ;; > static struct {
+  ;; >   unsigned int  hz;
+  ;; >   unsigned long tick;
+  ;; >   float         timer_hz;
+  ;; > } log_notes = {
+  ;; >   PIT_TICK_RATE, 0, 1.f
+  ;; > };
+  ;; > 
+  ;; > #endif
+  ;; > 
+  ;; 237a253,258
+  ;; > #ifdef LOG_NOTES
+  ;; >       if (p->mode == 3) {
+  ;; >         // PC speaker is governed by this timer.
+  ;; >         log_notes.timer_hz = 1000 / p->delay;
+  ;; >       }
+  ;; > #endif
+  ;; 240a262,285
+  ;; > #ifdef LOG_NOTES
+  ;; >       if (p->mode == 3) {
+  ;; >         // Square wave.
+  ;; >         const unsigned hz = unsigned(PIT_TICK_RATE / (double) p->cntr);
+  ;; >         if (hz != log_notes.hz) {
+  ;; >           // Note changed: output previous note + duration.
+  ;; >           const unsigned long ticks    = PIC_Ticks - log_notes.tick;
+  ;; >           const unsigned int  msecs    = (unsigned int) (1000 * ticks / log_notes.timer_hz);
+  ;; > 
+  ;; >           // Acorn Electron specific.
+  ;; >           const int           s_value  = 1000000 / (16 * log_notes.hz) - 1;
+  ;; >           const int           s_capped = (s_value < 0)   ? SILENCE
+  ;; >                                        : (s_value > 255) ? SILENCE
+  ;; >                                        : s_value;
+  ;; > 
+  ;; >           printf("  .byte %5d  ; %u hz\n", s_capped, log_notes.hz);
+  ;; >           printf("  .word %5u  ; ms\n", msecs);
+  ;; > 
+  ;; >           // Rememember the new note's frequency and when it started.
+  ;; >           log_notes.hz   = hz;
+  ;; >           log_notes.tick = PIC_Ticks;
+  ;; >         }
+  ;; >       }
+  ;; > #endif
 
   .byte    62  ; 988 hz
   .word    50  ; ms
