@@ -1,7 +1,7 @@
   ;; Patch DosBox to generate this listing of notes:
-  ;; 
+  ;;
   ;; $ diff dosbox-0.74-3/src/hardware/timer.cpp ~/Codez/dosbox-0.74-3/src/hardware/timer.cp
-  ;; 
+  ;;
   ;; 191a192,206
   ;; > #define LOG_NOTES
 	;; > #ifdef LOG_NOTES
