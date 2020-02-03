@@ -51,1389 +51,1389 @@
   ;; >       }
   ;; > #endif
 
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word    50  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   105  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    54  ; ms
   .byte     0  ; 1193182 hz
-  .word   447  ; ms
-  .byte     0  ; 164 hz
-  .word    16  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .word   443  ; ms
+  .byte   189  ; 164 hz
+  .word    21  ; ms
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   376  ; ms
   .byte     0  ; 1193182 hz
   .word   194  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte   213  ; 146 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   642  ; ms
+  .byte   105  ; 293 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte     0  ; 146 hz
+  .byte   141  ; 220 hz
+  .word    50  ; ms
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte   213  ; 146 hz
+  .word   177  ; ms
+  .byte     0  ; 1193182 hz
+  .word   337  ; ms
+  .byte   141  ; 220 hz
+  .word    54  ; ms
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte   213  ; 146 hz
+  .word   105  ; ms
+  .byte    62  ; 494 hz
+  .word    71  ; ms
+  .byte   213  ; 146 hz
+  .word    50  ; ms
+  .byte    46  ; 658 hz
+  .word    71  ; ms
+  .byte   213  ; 146 hz
+  .word    54  ; ms
+  .byte    38  ; 784 hz
+  .word    71  ; ms
+  .byte   213  ; 146 hz
+  .word    54  ; ms
+  .byte     0  ; 1193182 hz
+  .word    33  ; ms
+  .byte    30  ; 988 hz
+  .word    71  ; ms
+  .byte   189  ; 164 hz
+  .word   570  ; ms
+  .byte     0  ; 1193182 hz
+  .word    88  ; ms
+  .byte    93  ; 329 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte   189  ; 164 hz
+  .word   143  ; ms
+  .byte     0  ; 1193182 hz
+  .word   371  ; ms
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    33  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte   189  ; 164 hz
+  .word   536  ; ms
+  .byte     0  ; 1193182 hz
+  .word    54  ; ms
+  .byte    62  ; 494 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   646  ; ms
-  .byte   212  ; 293 hz
+  .byte    78  ; 392 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte     0  ; 220 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte     0  ; 146 hz
+  .byte     0  ; 1193182 hz
+  .word   515  ; ms
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte   213  ; 146 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   642  ; ms
+  .byte   105  ; 293 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte   141  ; 220 hz
+  .word    54  ; ms
+  .byte   105  ; 293 hz
+  .word    50  ; ms
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte   213  ; 146 hz
   .word   177  ; ms
   .byte     0  ; 1193182 hz
-  .word   337  ; ms
-  .byte     0  ; 220 hz
+  .word   342  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte     0  ; 146 hz
-  .word   105  ; ms
-  .byte   125  ; 494 hz
-  .word    71  ; ms
-  .byte     0  ; 146 hz
-  .word    54  ; ms
-  .byte    93  ; 658 hz
-  .word    67  ; ms
-  .byte     0  ; 146 hz
-  .word    54  ; ms
-  .byte    78  ; 784 hz
-  .word    71  ; ms
-  .byte     0  ; 146 hz
-  .word    54  ; ms
-  .byte     0  ; 1193182 hz
-  .word    33  ; ms
-  .byte    62  ; 988 hz
-  .word    71  ; ms
-  .byte     0  ; 164 hz
-  .word   570  ; ms
-  .byte     0  ; 1193182 hz
-  .word    88  ; ms
-  .byte   188  ; 329 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 164 hz
-  .word   139  ; ms
-  .byte     0  ; 1193182 hz
-  .word   376  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    33  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 164 hz
-  .word   536  ; ms
-  .byte     0  ; 1193182 hz
-  .word    54  ; ms
-  .byte   125  ; 494 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   642  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
+  .byte   213  ; 146 hz
+  .word   515  ; ms
   .byte     0  ; 1193182 hz
-  .word   519  ; ms
-  .byte   253  ; 246 hz
-  .word    50  ; ms
-  .byte   188  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte     0  ; 146 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   642  ; ms
-  .byte   212  ; 293 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    50  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte     0  ; 146 hz
-  .word   181  ; ms
-  .byte     0  ; 1193182 hz
-  .word   337  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    50  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte     0  ; 146 hz
-  .word   519  ; ms
-  .byte     0  ; 1193182 hz
-  .word    50  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word  1073  ; ms
   .byte     0  ; 1193182 hz
   .word   266  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    38  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   570  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
-  .byte    93  ; 658 hz
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte    46  ; 658 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   608  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   747  ; ms
   .byte     0  ; 1193182 hz
-  .word    21  ; ms
-  .byte    93  ; 658 hz
-  .word   532  ; ms
-  .byte     0  ; 220 hz
+  .word    16  ; ms
+  .byte    46  ; 658 hz
+  .word   536  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte   105  ; 587 hz
-  .word   515  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    67  ; ms
-  .byte     0  ; 1193182 hz
-  .word   574  ; ms
-  .byte     0  ; 130 hz
-  .word    33  ; ms
-  .byte    93  ; 658 hz
-  .word  1301  ; ms
-  .byte     0  ; 196 hz
+  .byte    52  ; 587 hz
+  .word   519  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   105  ; 293 hz
+  .word    50  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
-  .word   354  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte   239  ; 130 hz
+  .word    38  ; ms
+  .byte    46  ; 658 hz
+  .word  1301  ; ms
+  .byte   158  ; 196 hz
+  .word    54  ; ms
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    67  ; ms
+  .byte   239  ; 130 hz
+  .word   359  ; ms
   .byte     0  ; 1193182 hz
   .word   160  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   118  ; 261 hz
+  .word    50  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
-  .word   621  ; ms
+  .byte   239  ; 130 hz
+  .word   625  ; ms
   .byte     0  ; 98 hz
   .word  1233  ; ms
   .byte     0  ; 1193182 hz
-  .word    54  ; ms
-  .byte     0  ; 196 hz
   .word    50  ; ms
-  .byte   253  ; 246 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   515  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    67  ; ms
+  .byte   126  ; 246 hz
+  .word    50  ; ms
+  .byte   105  ; 293 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    33  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   608  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   697  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    67  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word   498  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    71  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   553  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   692  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   519  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   498  ; ms
-  .byte   125  ; 494 hz
-  .word  1056  ; ms
+  .byte    62  ; 494 hz
+  .word  1051  ; ms
   .byte     0  ; 1193182 hz
-  .word   371  ; ms
-  .byte     0  ; 196 hz
+  .word   376  ; ms
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    71  ; ms
+  .byte    93  ; 329 hz
+  .word    67  ; ms
   .byte     0  ; 82 hz
-  .word   177  ; ms
+  .word   181  ; ms
   .byte     0  ; 1193182 hz
   .word   321  ; ms
   .byte     0  ; 82 hz
   .word    16  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    67  ; ms
   .byte     0  ; 82 hz
   .word   109  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word   160  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word    54  ; ms
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
-  .word   143  ; ms
+  .word   139  ; ms
   .byte     0  ; 1193182 hz
-  .word   532  ; ms
-  .byte   188  ; 329 hz
+  .word   536  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   536  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    33  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   321  ; ms
   .byte     0  ; 1193182 hz
   .word   194  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    33  ; ms
-  .byte    93  ; 658 hz
-  .word  1305  ; ms
-  .byte   253  ; 246 hz
-  .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    46  ; 658 hz
+  .word  1301  ; ms
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   608  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   713  ; ms
-  .byte    93  ; 658 hz
-  .word   608  ; ms
-  .byte     0  ; 220 hz
-  .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte    46  ; 658 hz
+  .word   604  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   515  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word  1229  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   392  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    67  ; ms
-  .byte     0  ; 130 hz
+  .byte   118  ; 261 hz
+  .word    50  ; ms
+  .byte    93  ; 329 hz
+  .word    71  ; ms
+  .byte   239  ; 130 hz
   .word   768  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   188  ; 329 hz
-  .word    71  ; ms
+  .byte    93  ; 329 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte     0  ; 196 hz
+  .word   574  ; ms
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   519  ; ms
-  .byte     0  ; 196 hz
-  .word    33  ; ms
-  .byte   238  ; 261 hz
+  .word   515  ; ms
+  .byte   158  ; 196 hz
+  .word    38  ; ms
+  .byte   118  ; 261 hz
   .word    71  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   498  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   697  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    33  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   536  ; ms
-  .byte     0  ; 196 hz
-  .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte   105  ; 293 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    16  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word  1322  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    71  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word    33  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    71  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word   105  ; ms
   .byte     0  ; 1193182 hz
   .word   697  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   730  ; ms
-  .byte     0  ; 146 hz
+  .byte   213  ; 146 hz
   .word   519  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte     0  ; 146 hz
+  .byte   213  ; 146 hz
   .word    88  ; ms
   .byte     0  ; 1193182 hz
   .word   426  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    38  ; ms
-  .byte   167  ; 370 hz
-  .word    67  ; ms
-  .byte    78  ; 784 hz
+  .byte   105  ; 293 hz
+  .word    33  ; ms
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte    38  ; 784 hz
   .word   608  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   608  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   642  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    33  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   464  ; ms
-  .byte    83  ; 740 hz
-  .word    38  ; ms
-  .byte     0  ; 220 hz
-  .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte    41  ; 740 hz
+  .word    33  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   515  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   713  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
   .byte     0  ; 98 hz
   .word   570  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word    71  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
-  .byte    78  ; 784 hz
+  .byte   105  ; 293 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte    38  ; 784 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   574  ; ms
-  .byte    83  ; 740 hz
-  .word   925  ; ms
-  .byte     0  ; 123 hz
-  .word   430  ; ms
-  .byte   253  ; 246 hz
-  .word    50  ; ms
-  .byte   199  ; 311 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte     0  ; 123 hz
-  .word   143  ; ms
-  .byte     0  ; 1193182 hz
-  .word   371  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   199  ; 311 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte    93  ; 658 hz
-  .word   857  ; ms
-  .byte     0  ; 164 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
+  .byte    41  ; 740 hz
+  .word   929  ; ms
+  .byte   253  ; 123 hz
+  .word   426  ; ms
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte   253  ; 123 hz
+  .word   139  ; ms
+  .byte     0  ; 1193182 hz
+  .word   376  ; ms
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte    99  ; 311 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    67  ; ms
-  .byte     0  ; 164 hz
+  .byte     0  ; 1193182 hz
+  .word   519  ; ms
+  .byte    46  ; 658 hz
+  .word   857  ; ms
+  .byte   189  ; 164 hz
+  .word   570  ; ms
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte   189  ; 164 hz
   .word    54  ; ms
   .byte     0  ; 1193182 hz
   .word   464  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   570  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   713  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   642  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte   105  ; 587 hz
-  .word   515  ; ms
-  .byte     0  ; 220 hz
-  .word    38  ; ms
-  .byte   212  ; 293 hz
+  .byte    83  ; 370 hz
   .word    67  ; ms
-  .byte   167  ; 370 hz
+  .byte    52  ; 587 hz
+  .word   519  ; ms
+  .byte   141  ; 220 hz
+  .word    38  ; ms
+  .byte   105  ; 293 hz
+  .word    67  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   608  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   768  ; ms
   .byte     0  ; 1193182 hz
-  .word    71  ; ms
+  .word    67  ; ms
   .byte     0  ; 98 hz
-  .word   498  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    33  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte    78  ; 784 hz
-  .word   536  ; ms
-  .byte   253  ; 246 hz
+  .word   502  ; ms
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte   105  ; 293 hz
+  .word    38  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
+  .word   536  ; ms
+  .byte   126  ; 246 hz
+  .word    50  ; ms
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte    38  ; 784 hz
   .word    16  ; ms
   .byte     0  ; 1193182 hz
   .word   659  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   735  ; ms
-  .byte     0  ; 123 hz
+  .byte   253  ; 123 hz
   .word   532  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   199  ; 311 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   697  ; ms
-  .byte    93  ; 658 hz
-  .word   713  ; ms
-  .byte     0  ; 164 hz
-  .word   536  ; ms
-  .byte   253  ; 246 hz
+  .word   519  ; ms
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    99  ; 311 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   697  ; ms
+  .byte    46  ; 658 hz
+  .word   713  ; ms
+  .byte   189  ; 164 hz
+  .word   536  ; ms
+  .byte   126  ; 246 hz
+  .word    50  ; ms
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   570  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   713  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   642  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   515  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    50  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   604  ; ms
-  .byte    93  ; 658 hz
+  .word   608  ; ms
+  .byte    46  ; 658 hz
   .word   659  ; ms
   .byte     0  ; 1193182 hz
-  .word   164  ; ms
-  .byte     0  ; 130 hz
-  .word   498  ; ms
-  .byte     0  ; 196 hz
+  .word   160  ; ms
+  .byte   239  ; 130 hz
+  .word   502  ; ms
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    38  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
-  .word   536  ; ms
-  .byte     0  ; 196 hz
-  .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte    46  ; 658 hz
+  .word   532  ; ms
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   604  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word  1339  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    67  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   342  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word    21  ; ms
-  .byte     0  ; 130 hz
-  .word   443  ; ms
+  .word    16  ; ms
+  .byte   239  ; 130 hz
+  .word   447  ; ms
   .byte     0  ; 1193182 hz
   .word   105  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   553  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    21  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    50  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    71  ; ms
+  .byte    93  ; 329 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte   105  ; 587 hz
+  .word   574  ; ms
+  .byte    52  ; 587 hz
   .word   747  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   608  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word   519  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    38  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   692  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   680  ; ms
   .byte     0  ; 110 hz
   .word   515  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    71  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    33  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   502  ; ms
-  .byte     0  ; 220 hz
-  .word    71  ; ms
-  .byte   118  ; 523 hz
-  .word    33  ; ms
-  .byte   238  ; 261 hz
+  .byte   141  ; 220 hz
+  .word    67  ; ms
+  .byte    58  ; 523 hz
+  .word    38  ; ms
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 110 hz
   .word   498  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word   752  ; ms
   .byte     0  ; 82 hz
   .word   460  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
   .byte     0  ; 82 hz
   .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
+  .word    67  ; ms
+  .byte     0  ; 1193182 hz
+  .word   646  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
+  .byte     0  ; 1193182 hz
+  .word   574  ; ms
+  .byte   126  ; 246 hz
+  .word    50  ; ms
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   642  ; ms
-  .byte   158  ; 392 hz
+  .word   515  ; ms
+  .byte   126  ; 246 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   519  ; ms
-  .byte   253  ; 246 hz
-  .word    50  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte     0  ; 146 hz
+  .byte   213  ; 146 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte     0  ; 123 hz
+  .byte   253  ; 123 hz
   .word   642  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte     0  ; 146 hz
+  .byte   213  ; 146 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   141  ; 220 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   126  ; ms
-  .byte   125  ; 494 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    62  ; 494 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word    38  ; ms
-  .byte    78  ; 784 hz
+  .word    71  ; ms
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
+  .word    38  ; ms
+  .byte    38  ; 784 hz
   .word    71  ; ms
-  .byte    62  ; 988 hz
+  .byte     0  ; 1193182 hz
+  .word    67  ; ms
+  .byte    30  ; 988 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
-  .word    16  ; ms
-  .byte   188  ; 329 hz
+  .word    21  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   143  ; ms
   .byte     0  ; 1193182 hz
   .word   392  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   464  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   574  ; ms
-  .byte     0  ; 220 hz
-  .word    50  ; ms
-  .byte   212  ; 293 hz
+  .word   570  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   337  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   414  ; ms
-  .byte    93  ; 658 hz
-  .word   143  ; ms
-  .byte    58  ; 1046 hz
-  .word   532  ; ms
+  .byte    46  ; 658 hz
+  .word   139  ; ms
+  .byte    28  ; 1046 hz
+  .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word   198  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   570  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   321  ; ms
   .byte     0  ; 1193182 hz
   .word   198  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   426  ; ms
   .byte     0  ; 1193182 hz
   .word   143  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   591  ; ms
   .byte     0  ; 1193182 hz
   .word    50  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word   680  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   536  ; ms
-  .byte    58  ; 1046 hz
+  .byte    28  ; 1046 hz
   .word   498  ; ms
   .byte     0  ; 1193182 hz
   .word   215  ; ms
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word   570  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word   371  ; ms
   .byte     0  ; 1193182 hz
   .word   143  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte   118  ; 523 hz
-  .word    67  ; ms
-  .byte    58  ; 1046 hz
+  .byte    78  ; 392 hz
+  .word    50  ; ms
+  .byte    58  ; 523 hz
+  .word    71  ; ms
+  .byte    28  ; 1046 hz
   .word   287  ; ms
   .byte     0  ; 1193182 hz
   .word   287  ; ms
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word   587  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
   .byte     0  ; 98 hz
   .word   642  ; ms
-  .byte    78  ; 784 hz
-  .word    21  ; ms
-  .byte   212  ; 293 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    38  ; 784 hz
+  .word    16  ; ms
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   498  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    33  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte     0  ; 123 hz
+  .byte   253  ; 123 hz
   .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word    16  ; ms
-  .byte    78  ; 784 hz
+  .word    21  ; ms
+  .byte    38  ; 784 hz
   .word   587  ; ms
-  .byte     0  ; 146 hz
-  .word   663  ; ms
-  .byte   212  ; 293 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte   213  ; 146 hz
+  .word   659  ; ms
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
-  .word    71  ; ms
+  .byte    62  ; 494 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte   158  ; 392 hz
+  .word   574  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    38  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   498  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte   141  ; 440 hz
-  .word    38  ; ms
-  .byte    70  ; 880 hz
-  .word   498  ; ms
+  .byte    70  ; 440 hz
+  .word    33  ; ms
+  .byte    34  ; 880 hz
+  .word   502  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte     0  ; 146 hz
-  .word   591  ; ms
-  .byte   105  ; 587 hz
+  .byte   213  ; 146 hz
+  .word   587  ; ms
+  .byte    52  ; 587 hz
+  .word    54  ; ms
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    70  ; 440 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   141  ; 440 hz
-  .word    54  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
-  .word   460  ; ms
+  .byte    52  ; 587 hz
+  .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte     0  ; 185 hz
+  .byte   167  ; 185 hz
   .word   570  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word   675  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    54  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
-  .word    54  ; ms
-  .byte   118  ; 523 hz
-  .word    67  ; ms
+  .byte    70  ; 440 hz
+  .word    50  ; ms
+  .byte    58  ; 523 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   502  ; ms
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word   697  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word   680  ; ms
-  .byte   212  ; 293 hz
-  .word    71  ; ms
-  .byte   141  ; 440 hz
-  .word    50  ; ms
-  .byte   118  ; 523 hz
-  .word    71  ; ms
-  .byte    78  ; 784 hz
-  .word   519  ; ms
-  .byte   212  ; 293 hz
-  .word    50  ; ms
-  .byte   141  ; 440 hz
+  .byte   105  ; 293 hz
+  .word    67  ; ms
+  .byte    70  ; 440 hz
   .word    54  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte    70  ; 880 hz
-  .word   464  ; ms
+  .byte    38  ; 784 hz
+  .word   519  ; ms
+  .byte   105  ; 293 hz
+  .word    50  ; ms
+  .byte    70  ; 440 hz
+  .word    54  ; ms
+  .byte    58  ; 523 hz
+  .word    71  ; ms
+  .byte    34  ; 880 hz
+  .word   460  ; ms
   .byte     0  ; 1193182 hz
-  .word   105  ; ms
-  .byte    62  ; 988 hz
+  .word   109  ; ms
+  .byte    30  ; 988 hz
   .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    33  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   409  ; ms
   .byte     0  ; 1193182 hz
   .word   109  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte     0  ; 123 hz
+  .byte   253  ; 123 hz
   .word   498  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   608  ; ms
   .byte     0  ; 1193182 hz
   .word   160  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
   .byte     0  ; 98 hz
   .word   532  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    67  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   502  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word   519  ; ms
   .byte     0  ; 1193182 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    38  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   730  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte   125  ; 494 hz
-  .word    67  ; ms
+  .byte    78  ; 392 hz
+  .word    50  ; ms
+  .byte    62  ; 494 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   536  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
   .word   105  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   574  ; ms
-  .byte   188  ; 329 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
+  .word   570  ; ms
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word   371  ; ms
   .byte     0  ; 1193182 hz
   .word   143  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   502  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word   553  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
@@ -1441,145 +1441,145 @@
   .word   570  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   178  ; 349 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   141  ; 440 hz
+  .byte    88  ; 349 hz
+  .word    54  ; ms
+  .byte    70  ; 440 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   178  ; 349 hz
+  .byte    88  ; 349 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    71  ; ms
   .byte     0  ; 110 hz
   .word   337  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
-  .byte    58  ; 1046 hz
+  .byte    28  ; 1046 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte     0  ; 130 hz
-  .word   519  ; ms
+  .byte   239  ; 130 hz
+  .word   515  ; ms
   .byte     0  ; 1193182 hz
-  .word   194  ; ms
-  .byte     0  ; 220 hz
+  .word   198  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   178  ; 349 hz
+  .byte    88  ; 349 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   141  ; 220 hz
   .word    50  ; ms
-  .byte   178  ; 349 hz
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    88  ; 349 hz
   .word    71  ; ms
-  .byte     0  ; 174 hz
+  .byte   178  ; 174 hz
   .word   481  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte   178  ; 349 hz
+  .byte    88  ; 349 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   178  ; 349 hz
+  .byte    88  ; 349 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   178  ; 349 hz
-  .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
+  .word   519  ; ms
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    88  ; 349 hz
+  .word    50  ; ms
+  .byte    70  ; 440 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte    58  ; 1046 hz
+  .byte    28  ; 1046 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   646  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   178  ; 349 hz
+  .byte    88  ; 349 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   178  ; 349 hz
+  .byte    88  ; 349 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   481  ; ms
-  .byte    46  ; 1316 hz
+  .byte    22  ; 1316 hz
   .word    71  ; ms
-  .byte    62  ; 988 hz
-  .word    71  ; ms
-  .byte   158  ; 392 hz
-  .word    33  ; ms
-  .byte    78  ; 784 hz
-  .word    71  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte    93  ; 658 hz
+  .byte    30  ; 988 hz
   .word    67  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
+  .word    38  ; ms
+  .byte    38  ; 784 hz
+  .word    71  ; ms
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    46  ; 658 hz
+  .word    71  ; ms
+  .byte    78  ; 392 hz
+  .word    50  ; ms
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   604  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    62  ; 494 hz
+  .word    54  ; ms
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   519  ; ms
-  .byte   158  ; 392 hz
-  .word    50  ; ms
-  .byte   125  ; 494 hz
+  .word   515  ; ms
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte    93  ; 658 hz
+  .byte    62  ; 494 hz
+  .word    54  ; ms
+  .byte    46  ; 658 hz
   .word    71  ; ms
-  .byte     0  ; 123 hz
-  .word   376  ; ms
+  .byte   253  ; 123 hz
+  .word   371  ; ms
   .byte     0  ; 1193182 hz
-  .word   194  ; ms
-  .byte    78  ; 784 hz
+  .word   198  ; ms
+  .byte    38  ; 784 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
@@ -1587,791 +1587,791 @@
   .word   409  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word   392  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word  1305  ; ms
-  .byte   158  ; 392 hz
-  .word    50  ; ms
-  .byte   125  ; 494 hz
+  .word  1301  ; ms
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte    93  ; 658 hz
+  .byte    62  ; 494 hz
+  .word    54  ; ms
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    54  ; ms
-  .byte    93  ; 658 hz
-  .word    71  ; ms
+  .byte    46  ; 658 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte    83  ; 740 hz
+  .word   574  ; ms
+  .byte    41  ; 740 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word   232  ; ms
   .byte     0  ; 1193182 hz
   .word   287  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    54  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   587  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   177  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   392  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte   118  ; 523 hz
-  .word    67  ; ms
-  .byte     0  ; 130 hz
+  .byte    78  ; 392 hz
+  .word    50  ; ms
+  .byte    58  ; 523 hz
+  .word    71  ; ms
+  .byte   239  ; 130 hz
   .word    38  ; ms
   .byte     0  ; 1193182 hz
   .word   481  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    33  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte     0  ; 155 hz
+  .byte   200  ; 155 hz
   .word   570  ; ms
   .byte     0  ; 1193182 hz
-  .word    21  ; ms
-  .byte    78  ; 784 hz
-  .word    67  ; ms
-  .byte     0  ; 1193182 hz
-  .word   646  ; ms
-  .byte     0  ; 196 hz
-  .word   498  ; ms
-  .byte     0  ; 1193182 hz
-  .word   143  ; ms
-  .byte   238  ; 261 hz
-  .word    50  ; ms
-  .byte   199  ; 311 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   199  ; 311 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte   238  ; 261 hz
-  .word   498  ; ms
-  .byte   118  ; 523 hz
-  .word   498  ; ms
-  .byte     0  ; 1193182 hz
-  .word   287  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte   199  ; 311 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    50  ; ms
-  .byte   118  ; 523 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   519  ; ms
-  .byte   199  ; 311 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte   118  ; 523 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte    78  ; 784 hz
+  .word    16  ; ms
+  .byte    38  ; 784 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte   158  ; 392 hz
+  .byte   158  ; 196 hz
+  .word   502  ; ms
+  .byte     0  ; 1193182 hz
+  .word   139  ; ms
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    99  ; 311 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   515  ; ms
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    99  ; 311 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
+  .byte   118  ; 261 hz
+  .word   502  ; ms
+  .byte    58  ; 523 hz
+  .word   498  ; ms
+  .byte     0  ; 1193182 hz
+  .word   287  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
+  .byte     0  ; 1193182 hz
+  .word   574  ; ms
+  .byte    99  ; 311 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    58  ; 523 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   515  ; ms
+  .byte    99  ; 311 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   199  ; 311 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    38  ; 784 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   574  ; ms
-  .byte   199  ; 311 hz
+  .word   642  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    99  ; 311 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
+  .word   570  ; ms
+  .byte    99  ; 311 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   430  ; ms
-  .byte    52  ; 1175 hz
+  .byte    25  ; 1175 hz
   .word    67  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    38  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    16  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   177  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
-  .word    38  ; ms
-  .byte   167  ; 370 hz
-  .word    67  ; ms
+  .byte    52  ; 587 hz
+  .word    33  ; ms
+  .byte    83  ; 370 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   359  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word   481  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    50  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    50  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    54  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    71  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word   625  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word    16  ; ms
   .byte     0  ; 1193182 hz
   .word   608  ; ms
-  .byte     0  ; 185 hz
+  .byte   167  ; 185 hz
   .word   675  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
-  .word    54  ; ms
-  .byte   105  ; 587 hz
+  .byte    70  ; 440 hz
+  .word    50  ; ms
+  .byte    52  ; 587 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   167  ; 370 hz
+  .word   519  ; ms
+  .byte    83  ; 370 hz
   .word    38  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    67  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    71  ; ms
-  .byte     0  ; 146 hz
+  .byte   213  ; 146 hz
   .word   608  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    33  ; ms
   .byte     0  ; 1193182 hz
   .word  1305  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    50  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   519  ; ms
-  .byte   167  ; 370 hz
-  .word    50  ; ms
-  .byte   141  ; 440 hz
+  .word   515  ; ms
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   105  ; 587 hz
+  .byte    70  ; 440 hz
+  .word    54  ; ms
+  .byte    52  ; 587 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
-  .word    50  ; ms
-  .byte   105  ; 587 hz
-  .word    71  ; ms
-  .byte     0  ; 146 hz
+  .byte    70  ; 440 hz
+  .word    54  ; ms
+  .byte    52  ; 587 hz
+  .word    67  ; ms
+  .byte   213  ; 146 hz
   .word   519  ; ms
-  .byte   167  ; 370 hz
-  .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    83  ; 370 hz
   .word    50  ; ms
-  .byte   105  ; 587 hz
+  .byte    70  ; 440 hz
+  .word    54  ; ms
+  .byte    52  ; 587 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
+  .word    33  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte   189  ; 164 hz
   .word    38  ; ms
-  .byte   158  ; 392 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
-  .word    33  ; ms
-  .byte   125  ; 494 hz
-  .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    54  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word    54  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    16  ; ms
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word    33  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   143  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word   802  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
-  .byte    93  ; 658 hz
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte    46  ; 658 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   608  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    33  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   570  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   498  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   515  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   105  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   946  ; ms
   .byte     0  ; 1193182 hz
   .word   232  ; ms
-  .byte     0  ; 196 hz
-  .word    54  ; ms
-  .byte   238  ; 261 hz
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   232  ; ms
   .byte     0  ; 1193182 hz
-  .word   287  ; ms
-  .byte     0  ; 196 hz
-  .word    50  ; ms
-  .byte   238  ; 261 hz
+  .word   283  ; ms
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
-  .word   464  ; ms
+  .byte   239  ; 130 hz
+  .word   460  ; ms
   .byte     0  ; 1193182 hz
-  .word   105  ; ms
+  .word   109  ; ms
   .byte     0  ; 98 hz
   .word   747  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    38  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   447  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    38  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   604  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   498  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
-  .byte   125  ; 494 hz
-  .word    38  ; ms
-  .byte   158  ; 392 hz
-  .word    67  ; ms
-  .byte   125  ; 494 hz
-  .word   519  ; ms
-  .byte   253  ; 246 hz
-  .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    62  ; 494 hz
   .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    62  ; 494 hz
+  .word   519  ; ms
+  .byte   126  ; 246 hz
+  .word    71  ; ms
+  .byte    52  ; 587 hz
+  .word    33  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte    52  ; 587 hz
   .word   570  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   697  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word   109  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   515  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
-  .byte   118  ; 523 hz
-  .word    38  ; ms
-  .byte   141  ; 440 hz
-  .word    67  ; ms
+  .byte    58  ; 523 hz
+  .word    33  ; ms
+  .byte    70  ; 440 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
+  .byte    78  ; 392 hz
   .word    67  ; ms
-  .byte   125  ; 494 hz
+  .byte     0  ; 1193182 hz
+  .word    71  ; ms
+  .byte    62  ; 494 hz
   .word  1195  ; ms
   .byte     0  ; 1193182 hz
   .word    21  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word   392  ; ms
   .byte     0  ; 1193182 hz
-  .word   126  ; ms
-  .byte   253  ; 246 hz
-  .word   105  ; ms
-  .byte   158  ; 392 hz
+  .word   122  ; ms
+  .byte   126  ; 246 hz
+  .word   109  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word    88  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
-  .word    71  ; ms
+  .byte    46  ; 658 hz
+  .word    67  ; ms
   .byte     0  ; 82 hz
-  .word    33  ; ms
-  .byte    78  ; 784 hz
+  .word    38  ; ms
+  .byte    38  ; 784 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word    88  ; ms
-  .byte    62  ; 988 hz
+  .byte    30  ; 988 hz
   .word    71  ; ms
   .byte     0  ; 82 hz
   .word   194  ; ms
   .byte     0  ; 1193182 hz
   .word  1144  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
-  .word    54  ; ms
-  .byte   253  ; 246 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word  1035  ; ms
   .byte     0  ; 1193182 hz
   .word   215  ; ms
-  .byte   253  ; 246 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   608  ; ms
-  .byte    83  ; 740 hz
-  .word   608  ; ms
+  .byte    41  ; 740 hz
+  .word   604  ; ms
   .byte     0  ; 1193182 hz
-  .word    16  ; ms
-  .byte   141  ; 440 hz
+  .word    21  ; ms
+  .byte    70  ; 440 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   553  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   519  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   141  ; 220 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word  1090  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    54  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    67  ; ms
-  .byte     0  ; 130 hz
+  .byte   118  ; 261 hz
+  .word    50  ; ms
+  .byte    93  ; 329 hz
+  .word    71  ; ms
+  .byte   239  ; 130 hz
   .word   232  ; ms
   .byte     0  ; 1193182 hz
   .word   287  ; ms
-  .byte     0  ; 196 hz
+  .byte   158  ; 196 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   697  ; ms
   .byte     0  ; 1193182 hz
   .word   587  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    38  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   238  ; 261 hz
+  .word   519  ; ms
+  .byte   118  ; 261 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    16  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   625  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    33  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   713  ; ms
   .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
+  .word    67  ; ms
+  .byte    62  ; 494 hz
+  .word    38  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte   125  ; 494 hz
-  .word    33  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   515  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
-  .byte   158  ; 392 hz
-  .word   109  ; ms
+  .byte    78  ; 392 hz
+  .word   105  ; ms
   .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte    70  ; 880 hz
+  .word   574  ; ms
+  .byte    34  ; 880 hz
   .word  1339  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    33  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   238  ; 261 hz
-  .word    71  ; ms
-  .byte   141  ; 440 hz
-  .word   105  ; ms
+  .byte   118  ; 261 hz
+  .word    67  ; ms
+  .byte    70  ; 440 hz
+  .word   109  ; ms
   .byte     0  ; 1193182 hz
   .word   498  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   730  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte     0  ; 146 hz
+  .byte   213  ; 146 hz
   .word   625  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   498  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word    16  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    50  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
-  .word   587  ; ms
+  .byte    38  ; 784 hz
+  .word   591  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   591  ; ms
   .byte     0  ; 1193182 hz
   .word    50  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   574  ; ms
   .byte     0  ; 1193182 hz
   .word   105  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   519  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    33  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   426  ; ms
   .byte     0  ; 1193182 hz
   .word   270  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   515  ; ms
   .byte     0  ; 98 hz
   .word   680  ; ms
   .byte     0  ; 1193182 hz
-  .word    54  ; ms
-  .byte   253  ; 246 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   498  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   697  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   608  ; ms
-  .byte     0  ; 123 hz
+  .byte   253  ; 123 hz
   .word   625  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   553  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   642  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   481  ; ms
   .byte     0  ; 1193182 hz
   .word   266  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   253  ; 246 hz
+  .word   519  ; ms
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   574  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   570  ; ms
   .byte     0  ; 1193182 hz
   .word   160  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   498  ; ms
   .byte     0  ; 1193182 hz
   .word   126  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   515  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
-  .word    71  ; ms
-  .byte    83  ; 740 hz
-  .word   443  ; ms
+  .byte    70  ; 440 hz
+  .word    67  ; ms
+  .byte    41  ; 740 hz
+  .word   447  ; ms
   .byte     0  ; 1193182 hz
   .word   215  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   675  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
@@ -2379,209 +2379,209 @@
   .word   481  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    67  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   519  ; ms
-  .byte   212  ; 293 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   625  ; ms
-  .byte     0  ; 123 hz
+  .byte   253  ; 123 hz
   .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word   143  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   199  ; 311 hz
+  .byte    99  ; 311 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   570  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   675  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word   502  ; ms
   .byte     0  ; 1193182 hz
   .word   194  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    54  ; ms
-  .byte   125  ; 494 hz
-  .word    67  ; ms
+  .byte    78  ; 392 hz
+  .word    50  ; ms
+  .byte    62  ; 494 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   570  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word   697  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   608  ; ms
   .byte     0  ; 1193182 hz
-  .word    54  ; ms
-  .byte   167  ; 370 hz
   .word    50  ; ms
-  .byte   141  ; 440 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   105  ; 587 hz
+  .byte    70  ; 440 hz
+  .word    54  ; ms
+  .byte    52  ; 587 hz
   .word   587  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    54  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    54  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   663  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   570  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
-  .byte     0  ; 130 hz
-  .word   464  ; ms
+  .byte   239  ; 130 hz
+  .word   460  ; ms
   .byte     0  ; 1193182 hz
-  .word   194  ; ms
-  .byte   188  ; 329 hz
+  .word   198  ; ms
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
-  .word   502  ; ms
-  .byte   188  ; 329 hz
-  .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    46  ; 658 hz
+  .word   498  ; ms
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   118  ; 523 hz
+  .byte    78  ; 392 hz
+  .word    54  ; ms
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   697  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   659  ; ms
   .byte     0  ; 1193182 hz
   .word   143  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   426  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    54  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   515  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    50  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    54  ; ms
   .byte     0  ; 98 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
-  .word   126  ; ms
-  .byte   212  ; 293 hz
-  .word    67  ; ms
+  .word   122  ; ms
+  .byte   105  ; 293 hz
+  .word    71  ; ms
   .byte     0  ; 1193182 hz
-  .word   574  ; ms
-  .byte   253  ; 246 hz
-  .word    67  ; ms
-  .byte   158  ; 392 hz
+  .word   570  ; ms
+  .byte   126  ; 246 hz
+  .word    71  ; ms
+  .byte    78  ; 392 hz
   .word   109  ; ms
   .byte     0  ; 1193182 hz
   .word    16  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word   498  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
-  .byte   105  ; 587 hz
+  .byte    52  ; 587 hz
   .word    38  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
+  .byte    78  ; 392 hz
+  .word    67  ; ms
   .byte     0  ; 1193182 hz
-  .word   570  ; ms
-  .byte   141  ; 440 hz
+  .word   574  ; ms
+  .byte    70  ; 440 hz
   .word    16  ; ms
-  .byte   118  ; 523 hz
+  .byte    58  ; 523 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
-  .word    38  ; ms
-  .byte   188  ; 329 hz
+  .word    33  ; ms
+  .byte    93  ; 329 hz
   .word    71  ; ms
-  .byte   125  ; 494 hz
-  .word   570  ; ms
-  .byte   238  ; 261 hz
-  .word    71  ; ms
-  .byte   141  ; 440 hz
-  .word   105  ; ms
-  .byte   118  ; 523 hz
+  .byte    62  ; 494 hz
+  .word   574  ; ms
+  .byte   118  ; 261 hz
+  .word    67  ; ms
+  .byte    70  ; 440 hz
+  .word   109  ; ms
+  .byte    58  ; 523 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    50  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte   141  ; 440 hz
+  .byte    70  ; 440 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   659  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word   625  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    50  ; ms
   .byte     0  ; 82 hz
-  .word   325  ; ms
+  .word   321  ; ms
   .byte     0  ; 1193182 hz
-  .word   194  ; ms
-  .byte   253  ; 246 hz
+  .word   198  ; ms
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
@@ -2589,11 +2589,11 @@
   .word   392  ; ms
   .byte     0  ; 1193182 hz
   .word   105  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte     0  ; 164 hz
+  .byte   189  ; 164 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word    71  ; ms
@@ -2601,173 +2601,174 @@
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    71  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   426  ; ms
   .byte     0  ; 1193182 hz
   .word    88  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
   .word   608  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   642  ; ms
   .byte     0  ; 1193182 hz
   .word   697  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   519  ; ms
-  .byte   253  ; 246 hz
+  .byte   126  ; 246 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    78  ; 784 hz
-  .word   680  ; ms
-  .byte    83  ; 740 hz
-  .word   604  ; ms
+  .byte    38  ; 784 hz
+  .word   675  ; ms
+  .byte    41  ; 740 hz
+  .word   608  ; ms
   .byte     0  ; 1193182 hz
   .word    38  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   604  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
-  .word    71  ; ms
-  .byte   105  ; 587 hz
-  .word   515  ; ms
-  .byte     0  ; 220 hz
+  .byte    83  ; 370 hz
+  .word    67  ; ms
+  .byte    52  ; 587 hz
+  .word   519  ; ms
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte    83  ; 370 hz
   .word    71  ; ms
   .byte     0  ; 1193182 hz
   .word   642  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   591  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   536  ; ms
   .byte     0  ; 1193182 hz
   .word   143  ; ms
-  .byte   238  ; 261 hz
-  .word    54  ; ms
-  .byte   188  ; 329 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   158  ; 392 hz
+  .byte    93  ; 329 hz
+  .word    54  ; ms
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   519  ; ms
-  .byte   238  ; 261 hz
+  .byte   118  ; 261 hz
   .word    50  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    71  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word   908  ; ms
-  .byte     0  ; 130 hz
+  .byte   239  ; 130 hz
   .word   481  ; ms
   .byte     0  ; 1193182 hz
-  .word    92  ; ms
-  .byte   238  ; 261 hz
-  .word    50  ; ms
-  .byte   188  ; 329 hz
+  .word    88  ; ms
+  .byte   118  ; 261 hz
   .word    54  ; ms
-  .byte   158  ; 392 hz
-  .word    71  ; ms
-  .byte     0  ; 1193182 hz
-  .word   515  ; ms
-  .byte   238  ; 261 hz
+  .byte    93  ; 329 hz
   .word    54  ; ms
-  .byte   188  ; 329 hz
-  .word    54  ; ms
-  .byte   158  ; 392 hz
+  .byte    78  ; 392 hz
   .word    67  ; ms
   .byte     0  ; 1193182 hz
+  .word   519  ; ms
+  .byte   118  ; 261 hz
+  .word    54  ; ms
+  .byte    93  ; 329 hz
+  .word    50  ; ms
+  .byte    78  ; 392 hz
+  .word    71  ; ms
+  .byte     0  ; 1193182 hz
   .word   574  ; ms
-  .byte    70  ; 880 hz
+  .byte    34  ; 880 hz
   .word   532  ; ms
   .byte     0  ; 1193182 hz
-  .word   181  ; ms
-  .byte   141  ; 440 hz
-  .word    16  ; ms
-  .byte    78  ; 784 hz
+  .word   177  ; ms
+  .byte    70  ; 440 hz
+  .word    21  ; ms
+  .byte    38  ; 784 hz
   .word   464  ; ms
   .byte     0  ; 1193182 hz
   .word   139  ; ms
-  .byte    83  ; 740 hz
+  .byte    41  ; 740 hz
   .word    21  ; ms
-  .byte     0  ; 220 hz
-  .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   141  ; 220 hz
   .word    50  ; ms
-  .byte   167  ; 370 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
   .word    71  ; ms
-  .byte    83  ; 740 hz
-  .word   447  ; ms
+  .byte    41  ; 740 hz
+  .word   443  ; ms
   .byte     0  ; 1193182 hz
-  .word    50  ; ms
-  .byte     0  ; 220 hz
-  .word    71  ; ms
-  .byte   212  ; 293 hz
   .word    54  ; ms
-  .byte   167  ; 370 hz
+  .byte   141  ; 220 hz
   .word    71  ; ms
-  .byte    70  ; 880 hz
+  .byte   105  ; 293 hz
+  .word    54  ; ms
+  .byte    83  ; 370 hz
+  .word    71  ; ms
+  .byte    34  ; 880 hz
   .word   532  ; ms
-  .byte    78  ; 784 hz
+  .byte    38  ; 784 hz
   .word   680  ; ms
   .byte     0  ; 1193182 hz
   .word    33  ; ms
-  .byte    93  ; 658 hz
+  .byte    46  ; 658 hz
   .word   663  ; ms
-  .byte     0  ; 185 hz
-  .word    54  ; ms
-  .byte     0  ; 220 hz
+  .byte   167  ; 185 hz
   .word    50  ; ms
-  .byte   212  ; 293 hz
-  .word    71  ; ms
-  .byte    83  ; 740 hz
-  .word   519  ; ms
-  .byte     0  ; 185 hz
-  .word    50  ; ms
-  .byte     0  ; 220 hz
+  .byte   141  ; 220 hz
   .word    54  ; ms
-  .byte   212  ; 293 hz
+  .byte   105  ; 293 hz
   .word    71  ; ms
-  .byte     0  ; 164 hz
+  .byte    41  ; 740 hz
+  .word   515  ; ms
+  .byte   167  ; 185 hz
+  .word    54  ; ms
+  .byte   141  ; 220 hz
+  .word    54  ; ms
+  .byte   105  ; 293 hz
+  .word    71  ; ms
+  .byte   189  ; 164 hz
   .word    16  ; ms
-  .byte     0  ; 196 hz
-  .word   287  ; ms
-  .byte   253  ; 246 hz
-  .word    33  ; ms
-  .byte   158  ; 392 hz
+  .byte   158  ; 196 hz
+  .word   283  ; ms
+  .byte   126  ; 246 hz
+  .word    38  ; ms
+  .byte    78  ; 392 hz
   .word   215  ; ms
-  .byte   188  ; 329 hz
+  .byte    93  ; 329 hz
   .word    16  ; ms
-  .byte   125  ; 494 hz
+  .byte    62  ; 494 hz
   .word   304  ; ms
-  .byte    93  ; 658 hz
-  .word  1732  ; ms
+  .byte    46  ; 658 hz
+  .word  1727  ; ms
+  
