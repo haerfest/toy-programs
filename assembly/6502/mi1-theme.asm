@@ -36,7 +36,7 @@
   ;; >           const unsigned int  msecs    = (unsigned int) (1000 * ticks / log_notes.timer_hz);
   ;; > 
   ;; >           // Acorn Electron specific.
-  ;; >           const int           s_value  = 1000000 / (16 * log_notes.hz) - 1;
+  ;; >           const int           s_value  = 1000000 / (32 * log_notes.hz) - 1;
   ;; >           const int           s_capped = (s_value < 0)   ? SILENCE
   ;; >                                        : (s_value > 255) ? SILENCE
   ;; >                                        : s_value;
