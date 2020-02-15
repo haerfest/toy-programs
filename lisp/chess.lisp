@@ -170,10 +170,18 @@
            (Q (valid-queen-move-p  from to board))
            (R (valid-rook-move-p   from to board))))))
 
-(defun test ()
-  (print-board *board*)
+(defun play-white (board)
+  (print-board board)
   (loop
      for move = (read-move)
-     do (when (valid-move-p move *board*)
-          (make-move move *board*)
-          (print-board *board*))))
+     until (valid-move-p move *board*)
+     finally (make-move move *board*)))
+
+(defun play-black (board)
+  (declare (ignore board)))
+
+(defun test ()
+  (print-board *board*)
+  (loop do
+       (play-white *board*)
+       (play-black *board*)))
