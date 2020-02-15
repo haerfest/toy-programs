@@ -159,8 +159,8 @@
              (eq (color to board) 'B)))))
 
 (defun valid-move-p (move board)
-  (let* ((from  (car move))
-         (to    (cdr move)))
+  (let ((from  (car move))
+        (to    (cdr move)))
     (and (not (empty-p from board))
          (case (kind from board)
            (B (valid-bishop-move-p from to board))
@@ -172,10 +172,8 @@
 
 (defun test ()
   (print-board *board*)
-  (labels ((read-valid-move ()
-             (let ((move (read-move)))
-               (if (valid-move-p move *board*)
-                   move
-                   (read-valid-move)))))
-    (make-move (read-valid-move) *board*)
-    (test)))
+  (loop
+     for move = (read-move)
+     do (when (valid-move-p move *board*)
+          (make-move move *board*)
+          (print-board *board*))))
