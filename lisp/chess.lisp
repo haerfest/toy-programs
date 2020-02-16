@@ -155,8 +155,22 @@
   (or (valid-rook-move-p   from to board my-color opponent-color)
       (valid-bishop-move-p from to board my-color opponent-color)))
 
+(defun attackable-p (pos my-color opponent-color board)
+  (loop named outer
+     for row below 8 do
+       (loop
+          for col below 8
+          with from = (cons (1+ col) (1+ row)) do
+            (when (and (occupied-p from board)
+                       (eq (color from board) opponent-color)
+                       (valid-move-p (cons from pos)
+                                     my-color
+                                     opponent-color
+                                     board))
+              (return-from outer t))))
+  nil)
+
 (defun valid-king-move-p (from to board my-color opponent-color)
-  (declare (ignore my-color))
   (let ((from-col (car from))
         (from-row (cdr from))
         (to-col   (car to))
@@ -164,7 +178,8 @@
     (and (<= (abs (- to-col from-col)) 1)
          (<= (abs (- to-row from-row)) 1)
          (or (empty-p to board)
-             (eq (color to board) opponent-color)))))
+             (eq (color to board) opponent-color))
+         (not (attackable-p to my-color opponent-color board)))))
 
 (defun valid-move-p (move my-color opponent-color board)
   (let ((from  (car move))
