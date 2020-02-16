@@ -8,8 +8,15 @@
     ((P . W) (P . W) (P . W) (P . W) (P . W) (P . W) (P . W) (P . W))
     ((R . W) (N . W) (B . W) (K . W) (Q . W) (B . W) (N . W) (R . W))))
 
+(defparameter *scores* '((P . 3) (R . 5) (N . 7) (B . 5) (Q . 10) (K . 100)))
+
 (defmacro square (pos board)
-  `(aref ,board (- 8 (cdr ,pos)) (1- (car ,pos))))
+  `(aref ,board (- 7 (cdr ,pos)) (car ,pos)))
+
+(defmacro each-square (row col &body body)
+  `(dotimes (,row 8)
+     (dotimes (,col 8)
+       ,@body)))
 
 (defun empty-p (pos board)
   (eq (square pos board) 'NONE))
@@ -27,7 +34,7 @@
   (dotimes (row 8)
     (format t "~A " (- 8 row))
     (dotimes (col 8)
-      (let ((pos (cons (1+ col) (- 8 row))))
+      (let ((pos (cons col (- 7 row))))
         (if (occupied-p pos board)
             (format t "~A~A " (color pos board) (kind pos board))
             (format t " . "))))
@@ -37,17 +44,17 @@
 (defun valid-pos-p (pos)
   (let ((col (car pos))
         (row (cdr pos)))
-    (and (<= 1 col 8)
-         (<= 1 row 8))))
+    (and (<= 0 col 7)
+         (<= 0 row 7))))
 
 (defun read-move ()
   (format t "? ")
   (let ((move (read-line)))
     (if (= 4 (length move))
-        (let ((from (cons (- (char-code (char-upcase (char move 0))) 64)
-                          (- (char-code              (char move 1))  48)))
-              (to   (cons (- (char-code (char-upcase (char move 2))) 64)
-                          (- (char-code              (char move 3))  48))))
+        (let ((from (cons (- (char-code (char-upcase (char move 0))) 65)
+                          (- (char-code              (char move 1))  49)))
+              (to   (cons (- (char-code (char-upcase (char move 2))) 65)
+                          (- (char-code              (char move 3))  49))))
           (if (and (valid-pos-p from)
                    (valid-pos-p to))
               (cons from to)
@@ -67,7 +74,7 @@
         (to-col    (car to))
         (to-row    (cdr to))
         (next-row  (if (eq my-color 'W) #'1+ #'1-))
-        (start-row (if (eq my-color 'W) 2 7)))
+        (start-row (if (eq my-color 'W) 1 6)))
     (or
      ;; two squares forward from starting position
      (and (eq to-col from-col)
@@ -160,13 +167,10 @@
      for row below 8 do
        (loop
           for col below 8
-          with from = (cons (1+ col) (1+ row)) do
+          with from = (cons col row) do
             (when (and (occupied-p from board)
                        (eq (color from board) opponent-color)
-                       (valid-move-p (cons from pos)
-                                     my-color
-                                     opponent-color
-                                     board))
+                       (valid-move-p (cons from pos) my-color opponent-color board))
               (return-from outer t))))
   nil)
 
@@ -203,83 +207,60 @@
 
 (defun copy-board (board)
   (let ((copy (make-array '(8 8))))
-    (dotimes (row 8)
-      (dotimes (col 8)
-        (setf (aref copy row col)
-              (aref board row col))))
+    (each-square row col
+      (setf (aref copy row col)
+            (aref board row col)))
     copy))
 
-(defun rate-move (from to my-color opponent-color scores board)
-  (if (and (occupied-p to board)
-           (eq (color to board) opponent-color)
-           (valid-move-p (cons from to) my-color opponent-color board))
-      (cdr (assoc (kind to board) scores))
-      0))
-
-(defun rate-moves (from my-color opponent-color scores board)
+(defun rate-possible-moves (from board)
   (let ((score 0))
-    (dotimes (row 8)
-      (dotimes (col 8)
-        (let* ((to (cons (1+ col) (1+ row))))
-          (incf score
-                (rate-move from to my-color opponent-color scores board)))))
+    (each-square row col
+      (let* ((to   (cons col row))
+             (move (cons from to)))
+        (when (and (occupied-p to board)
+                   (eq (color to board) 'W)
+                   (valid-move-p move 'B 'W board))
+          (incf score (cdr (assoc (kind to board) *scores*))))))
     score))
 
-(defun rate-board (my-color opponent-color board)
+(defun rate-board (board)
   (let ((score 0))
-    (dotimes (row 8)
-      (dotimes (col 8)
-        (let ((from (cons (1+ col) (1+ row))))
-          (when (occupied-p from board)
-            (if (eq (color from board) my-color)
-                (incf score (rate-moves from
-                                        my-color
-                                        opponent-color
-                                        '((P . 1)
-                                          (R . 3)
-                                          (N . 5)
-                                          (B . 3)
-                                          (Q . 10)
-                                          (K . 50))
-                                        board))
-                (incf score (rate-moves from
-                                        my-color
-                                        opponent-color
-                                        '((P . -3)
-                                          (R . -5)
-                                          (N . -10)
-                                          (B . -5)
-                                          (Q . -20)
-                                          (K . -100))
-                                        board)))))))
+    (each-square row col
+      (let ((pos (cons col row)))
+        (when (and (occupied-p pos board)
+                   (eq (color pos board) 'B))
+          (incf score (rate-possible-moves pos board)))))
     score))
 
-(defun min-max (depth my-color opponent-color my-max opponent-min board)
-  (let ((best-score (rate-board my-color opponent-color board))
-        (best-move  nil))
-    (when (> depth 0)
-      (dotimes (row 8)
-        (dotimes (col 8)
-          (let ((from (cons (1+ col) (1+ row))))
+(defun minimax (depth max-depth maximizing board)
+  (if (= depth max-depth)
+      (values (rate-board board) nil)
+      (let ((best-score     nil)
+            (best-move      nil)
+            (my-color       (if maximizing 'B 'W))
+            (opponent-color (if maximizing 'W 'B)))
+        (format t "~vtminimax ~a:~%" (* 3 depth) my-color)
+        (each-square row col
+          (let ((from (cons col row)))
             (when (and (occupied-p from board)
                        (eq (color from board) my-color))
-              (dotimes (to-row 8)
-                (dotimes (to-col 8)
-                  (let ((move (cons from
-                                    (cons (1+ to-col) (1+ to-row)))))
-                    (when (valid-move-p move my-color opponent-color board)
-                      (let ((board-copy (copy-board board)))
-                        (make-move move board-copy)
-                        (let ((score (min-max (1- depth)
-                                              opponent-color
-                                              my-color
-                                              opponent-min
-                                              my-max
-                                              board-copy)))
-                          (when (funcall my-max score best-score)
-                            (setf best-score score)
-                            (setf best-move  move)))))))))))))
-    (values best-score best-move)))
+              (each-square to-row to-col
+                (let ((move (cons from (cons to-col to-row))))
+                  (when (valid-move-p move my-color opponent-color board)
+                    (format t "~vt  considering ~a~%" (* 3 depth) (format-move move))
+                    (let ((board-copy (copy-board board)))
+                      (make-move move board-copy)
+                      (let ((score (minimax (1+ depth) max-depth (not maximizing) board-copy)))
+                        (format t "~vt  scores ~d~%" (* 3 depth) score)
+                        (when (or (null best-score)
+                                  (and maximizing
+                                       (> score best-score))
+                                  (and (not maximizing)
+                                       (< score best-score)))
+                          (setf best-score score
+                                best-move  move))))))))))
+        (format t "~vt  winner ~a with score ~d~%" (* 3 depth) (format-move best-move) best-score)
+        (values best-score best-move))))
 
 (defun format-move (move)
   (let* ((from     (car move))
@@ -289,22 +270,22 @@
          (to-col   (car to))
          (to-row   (cdr to)))
     (format nil "~(~a~d~a~d~)"
-            (code-char (+ from-col 64))
-            from-row
-            (code-char (+ to-col 64))
-            to-row)))
+            (code-char (+ from-col 65))
+            (1+ from-row)
+            (code-char (+ to-col 65))
+            (1+ to-row))))
 
-(defun play-black (board)
+(defun play-black (max-depth board)
   (multiple-value-bind (score move)
-      (min-max 3 'B 'W #'>= #'<= board)
-    (format t "~a (score: ~a)~%" (format-move move) score)
+      (minimax 0 max-depth t board)
+    (declare (ignore score))
+    (format t "! ~a~%" (format-move move))
     (make-move move board)))
 
-(defun play-game ()
-  (let ((board (make-array '(8 8)
-                           :initial-contents *initial-board*)))
+(defun play-game (&optional (max-depth 3))
+  (let ((board (make-array '(8 8) :initial-contents *initial-board*)))
     (loop do
          (print-board board)
          (play-white board)
          (print-board board)
-         (play-black board))))
+         (play-black max-depth board))))
