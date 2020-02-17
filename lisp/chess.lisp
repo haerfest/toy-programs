@@ -10,6 +10,8 @@
 
 (defparameter *scores* '((P . 3) (R . 5) (N . 7) (B . 5) (Q . 10) (K . 100)))
 
+(defparameter *debug* nil)
+
 (defmacro square (pos board)
   `(aref ,board (- 7 (cdr ,pos)) (car ,pos)))
 
@@ -239,7 +241,8 @@
             (best-move      nil)
             (my-color       (if maximizing 'B 'W))
             (opponent-color (if maximizing 'W 'B)))
-        (format t "~vtminimax ~a:~%" (* 3 depth) my-color)
+        (when *debug*
+          (format t "~vtminimax ~a:~%" (* 3 depth) my-color))
         (each-square row col
           (let ((from (cons col row)))
             (when (and (occupied-p from board)
@@ -247,11 +250,13 @@
               (each-square to-row to-col
                 (let ((move (cons from (cons to-col to-row))))
                   (when (valid-move-p move my-color opponent-color board)
-                    (format t "~vt  considering ~a~%" (* 3 depth) (format-move move))
+                    (when *debug*
+                      (format t "~vt  considering ~a~%" (* 3 depth) (format-move move)))
                     (let ((board-copy (copy-board board)))
                       (make-move move board-copy)
                       (let ((score (minimax (1+ depth) max-depth (not maximizing) board-copy)))
-                        (format t "~vt  scores ~d~%" (* 3 depth) score)
+                        (when *debug*
+                          (format t "~vt  scores ~d~%" (* 3 depth) score))
                         (when (or (null best-score)
                                   (and maximizing
                                        (> score best-score))
@@ -259,7 +264,8 @@
                                        (< score best-score)))
                           (setf best-score score
                                 best-move  move))))))))))
-        (format t "~vt  winner ~a with score ~d~%" (* 3 depth) (format-move best-move) best-score)
+        (when *debug*
+          (format t "~vt  winner ~a with score ~d~%" (* 3 depth) (format-move best-move) best-score))
         (values best-score best-move))))
 
 (defun format-move (move)
