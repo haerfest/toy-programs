@@ -22,24 +22,39 @@
   map_width  = 80
   map_height = 31
 
+  room_min_width  = 4
+  room_min_height = 4
+
   ;; --------------------------------------------------------------------------
   ;; Zero page workspace.
   ;; --------------------------------------------------------------------------   
   temp    = $70
   ptr     = $71
 
+  ;; --------------------------------------------------------------------------
+  ;; Main program, entry point.
+  ;; --------------------------------------------------------------------------
 main
   jsr init
+- jsr clear_map
   jsr generate_map
   ldx #0
   jsr draw_map
   jsr osrdch
-  rts
+  jmp -
 
   ;; --------------------------------------------------------------------------
   ;; Initializes the program.
   ;; --------------------------------------------------------------------------
 init
+  jsr init_vdu
+  jsr srand
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Initializes the VDU.
+  ;; --------------------------------------------------------------------------
+init_vdu
   ldx #0
 - ldy data_vdu,x
   beq +
@@ -200,20 +215,153 @@ rand
   ;; --------------------------------------------------------------------------
 mod
   stx temp
-  sed
-- sec
-  sbc temp
+  sec
+- sbc temp
   bcs -
   adc temp
   rts
 
 map
-  .fill map_height * map_width, tile_floor
+  .fill map_height * map_width
+
+  ;; --------------------------------------------------------------------------
+  ;; Clears the map by setting each tile to a space.
+  ;; --------------------------------------------------------------------------
+clear_map
+  ; Make (ptr) point to the map.
+  lda #<map
+  sta ptr
+  lda #>map
+  sta ptr + 1
+
+  ; Erase this many rows.
+  ldx #map_height
+
+  ; Erase one row.
+- lda #' '
+  ldy #map_width - 1
+- sta (ptr),y
+  dey
+  bpl -
+
+  ; Advance to next row.
+  clc
+  lda ptr
+  adc #map_width
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+
+  ; Erase next row.
+  dex
+  bne --
+
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; The type of a single room
+  ;; --------------------------------------------------------------------------
+room_t .struct
+  x1 .byte 0
+  y1 .byte 0
+  x2 .byte 0
+  y2 .byte 0
+.ends
+
+  ;; --------------------------------------------------------------------------
+  ;; The nine rooms we have.
+  ;; --------------------------------------------------------------------------
+room0 .dstruct room_t
+room1 .dstruct room_t
+room2 .dstruct room_t
+room3 .dstruct room_t
+room4 .dstruct room_t
+room5 .dstruct room_t
+room6 .dstruct room_t
+room7 .dstruct room_t
+room8 .dstruct room_t
+room9 .dstruct room_t
 
   ;; --------------------------------------------------------------------------
   ;; Generates a single random map.
   ;; --------------------------------------------------------------------------
 generate_map
+  ; Generate room0 y1.
+  jsr rand
+  ldx #map_height / 3 - room_min_height
+  jsr mod
+  sta room0.y1
+
+  ; Generate room0 y2.
+  jsr rand
+  tay
+  sec
+  lda #map_height / 3
+  sbc room0.y1
+  sbc #room_min_height
+  tax
+  tya
+  jsr mod
+  clc
+  adc room0.y1
+  adc #room_min_height
+  sta room0.y2
+
+  ; Update the map with room0 left edge at column 0.
+  lda #<map
+  sta ptr
+  lda #>map
+  sta ptr + 1
+
+  ; Need for (ptr),y operations.
+  ldy #0
+
+  ; Move to y1 by adding map_width y1 times.
+  clc
+  ldx room0.y1
+  beq +
+- lda ptr
+  adc #map_width
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  dex
+  bne -
+
+  ; Store the top left corner tile.
++ lda #tile_corner_tl
+  sta (ptr),y
+
+  ; Remember where we started from.
+  ldx room0.y1
+  
+  ; Move to the next row.
+- clc
+  lda ptr
+  adc #map_width
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  
+  ; Are we at y2 yet?
+  inx
+  cpx room0.y2
+  beq +
+
+  ; No, store a vertical edge tile.
+  lda #tile_edge_v
+  sta (ptr),y
+
+  ; Next row.
+  jmp -  
+
+  ; Yes, store a bottom left corner tile.
++ lda #tile_corner_bl
+  sta (ptr),y
+
   rts
 
   ;; --------------------------------------------------------------------------
