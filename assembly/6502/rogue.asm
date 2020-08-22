@@ -8,14 +8,13 @@
   osword = $fff1
   osbyte = $fff4
 
-  tile_empty     = 0
-  tile_floor     = 1
-  tile_corner_tl = 2
-  tile_corner_tr = 3
-  tile_corner_bl = 4
-  tile_corner_br = 5
-  tile_edge_h    = 6
-  tile_edge_v    = 7
+  tile_floor     = 224
+  tile_corner_tl = 225
+  tile_corner_tr = 226
+  tile_corner_bl = 227
+  tile_corner_br = 228
+  tile_edge_h    = 229
+  tile_edge_v    = 230
 
   screen_mode  = 4
   screen_width = 40
@@ -27,127 +26,138 @@
   ;; Zero page workspace.
   ;; --------------------------------------------------------------------------   
   temp    = $70
-  src     = $71
-  dst     = $73
-  map_ptr = $75
+  ptr     = $71
 
 main
   jsr init
   jsr generate_map
-  jsr vsync
   ldx #0
   jsr draw_map
-- jmp -
-
-  ;; --------------------------------------------------------------------------
-  ;; Wait for vertical sync.
-  ;; --------------------------------------------------------------------------
-vsync
-  lda #19
-  jsr osbyte
+  jsr osrdch
   rts
-  
+
   ;; --------------------------------------------------------------------------
   ;; Initializes the program.
   ;; --------------------------------------------------------------------------
 init
   ldx #0
-- ldy vdu_data,x
+- ldy data_vdu,x
   beq +
-- inx
-  lda vdu_data,x
-  jsr oswrch
-  dey  
-  bne -
   inx
+
+- lda data_vdu,x
+  jsr oswrch
+  inx  
+  dey
+  bne -
   jmp --
+
 + rts
-
+  
   ;; --------------------------------------------------------------------------
-  ;; The type of a room.
+  ;; VDU initialization commands.
+  ;; Format is: first byte (=N), then N bytes. Repeat as desired, end with N=0.
   ;; --------------------------------------------------------------------------
-room_t .struct x, y, w, h
-  x1 .byte \x
-  y1 .byte \y
-  x2 .byte \x + \w - 1
-  y2 .byte \y + \h - 1
-  w  .byte \w
-  h  .byte \h
-  .ends
+data_vdu
+  ; Set the screen MODE.
+  .byte 2
+  .byte 22, screen_mode
 
-  ;; --------------------------------------------------------------------------
-  ;; An example room.
-  ;; --------------------------------------------------------------------------
-room .dstruct room_t, 5, 6, 30, 11
+  ; Disable the cursor.
+  .byte 10
+  .byte 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
 
-  ;; --------------------------------------------------------------------------
-  ;; Draws the example room.
-  ;; --------------------------------------------------------------------------
-room_draw
-  ; Top row.
-  lda #tile_corner_tl
-  jsr tile_load
-  ldx room.x1
-  ldy room.y1
-  jsr tab
-  jsr tile_draw
+  ; Floor tile.
+  .byte 10
+  .byte 23, tile_floor 
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00001000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
 
-  lda #tile_edge_h
-  jsr tile_load
-  ldx room.w
-- jsr tile_draw
-  dex
-  bne -
+  ; Top left corner tile.
+  .byte 10
+  .byte 23, tile_corner_tl
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00001111
+  .byte %00011111
+  .byte %00011100
+  .byte %00011000
+  .byte %00011000
 
-  lda #tile_corner_tr
-  jsr tile_load
-  jsr tile_draw
+  ; Top right corner tile.
+  .byte 10
+  .byte 23, tile_corner_tr
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %11110000
+  .byte %11111000
+  .byte %00111000
+  .byte %00011000
+  .byte %00011000
 
-  ; Center rows.
-  ldy room.y1
-  iny
-- ldx room.x1
-  jsr tab
+  ; Bottom left corner tile.
+  .byte 10
+  .byte 23, tile_corner_bl
+  .byte %00011000
+  .byte %00011000
+  .byte %00011100
+  .byte %00011111
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
 
-  lda #tile_edge_v
-  jsr tile_load
-  jsr tile_draw
+  ; Bottom right corner tile.
+  .byte 10
+  .byte 23, tile_corner_br
+  .byte %00011000
+  .byte %00011000
+  .byte %00111000
+  .byte %11111000
+  .byte %11110000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
 
-  lda #tile_floor
-  jsr tile_load
-  ldx room.w
-- jsr tile_draw
-  dex
-  bne -
+  ; Vertical edge tile.
+  .byte 10
+  .byte 23, tile_edge_v
+  .byte %00011000
+  .byte %00011000
+  .byte %00011000
+  .byte %00011000
+  .byte %00011000
+  .byte %00011000
+  .byte %00011000
+  .byte %00011000
 
-  lda #tile_edge_v
-  jsr tile_load
-  jsr tile_draw
+  ; Horizontal edge tile.
+  .byte 10
+  .byte 23, tile_edge_h
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %11111111
+  .byte %11111111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
 
-  iny
-  cpy room.y2
-  bne --
+  ; Colour yellow on blue.
+  .byte 12
+  .byte 19, 1, 3, 0, 0, 0
+  .byte 19, 0, 4, 0, 0, 0
 
-  ; Bottom row.
-  lda #tile_corner_bl
-  jsr tile_load
-  ldx room.x1
-  ldy room.y2
-  jsr tab
-  jsr tile_draw
-
-  lda #tile_edge_h
-  jsr tile_load
-  ldx room.w
-- jsr tile_draw
-  dex
-  bne -
-
-  lda #tile_corner_br
-  jsr tile_load
-  jsr tile_draw
-
-  rts
+  ; End of VDU data.
+  .byte 0
 
   ;; -------------------------------------------------------------------------- 
   ;; Initial random number generator seed. Only four bytes are used, but we
@@ -197,210 +207,8 @@ mod
   adc temp
   rts
 
-  ;; --------------------------------------------------------------------------
-  ;; VDU initialization commands.
-  ;; Format is: first byte (=N), then N bytes. Repeat as desired, end with N=0.
-  ;; --------------------------------------------------------------------------
-vdu_data
-  .byte 2, 22, screen_mode
-  ; cursor off
-  .byte 10, 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
-  ; done
-  .byte 0
-
-  ;; --------------------------------------------------------------------------
-  ;; Sets (dst) up to point to character cell XY, by pointing it to
-  ;; $5800 + Y * $140 + X * 8.
-  ;; --------------------------------------------------------------------------
-tab
-  pha
-  txa
-  pha
-  tya
-  pha
-
-  lda #$00
-  sta dst
-  lda #$58
-  sta dst + 1
-
-  ; Each row is offset $140 bytes, so add it Y times.
-  cpy #0
-  beq +
-  clc
-- lda dst
-  adc #$40
-  sta dst
-  lda dst + 1
-  adc #$01
-  sta dst + 1
-  dey
-  bne -
-
-  ; Each column is offset 8 bytes, so add it X times.
-+ cpx #0
-  beq +
-  clc
-- lda dst
-  adc #$08
-  sta dst
-  lda dst + 1
-  adc #$00
-  sta dst + 1
-  dex
-  bne -
-
-+ pla
-  tay
-  pla
-  tax
-  pla
-  rts
-
-  ;; --------------------------------------------------------------------------
-  ;; Sets up (src) to point to a tile (in A).
-  ;; --------------------------------------------------------------------------
-tile_load
-  sta temp
-
-  pha
-  txa
-  pha
-
-  asl temp
-  ldx temp
-  lda bitmaps,x
-  sta src
-  lda bitmaps + 1,x
-  sta src + 1
-
-  pla
-  tax
-  pla
-  rts
-
-  ;; --------------------------------------------------------------------------
-  ;; Draws a tile, pointed to by (src), at the character cell pointed to by
-  ;; (dst).
-  ;; --------------------------------------------------------------------------
-tile_draw
-  pha
-  tya
-  pha
-
-  ldy #0
-.rept 8 
-  lda (src),y
-  sta (dst),y
-  iny
-.next
-
-  ; Update pointer, maybe we want to write to the adjacent cell.
-  clc
-  lda dst
-  adc #8
-  sta dst
-  lda dst + 1
-  adc #0
-  sta dst + 1
-
-  pla
-  tay
-  pla
-  rts
-
-bitmaps
-  .addr bitmap_tile_empty
-  .addr bitmap_tile_floor
-  .addr bitmap_tile_corner_tl
-  .addr bitmap_tile_corner_tr
-  .addr bitmap_tile_corner_bl
-  .addr bitmap_tile_corner_br
-  .addr bitmap_tile_edge_h
-  .addr bitmap_tile_edge_v
-
-bitmap_tile_empty
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-        
-bitmap_tile_floor
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00001000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-
-bitmap_tile_corner_tl
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00001111
-  .byte %00011111
-  .byte %00011100
-  .byte %00011000
-  .byte %00011000
-
-bitmap_tile_corner_tr
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %11110000
-  .byte %11111000
-  .byte %00111000
-  .byte %00011000
-  .byte %00011000
-
-bitmap_tile_corner_bl
-  .byte %00011000
-  .byte %00011000
-  .byte %00011100
-  .byte %00011111
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-
-bitmap_tile_corner_br
-  .byte %00011000
-  .byte %00011000
-  .byte %00111000
-  .byte %11111000
-  .byte %11110000
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-
-bitmap_tile_edge_v
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-
-bitmap_tile_edge_h
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %11111111
-  .byte %11111111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-
 map
-  .fill 32 * 80, tile_floor
+  .fill map_height * map_width, tile_floor
 
   ;; --------------------------------------------------------------------------
   ;; Generates a single random map.
@@ -409,53 +217,48 @@ generate_map
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; Draws a single map starting at column X, since a map is 80 columns
-  ;; wide but the screen is 40, so we only show columns X:X+40.
+  ;; Draws a single map starting at column X.
   ;; --------------------------------------------------------------------------
 draw_map
+  ; Make (ptr) point to column X of the map.
   stx temp
-
-  ; Start drawing in the top-left corner.
-  ldx #0
-  ldy #0
-  jsr tab
-
-  ; Make (map_ptr) point to the start of the map at column X.
   clc
   lda #<map
   adc temp
-  sta map_ptr
+  sta ptr
   lda #>map
   adc #0
-  sta map_ptr + 1
+  sta ptr + 1
 
-  ; Repeat for each row of tiles.
+  ; Move the cursor to the top left corner.
+  lda #30
+  jsr oswrch
+
+  ; The number of rows to print.
   ldx #map_height
 
-  ; Draw a single row of tiles.
+  ; Display a single row.
 - ldy #0
-- lda (map_ptr),y
-  jsr tile_load
-  jsr tile_draw
+- lda (ptr),y
+  jsr oswrch
   iny
   cpy #screen_width
   bne -
 
-  ; Move (map_ptr) to next row by adding map_width bytes.
-  clc
-  lda map_ptr
-  adc #map_width
-  sta map_ptr
-  lda map_ptr + 1
-  adc #0
-  sta map_ptr + 1
-
-  ; Check for another row to draw.
+  ; Print another row?
   dex
-  bne --
+  beq +
 
-  rts
-  
-  
+  ; Move to the next row by adding map_width columns.
+  clc
+  lda ptr
+  adc #map_width
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
 
-  
+  ; Print another row.
+  jmp --
+
++ rts 
