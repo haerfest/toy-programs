@@ -8,30 +8,45 @@
   osword = $fff1
   osbyte = $fff4
 
-  tile_floor     = 0
-  tile_corner_tl = 1
-  tile_corner_tr = 2
-  tile_corner_bl = 3
-  tile_corner_br = 4
-  tile_edge_h    = 5
-  tile_edge_v    = 6
+  tile_empty     = 0
+  tile_floor     = 1
+  tile_corner_tl = 2
+  tile_corner_tr = 3
+  tile_corner_bl = 4
+  tile_corner_br = 5
+  tile_edge_h    = 6
+  tile_edge_v    = 7
+
+  screen_mode  = 4
+  screen_width = 40
+
+  map_width  = 80
+  map_height = 31
 
   ;; --------------------------------------------------------------------------
   ;; Zero page workspace.
   ;; --------------------------------------------------------------------------   
-  temp = $70
-  src  = $71
-  dst  = $73
+  temp    = $70
+  src     = $71
+  dst     = $73
+  map_ptr = $75
 
 main
   jsr init
-  lda #'.'
-  sta temp
-- jsr room_draw
-  jsr osrdch
-  inc temp
-  jmp -
+  jsr generate_map
+  jsr vsync
+  ldx #0
+  jsr draw_map
+- jmp -
 
+  ;; --------------------------------------------------------------------------
+  ;; Wait for vertical sync.
+  ;; --------------------------------------------------------------------------
+vsync
+  lda #19
+  jsr osbyte
+  rts
+  
   ;; --------------------------------------------------------------------------
   ;; Initializes the program.
   ;; --------------------------------------------------------------------------
@@ -187,8 +202,7 @@ mod
   ;; Format is: first byte (=N), then N bytes. Repeat as desired, end with N=0.
   ;; --------------------------------------------------------------------------
 vdu_data
-  ; mode 4
-  .byte 2, 22, 4
+  .byte 2, 22, screen_mode
   ; cursor off
   .byte 10, 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
   ; done
@@ -296,6 +310,7 @@ tile_draw
   rts
 
 bitmaps
+  .addr bitmap_tile_empty
   .addr bitmap_tile_floor
   .addr bitmap_tile_corner_tl
   .addr bitmap_tile_corner_tr
@@ -304,6 +319,16 @@ bitmaps
   .addr bitmap_tile_edge_h
   .addr bitmap_tile_edge_v
 
+bitmap_tile_empty
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+        
 bitmap_tile_floor
   .byte %00000000
   .byte %00000000
@@ -373,3 +398,64 @@ bitmap_tile_edge_h
   .byte %00000000
   .byte %00000000
   .byte %00000000
+
+map
+  .fill 32 * 80, tile_floor
+
+  ;; --------------------------------------------------------------------------
+  ;; Generates a single random map.
+  ;; --------------------------------------------------------------------------
+generate_map
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Draws a single map starting at column X, since a map is 80 columns
+  ;; wide but the screen is 40, so we only show columns X:X+40.
+  ;; --------------------------------------------------------------------------
+draw_map
+  stx temp
+
+  ; Start drawing in the top-left corner.
+  ldx #0
+  ldy #0
+  jsr tab
+
+  ; Make (map_ptr) point to the start of the map at column X.
+  clc
+  lda #<map
+  adc temp
+  sta map_ptr
+  lda #>map
+  adc #0
+  sta map_ptr + 1
+
+  ; Repeat for each row of tiles.
+  ldx #map_height
+
+  ; Draw a single row of tiles.
+- ldy #0
+- lda (map_ptr),y
+  jsr tile_load
+  jsr tile_draw
+  iny
+  cpy #screen_width
+  bne -
+
+  ; Move (map_ptr) to next row by adding map_width bytes.
+  clc
+  lda map_ptr
+  adc #map_width
+  sta map_ptr
+  lda map_ptr + 1
+  adc #0
+  sta map_ptr + 1
+
+  ; Check for another row to draw.
+  dex
+  bne --
+
+  rts
+  
+  
+
+  
