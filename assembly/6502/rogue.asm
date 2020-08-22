@@ -22,6 +22,9 @@
   map_width  = 80
   map_height = 31
 
+  room_cell_width  = map_width  / 3
+  room_cell_height = map_height / 3
+
   room_min_width  = 4
   room_min_height = 4
 
@@ -30,6 +33,8 @@
   ;; --------------------------------------------------------------------------   
   temp    = $70
   ptr     = $71
+  ptr2    = $73
+  ptr3    = $75
 
   ;; --------------------------------------------------------------------------
   ;; Main program, entry point.
@@ -192,7 +197,7 @@ srand
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; Returns a 16-bit random value in A (high) and X (low).
+  ;; Returns an 8-bit random value in A.
   ;; Implements R(n + 1) = $01010101 * R(n) + $b3b3b3b3.
   ;; Credits to cc65 implementation.
   ;; --------------------------------------------------------------------------
@@ -205,7 +210,6 @@ rand
   sta seed + 1
   adc seed + 2
   sta seed + 2
-  tax
   adc seed + 3
   sta seed + 3
   rts
@@ -263,10 +267,12 @@ clear_map
   ;; The type of a single room
   ;; --------------------------------------------------------------------------
 room_t .struct
-  x1 .byte 0
-  y1 .byte 0
-  x2 .byte 0
-  y2 .byte 0
+  x1     .byte 0
+  y1     .byte 0
+  x2     .byte 0
+  y2     .byte 0
+  width  .byte 0
+  height .byte 0
 .ends
 
   ;; --------------------------------------------------------------------------
@@ -287,80 +293,197 @@ room9 .dstruct room_t
   ;; Generates a single random map.
   ;; --------------------------------------------------------------------------
 generate_map
-  ; Generate room0 y1.
-  jsr rand
-  ldx #map_height / 3 - room_min_height
-  jsr mod
-  sta room0.y1
+  lda #<room0
+  sta ptr
+  lda #>room0
+  sta ptr + 1
+  jsr room_generate
+  jsr room_draw
+  rts
 
-  ; Generate room0 y2.
+  ;; --------------------------------------------------------------------------
+  ;; Generate a single random room. (ptr) needs to point to the room_t to
+  ;; generate.
+  ;; --------------------------------------------------------------------------
+room_generate
+  ; y1 := rand() % (room_cell_height - room_min_height)
+  ldx #room_cell_height - room_min_height
   jsr rand
-  tay
+  jsr mod
+  ldy #room_t.y1
+  sta (ptr),y
+
+  ; height := room_min_height + rand() % (room_cell_height - y1 - room_min_height)
+  lda #room_cell_height - room_min_height
   sec
-  lda #map_height / 3
-  sbc room0.y1
-  sbc #room_min_height
+  sbc (ptr),y
   tax
-  tya
+  jsr rand
   jsr mod
   clc
-  adc room0.y1
   adc #room_min_height
-  sta room0.y2
+  ldy #room_t.height
+  sta (ptr),y
 
-  ; Update the map with room0 left edge at column 0.
-  lda #<map
-  sta ptr
-  lda #>map
-  sta ptr + 1
-
-  ; Need for (ptr),y operations.
-  ldy #0
-
-  ; Move to y1 by adding map_width y1 times.
+  ; y2 := y1 + height
+  ldy #room_t.y1
   clc
-  ldx room0.y1
-  beq +
-- lda ptr
+  adc (ptr),y
+  ldy #room_t.y2
+  sta (ptr),y
+
+  ; x1 := and() % (room_cell_width - room_min_width)
+  ldx #room_cell_width - room_min_width
+  jsr rand
+  jsr mod
+  ldy #room_t.x1
+  sta (ptr),y
+
+  ; width := room_min_width + rand() % (room_cell_width - x1 - room_min_width)
+  lda #room_cell_width - room_min_width
+  sec
+  sbc (ptr),y
+  tax
+  jsr rand
+  jsr mod
+  clc
+  adc #room_min_width
+  ldy #room_t.width
+  sta (ptr),y
+  
+  ; x2 := x1 + width
+  ldy #room_t.x1
+  clc
+  adc (ptr),y
+  ldy #room_t.x2
+  sta (ptr),y
+  
+  rts
+
+room_tiles_row_top
+  .byte tile_corner_tl, tile_edge_h, tile_corner_tr
+
+room_tiles_row_center
+  .byte tile_edge_v,    tile_floor,  tile_edge_v
+
+room_tiles_row_bottom
+  .byte tile_corner_bl, tile_edge_h, tile_corner_br
+
+  ;; --------------------------------------------------------------------------
+  ;; Draws a room_t, pointed at by (ptr), into the map.
+  ;; --------------------------------------------------------------------------
+room_draw
+  ; Make (ptr2) point to the map.
+  lda #<map
+  sta ptr2
+  lda #>map
+  sta ptr2 + 1
+
+  ; Offset to y1.
+  ldy #room_t.y1
+  lda (ptr),y
+
+  ; Move to row y1 in the map by adding #map_width y1 times.
+  tay
+- clc
+  lda ptr2
   adc #map_width
-  sta ptr
-  lda ptr + 1
+  sta ptr2
+  lda ptr2 + 1
   adc #0
-  sta ptr + 1
+  sta ptr2 + 1
+  dey
+  bne -
+
+  ; Offset to x1.
+  ldy #room_t.x1
+
+  ; Move to column x1 in the map by adding x1.
+  clc
+  lda ptr2
+  adc (ptr),y
+  sta ptr2
+  lda ptr2 + 1
+  adc #0
+  sta ptr2 + 1
+
+  ; Draw the top row into the map.
+  clc
+  lda #<room_tiles_row_top
+  sta ptr3
+  lda #>room_tiles_row_top
+  sta ptr3 + 1
+  jsr draw_room_row
+
+  ; Fetch the height.
+  ldy #room_t.height
+  lda (ptr),y
+  sta temp
+
+  ; Draw the center rows.
+  clc
+  lda #<room_tiles_row_center
+  sta ptr3
+  lda #>room_tiles_row_center
+  sta ptr3 + 1
+
+- jsr draw_room_row
+  dec temp
+  bne -
+
+  ; Draw the bottom row.
+  clc
+  lda #<room_tiles_row_bottom
+  sta ptr3
+  lda #>room_tiles_row_bottom
+  sta ptr3 + 1
+  jsr draw_room_row
+
+  rts
+  
+  ;; --------------------------------------------------------------------------
+  ;; Draws a single row for a room. The room is pointed at by (ptr), (ptr2)
+  ;; already should point to the leftmost map location where the row is to
+  ;; start, and (ptr3) points to the three tiles that make up this row.
+  ;; Advances (ptr2) to the beginning of the next row.
+  ;; --------------------------------------------------------------------------
+draw_room_row
+  ; Push the right and center tiles on the stack.
+  ldy #2
+  lda (ptr3),y
+  pha
+  dey
+  lda (ptr3),y
+  pha
+  dey
+
+  ; Store the top left corner tile.
+  lda (ptr3),y
+  sta (ptr2),y
+
+  ; Store the horizontal edge tile width times.
+  ldy #room_t.width
+  lda (ptr),y
+  tax
+  ldy #1
+  pla
+- sta (ptr2),y
+  iny
   dex
   bne -
 
-  ; Store the top left corner tile.
-+ lda #tile_corner_tl
-  sta (ptr),y
+  ; Store the top right corner tile.
+  pla
+  sta (ptr2),y
 
-  ; Remember where we started from.
-  ldx room0.y1
-  
-  ; Move to the next row.
-- clc
-  lda ptr
+  ; Advance (ptr2) to the beginning of the next row.
+  clc
+  lda ptr2
   adc #map_width
-  sta ptr
-  lda ptr + 1
+  sta ptr2
+  lda ptr2 + 1
   adc #0
-  sta ptr + 1
-  
-  ; Are we at y2 yet?
-  inx
-  cpx room0.y2
-  beq +
-
-  ; No, store a vertical edge tile.
-  lda #tile_edge_v
-  sta (ptr),y
-
-  ; Next row.
-  jmp -  
-
-  ; Yes, store a bottom left corner tile.
-+ lda #tile_corner_bl
-  sta (ptr),y
+  sta ptr2 + 1
 
   rts
 
