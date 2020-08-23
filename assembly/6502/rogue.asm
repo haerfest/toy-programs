@@ -16,58 +16,56 @@
   tile_edge_h    = 229
   tile_edge_v    = 230
 
-  screen_mode   = 0
-  screen_width  = 80
+  screen_mode   = 4
+  screen_width  = 40
   screen_height = 32
-
-  map_width  = 80
-  map_height = screen_height - 1
-
-  room_cell_width  = map_width  / 3
-  room_cell_height = map_height / 3
 
   room_min_width  = 4
   room_min_height = 4
 
+  room_cell_width  = 26
+  room_cell_height = 10
+
+  map_width  = room_cell_width  * 3
+  map_height = room_cell_height * 3
+
+  key_space = ' '
+  key_left  = 136
+  key_right = 137
+
   ;; --------------------------------------------------------------------------
   ;; Zero page workspace.
   ;; --------------------------------------------------------------------------   
-  temp    = $70
-  ptr     = $71
-  ptr2    = $73
-  ptr3    = $75
+  temp = $70
+  ptr  = $71
+  ptr2 = $73
+  ptr3 = $75
 
   ;; --------------------------------------------------------------------------
   ;; Main program, entry point.
   ;; --------------------------------------------------------------------------
 main
   jsr init
-- jsr map_clear
+  jsr status_print
+  jsr map_clear
   jsr map_generate
-  ldx #0
+- ldx viewport_column
   jsr map_draw
-
-  lda #31
-  jsr oswrch
-  lda #0
-  jsr oswrch
-  lda #31
-  jsr oswrch
-  lda #room_cell_width
-  jsr byte_print
-  lda #' '
-  jsr oswrch
-  lda #room_cell_height
-  jsr byte_print
-
-  jsr osrdch
+  jsr keyboard_handle
   jmp -
+
+  ;; --------------------------------------------------------------------------
+  ;; Variables.
+  ;; --------------------------------------------------------------------------
+viewport_column
+  .byte 0
 
   ;; --------------------------------------------------------------------------
   ;; Initializes the program.
   ;; --------------------------------------------------------------------------
 init
   jsr init_vdu
+  jsr init_fx
   jsr srand
   rts
 
@@ -91,7 +89,7 @@ init_vdu
   
   ;; --------------------------------------------------------------------------
   ;; VDU initialization commands.
-  ;; Format is: first byte (=N), then N bytes. Repeat as desired, end with N=0.
+  ;; Format: first byte (=N), then N bytes. Repeat as desired, end with N=0.
   ;; --------------------------------------------------------------------------
 data_vdu
   ; Set the screen MODE.
@@ -194,6 +192,16 @@ data_vdu
   ; End of VDU data.
   .byte 0
 
+  ;; --------------------------------------------------------------------------
+  ;; Initializes *FX.
+  ;; --------------------------------------------------------------------------
+init_fx
+  ; Disable cursor editing.
+  lda #4
+  ldx #1
+  jsr osbyte
+  rts
+
   ;; -------------------------------------------------------------------------- 
   ;; Initial random number generator seed. Only four bytes are used, but we
   ;; reserve five so we can easily initialize it with the time.
@@ -238,6 +246,46 @@ mod
 - sbc temp
   bcs -
   adc temp
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Handles... the keyboard.
+  ;; --------------------------------------------------------------------------
+keyboard_handle
+  jsr osrdch
+  bcc +
+
+  ; Acknowldege escape condition (error).
+  lda #$7e
+  jmp osbyte
+
++ cmp #key_left
+  beq keyboard_handle_left
+  cmp #key_right
+  beq keyboard_handle_right
+  cmp #key_space
+  beq keyboard_handle_space
+  rts
+
+keyboard_handle_left
+  ; Left key pressed: scroll right.
+  lda viewport_column
+  beq +
+  dec viewport_column
++ rts
+
+keyboard_handle_right
+  ; Right key pressed: scroll left.
+  lda viewport_column
+  cmp #map_width - screen_width - 1
+  beq +
+  inc viewport_column
++ rts
+
+keyboard_handle_space
+  ; Space bar pressed: generate new level.
+  jsr map_clear
+  jsr map_generate
   rts
 
   ;; --------------------------------------------------------------------------
@@ -666,6 +714,54 @@ byte_print
 
 hex_chars
   .text "0123456789ABCDEF"
+
+  ;; --------------------------------------------------------------------------
+  ;; Prints a fixed status message for show.
+  ;; --------------------------------------------------------------------------
+status_print
+  pha
+
+  ; Place the cursor at the next to last row.
+  lda #31
+  jsr oswrch
+  lda #0
+  jsr oswrch
+  lda #30
+  jsr oswrch
+
+  ; Print the status message.
+  lda #<status_message
+  sta ptr
+  lda #>status_message
+  sta ptr + 1
+  jsr string_print
+
+  pla
+  rts
+
+status_message
+  .text "L:1 H:12(12) S:16(16) G:20 A:5 E:1/0"
+  .byte 0
+
+  ;; --------------------------------------------------------------------------
+  ;; Prints a null-terminated string pointed to by (ptr).
+  ;; --------------------------------------------------------------------------
+string_print
+  pha
+  tya
+  pha
+
+  ldy #0
+- lda (ptr),y
+  beq +
+  jsr oswrch
+  iny
+  jmp -
+
++ pla
+  tay
+  pla
+  rts
 
   ;; --------------------------------------------------------------------------
   ;; The map will be map_height * map_width bytes in size and generated on
