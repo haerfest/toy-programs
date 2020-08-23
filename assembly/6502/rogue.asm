@@ -16,11 +16,12 @@
   tile_edge_h    = 229
   tile_edge_v    = 230
 
-  screen_mode  = 4
-  screen_width = 40
+  screen_mode   = 4
+  screen_width  = 40
+  screen_height = 32
 
   map_width  = 80
-  map_height = 31
+  map_height = screen_height - 1
 
   room_cell_width  = map_width  / 3
   room_cell_height = map_height / 3
@@ -45,6 +46,13 @@ main
   jsr generate_map
   ldx #0
   jsr draw_map
+
+  lda #<room0
+  sta ptr
+  lda #>room0
+  sta ptr + 1
+  jsr room_print
+
   jsr osrdch
   jmp -
 
@@ -225,9 +233,6 @@ mod
   adc temp
   rts
 
-map
-  .fill map_height * map_width
-
   ;; --------------------------------------------------------------------------
   ;; Clears the map by setting each tile to a space.
   ;; --------------------------------------------------------------------------
@@ -332,7 +337,7 @@ room_generate
   ldy #room_t.y2
   sta (ptr),y
 
-  ; x1 := and() % (room_cell_width - room_min_width)
+  ; x1 := rand() % (room_cell_width - room_min_width)
   ldx #room_cell_width - room_min_width
   jsr rand
   jsr mod
@@ -384,6 +389,7 @@ room_draw
   lda (ptr),y
 
   ; Move to row y1 in the map by adding #map_width y1 times.
+  beq +
   tay
 - clc
   lda ptr2
@@ -396,7 +402,7 @@ room_draw
   bne -
 
   ; Offset to x1.
-  ldy #room_t.x1
++ ldy #room_t.x1
 
   ; Move to column x1 in the map by adding x1.
   clc
@@ -532,4 +538,82 @@ draw_map
   ; Print another row.
   jmp --
 
-+ rts 
++ rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Prints a room's coordinates. The room is pointed at by (ptr).
+  ;; --------------------------------------------------------------------------
+room_print
+  pha
+  tya
+  pha
+
+  ; Move the cursor to the last row.
+  lda #31
+  jsr oswrch
+  lda #0
+  jsr oswrch
+  lda #screen_height - 1
+  jsr oswrch
+
+  ; A room has six byte values.
+  ldy #0
+- lda (ptr),y
+  jsr byte_print
+  lda #' '
+  jsr oswrch
+  iny
+  cpy #6
+  bne -
+
+  pla
+  tay
+  pla
+  rts
+  
+  ;; --------------------------------------------------------------------------
+  ;; Prints a single byte in A.
+  ;; --------------------------------------------------------------------------
+byte_print
+  pha
+  txa
+  pha
+
+  ; Load A from the stack and push it once more.
+  tsx
+  inx
+  inx
+  lda $0100,x
+  pha
+
+  ; Print upper nibble.
+  lsr a
+  lsr a
+  lsr a
+  lsr a
+  tax
+  lda hex_chars,x
+  jsr oswrch
+
+  ; Print lower nibble.
+  pla
+  and #$0F
+  tax
+  lda hex_chars,x
+  jsr oswrch
+
+  pla
+  tax
+  pla
+  rts
+
+hex_chars
+  .text "0123456789ABCDEF"
+
+  ;; --------------------------------------------------------------------------
+  ;; The map will be map_height * map_width bytes in size and generated on
+  ;; the fly. No need to store that in the binary.
+  ;; --------------------------------------------------------------------------
+map
+  .byte 0
+
