@@ -42,16 +42,23 @@
   ;; --------------------------------------------------------------------------
 main
   jsr init
-- jsr clear_map
-  jsr generate_map
+- jsr map_clear
+  jsr map_generate
   ldx #0
-  jsr draw_map
+  jsr map_draw
 
-  lda #<room0
-  sta ptr
-  lda #>room0
-  sta ptr + 1
-  jsr room_print
+  lda #31
+  jsr oswrch
+  lda #0
+  jsr oswrch
+  lda #31
+  jsr oswrch
+  lda #room_cell_width
+  jsr byte_print
+  lda #' '
+  jsr oswrch
+  lda #room_cell_height
+  jsr byte_print
 
   jsr osrdch
   jmp -
@@ -236,7 +243,7 @@ mod
   ;; --------------------------------------------------------------------------
   ;; Clears the map by setting each tile to a space.
   ;; --------------------------------------------------------------------------
-clear_map
+map_clear
   ; Make (ptr) point to the map.
   lda #<map
   sta ptr
@@ -297,7 +304,7 @@ room9 .dstruct room_t
   ;; --------------------------------------------------------------------------
   ;; Generates a single random map.
   ;; --------------------------------------------------------------------------
-generate_map
+map_generate
   lda #<room0
   sta ptr
   lda #>room0
@@ -353,18 +360,8 @@ generate_map
   ;; generate.
   ;; --------------------------------------------------------------------------
 room_generate
-  ; y1 := rand() % (room_cell_height - room_min_height)
+  ; height := room_min_height + rand() % (room_cell_height - room_min_height)
   ldx #room_cell_height - room_min_height
-  jsr rand
-  jsr mod
-  ldy #room_t.y1
-  sta (ptr),y
-
-  ; height := room_min_height + rand() % (room_cell_height - y1 - room_min_height)
-  lda #room_cell_height - room_min_height
-  sec
-  sbc (ptr),y
-  tax
   jsr rand
   jsr mod
   clc
@@ -372,36 +369,50 @@ room_generate
   ldy #room_t.height
   sta (ptr),y
 
-  ; y2 := y1 + height
-  ldy #room_t.y1
-  clc
-  adc (ptr),y
-  ldy #room_t.y2
-  sta (ptr),y
-
-  ; x1 := rand() % (room_cell_width - room_min_width)
-  ldx #room_cell_width - room_min_width
-  jsr rand
-  jsr mod
-  ldy #room_t.x1
-  sta (ptr),y
-
-  ; width := room_min_width + rand() % (room_cell_width - x1 - room_min_width)
-  lda #room_cell_width - room_min_width
+  ; y1 := rand() % (room_cell_height - height)
+  lda #room_cell_height
   sec
   sbc (ptr),y
   tax
+  jsr rand
+  jsr mod
+  ldy #room_t.y1
+  sta (ptr),y
+
+  ; y2 := y1 + height - 1
+  ldy #room_t.height
+  clc
+  adc (ptr),y
+  sec
+  sbc #1
+  ldy #room_t.y2
+  sta (ptr),y
+
+  ; width := room_min_width + rand() % (room_cell_width - room_min_width)
+  ldx #room_cell_width - room_min_width
   jsr rand
   jsr mod
   clc
   adc #room_min_width
   ldy #room_t.width
   sta (ptr),y
-  
-  ; x2 := x1 + width
+
+  ; x1 := rand() % (room_cell_width - width)
+  lda #room_cell_width
+  sec
+  sbc (ptr),y
+  tax
+  jsr rand
+  jsr mod
   ldy #room_t.x1
+  sta (ptr),y
+
+  ; x2 := x1 + width - 1
+  ldy #room_t.width
   clc
   adc (ptr),y
+  sec
+  sbc #1
   ldy #room_t.x2
   sta (ptr),y
   
@@ -463,9 +474,11 @@ room_draw
   sta ptr3 + 1
   jsr draw_room_row
 
-  ; Fetch the height.
+  ; Fetch the height - 2.
   ldy #room_t.height
   lda (ptr),y
+  sec
+  sbc #2
   sta temp
 
   ; Draw the center rows.
@@ -509,10 +522,12 @@ draw_room_row
   lda (ptr3),y
   sta (ptr2),y
 
-  ; Store the horizontal edge tile width times.
+  ; Store the horizontal edge tile width - 2 times.
   ldy #room_t.width
   lda (ptr),y
   tax
+  dex
+  dex
   ldy #1
   pla
 - sta (ptr2),y
@@ -538,7 +553,7 @@ draw_room_row
   ;; --------------------------------------------------------------------------
   ;; Draws a single map starting at column X.
   ;; --------------------------------------------------------------------------
-draw_map
+map_draw
   ; Make (ptr) point to column X of the map.
   stx temp
   clc
