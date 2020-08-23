@@ -16,8 +16,8 @@
   tile_edge_h    = 229
   tile_edge_v    = 230
 
-  screen_mode   = 4
-  screen_width  = 40
+  screen_mode   = 0
+  screen_width  = 80
   screen_height = 32
 
   map_width  = 80
@@ -302,8 +302,50 @@ generate_map
   sta ptr
   lda #>room0
   sta ptr + 1
+
+.for cell_y in 0, 1, 2
+.for cell_x in 0, 1, 2
   jsr room_generate
+
+  ; Correct x1, y1, x2, y2 for the grid cell.
+  ldy #room_t.x1
+  lda (ptr),y
+  clc
+  adc #cell_x * room_cell_width
+  sta (ptr),y
+
+  ldy #room_t.x2
+  lda (ptr),y
+  clc
+  adc #cell_x * room_cell_width
+  sta (ptr),y
+
+  ldy #room_t.y1
+  lda (ptr),y
+  clc
+  adc #cell_y * room_cell_height
+  sta (ptr),y
+
+  ldy #room_t.y2
+  lda (ptr),y
+  clc
+  adc #cell_y * room_cell_height
+  sta (ptr),y
+
+  ; Draw this room.
   jsr room_draw
+
+  ; Move (ptr) to the next room.
+  clc
+  lda ptr
+  adc #size(room_t)
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+.next
+.next
+
   rts
 
   ;; --------------------------------------------------------------------------
