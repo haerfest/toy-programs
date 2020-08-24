@@ -1,7 +1,7 @@
 ;; To assemble:
 ;;   64tass --nostart -Wall --output rogue.o rogue.asm
 
-  * = $2000
+  * = $e00
 
   osrdch = $ffe0
   oswrch = $ffee
@@ -41,7 +41,7 @@
   x1   = $77
   y1   = $78
   x2   = $79
-  y2   = $80
+  y2   = $7a
 
   ;; --------------------------------------------------------------------------
   ;; Main program, entry point.
@@ -51,7 +51,6 @@ main
   jsr status_print
 - jsr map_clear
   jsr map_generate
-  ldx #0
   jsr map_draw
   jsr keyboard_handle
   jmp -
@@ -204,7 +203,7 @@ data_vdu
   .byte %00110011
   .byte %11001100
 
-; Colour yellow on blue.
+  ; Colour yellow on blue.
   .byte 12
   .byte 19, 1, 3, 0, 0, 0
   .byte 19, 0, 4, 0, 0, 0
@@ -227,7 +226,7 @@ init_fx
   ;; reserve five so we can easily initialize it with the time.
   ;; -------------------------------------------------------------------------- 
 seed
-  .fill 5
+  .byte 0, 0, 0, 0, 0
 
   ;; --------------------------------------------------------------------------
   ;; Read system clock and store as random seed.
@@ -295,14 +294,15 @@ map_clear
 
   ; Erase one row.
 - lda #' '
-  ldy #map_width - 1
+  ldy #0
 - sta (ptr),y
-  dey
-  bpl -
+  iny
+  cpy #map_width
+  bne -
 
   ; Advance to next row.
-  clc
   lda ptr
+  clc
   adc #map_width
   sta ptr
   lda ptr + 1
@@ -395,7 +395,11 @@ map_generate
 
   ; Connect room0 to room1
   lda #0
-  jsr room_connect
+  jsr room_connect_right
+
+  ; Connect room0 to room3.
+  lda #0
+  jsr room_connect_down
 
   rts
 
@@ -488,8 +492,8 @@ room_draw
   ; Move to row y1 in the map by adding #map_width y1 times.
   beq +
   tay
-- clc
-  lda ptr2
+- lda ptr2
+  clc
   adc #map_width
   sta ptr2
   lda ptr2 + 1
@@ -502,8 +506,8 @@ room_draw
 + ldy #room_t.x1
 
   ; Move to column x1 in the map by adding x1.
-  clc
   lda ptr2
+  clc
   adc (ptr),y
   sta ptr2
   lda ptr2 + 1
@@ -511,12 +515,12 @@ room_draw
   sta ptr2 + 1
 
   ; Draw the top row into the map.
-  clc
   lda #<room_tiles_row_top
+  clc  
   sta ptr3
   lda #>room_tiles_row_top
   sta ptr3 + 1
-  jsr draw_room_row
+  jsr room_row_draw
 
   ; Fetch the height - 2.
   ldy #room_t.height
@@ -532,7 +536,7 @@ room_draw
   lda #>room_tiles_row_center
   sta ptr3 + 1
 
-- jsr draw_room_row
+- jsr room_row_draw
   dec temp
   bne -
 
@@ -542,7 +546,7 @@ room_draw
   sta ptr3
   lda #>room_tiles_row_bottom
   sta ptr3 + 1
-  jsr draw_room_row
+  jsr room_row_draw
 
   rts
   
@@ -552,7 +556,7 @@ room_draw
   ;; start, and (ptr3) points to the three tiles that make up this row.
   ;; Advances (ptr2) to the beginning of the next row.
   ;; --------------------------------------------------------------------------
-draw_room_row
+room_row_draw
   ; Push the right and center tiles on the stack.
   ldy #2
   lda (ptr3),y
@@ -597,7 +601,7 @@ draw_room_row
   ;; --------------------------------------------------------------------------
   ;; Connect room A to room A+1.
   ;; --------------------------------------------------------------------------
-room_connect
+room_connect_right
   tax
 
   ; Setup (ptr) to point to room0.
@@ -683,14 +687,108 @@ room_connect
   ; The passage lies in between the doors.
   inc x1
   dec x2
-  jsr passage_generate
+  jsr passage_generate_right
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; Generates a random passage from (x1,y1) to (x2,y2). These are not door
-  ;; points, but the starting points of the passage, outside the doors.
+  ;; Connect room A to room A+3.
   ;; --------------------------------------------------------------------------
-passage_generate
+room_connect_down
+  tax
+
+  ; Setup (ptr) to point to room0.
+  lda #<room0
+  sta ptr
+  lda #>room0
+  sta ptr + 1
+
+  ; Advance to room{A}.
+  cpx #0
+  beq +
+- clc
+  lda ptr
+  adc #size(room_t)
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  dex
+  bne -
+
+  ; Pick a random spot on the bottom edge for a door:
+  ; x1 + 1 + rand() % (width - 2)
++ ldy #room_t.width
+  lda (ptr),y
+  tax
+  dex
+  dex
+  jsr rand
+  jsr mod
+  clc
+  ldy #room_t.x1
+  adc (ptr),y
+  adc #1
+  sta x1
+
+  ; Choose y2 for the y-coordinate.
+  ldy #room_t.y2
+  lda (ptr),y
+  sta y1
+
+  ; Place the tile in the map.
+  lda #tile_door
+  ldx x1
+  ldy y1
+  jsr tile_place
+
+  ; Advance (ptr) one room down (= three rooms right).
+  ldy #3
+- clc
+  lda ptr
+  adc #size(room_t)
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  dey
+  bne -
+
+  ; Pick a random spot on the top edge for a door:
+  ; x1 + 1 + rand() % (width - 2)
++ ldy #room_t.width
+  lda (ptr),y
+  tax
+  dex
+  dex
+  jsr rand
+  jsr mod
+  clc
+  ldy #room_t.x1
+  adc (ptr),y
+  adc #1
+  sta x2
+
+  ; Choose y1 for the x-coordinate.
+  ldy #room_t.y1
+  lda (ptr),y
+  sta y2
+
+  ; Place the tile in the map.
+  lda #tile_door
+  ldx x2
+  ldy y2
+  jsr tile_place
+
+  ; The passage lies in between the doors.
+  inc y1
+  dec y2
+  jsr passage_generate_down
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Generates a random passage rightwards, from (x1,y1) to (x2,y2).
+  ;; --------------------------------------------------------------------------
+passage_generate_right
   ; Calculate a random turning point between x1 and x2:
   ; x1 + rand() % (x2 - x1 + 1)
   lda x2
@@ -733,6 +831,57 @@ passage_generate
 - cpx x2
   beq +
   inx
+  jsr tile_place
+  jmp -
+
++ rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Generates a random passage downwards, from (x1,y1) to (x2,y2).
+  ;; --------------------------------------------------------------------------
+passage_generate_down
+  ; Calculate a random turning point between y1 and y2:
+  ; y1 + rand() % (y2 - y1 + 1)
+  lda y2
+  sec
+  sbc y1
+  tax
+  inx
+  jsr rand
+  jsr mod
+  clc
+  adc y1
+  sta temp
+
+  ; Start at (x1,y1).
+  lda #tile_passage
+  ldx x1
+  ldy y1
+  jsr tile_place
+
+  ; Draw to (x1,temp).
+- cpy temp
+  beq +
+  iny
+  jsr tile_place
+  jmp -
+
+  ; Draw to (x2,temp).
++ nop
+- cpx x2
+  beq ++
+  bpl +
+  inx
+  inx
++ dex
+  jsr tile_place
+  jmp -
+
+  ; Draw to (x2,y2).
++ nop
+- cpy y2
+  beq +
+  iny
   jsr tile_place
   jmp -
 
@@ -785,17 +934,13 @@ tile_place
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; Draws a single map starting at column X.
+  ;; Draws the map to the screen.
   ;; --------------------------------------------------------------------------
 map_draw
-  ; Make (ptr) point to column X of the map.
-  stx temp
-  clc
+  ; Make (ptr) point to the map.
   lda #<map
-  adc temp
   sta ptr
   lda #>map
-  adc #0
   sta ptr + 1
 
   ; Move the cursor to the top left corner.
@@ -818,8 +963,8 @@ map_draw
   beq +
 
   ; Move to the next row by adding map_width columns.
-  clc
   lda ptr
+  clc
   adc #map_width
   sta ptr
   lda ptr + 1
@@ -955,4 +1100,3 @@ string_print
   ;; --------------------------------------------------------------------------
 map
   .byte 0
-
