@@ -15,9 +15,10 @@
   tile_corner_br = 228
   tile_edge_h    = 229
   tile_edge_v    = 230
+  tile_door      = 231
 
-  screen_mode   = 4
-  screen_width  = 40
+  screen_mode   = 0
+  screen_width  = 80
   screen_height = 32
 
   room_min_width  = 4
@@ -47,18 +48,12 @@
 main
   jsr init
   jsr status_print
-  jsr map_clear
+- jsr map_clear
   jsr map_generate
-- ldx viewport_column
+  ldx #0
   jsr map_draw
   jsr keyboard_handle
   jmp -
-
-  ;; --------------------------------------------------------------------------
-  ;; Variables.
-  ;; --------------------------------------------------------------------------
-viewport_column
-  .byte 0
 
   ;; --------------------------------------------------------------------------
   ;; Initializes the program.
@@ -184,6 +179,18 @@ data_vdu
   .byte %00000000
   .byte %00000000
 
+  ; Door tile.
+  .byte 10
+  .byte 23, tile_door
+  .byte %11111111
+  .byte %10000001
+  .byte %10111101
+  .byte %10111101
+  .byte %10110101
+  .byte %10111101
+  .byte %10111101
+  .byte %10111101
+
   ; Colour yellow on blue.
   .byte 12
   .byte 19, 1, 3, 0, 0, 0
@@ -259,34 +266,7 @@ keyboard_handle
   lda #$7e
   jmp osbyte
 
-+ cmp #key_left
-  beq keyboard_handle_left
-  cmp #key_right
-  beq keyboard_handle_right
-  cmp #key_space
-  beq keyboard_handle_space
-  rts
-
-keyboard_handle_left
-  ; Left key pressed: scroll right.
-  lda viewport_column
-  beq +
-  dec viewport_column
 + rts
-
-keyboard_handle_right
-  ; Right key pressed: scroll left.
-  lda viewport_column
-  cmp #map_width - screen_width - 1
-  beq +
-  inc viewport_column
-+ rts
-
-keyboard_handle_space
-  ; Space bar pressed: generate new level.
-  jsr map_clear
-  jsr map_generate
-  rts
 
   ;; --------------------------------------------------------------------------
   ;; Clears the map by setting each tile to a space.
@@ -324,7 +304,7 @@ map_clear
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; The type of a single room
+  ;; The type of a single room. The width and height include all edges.
   ;; --------------------------------------------------------------------------
 room_t .struct
   x1     .byte 0
@@ -400,6 +380,10 @@ map_generate
   sta ptr + 1
 .next
 .next
+
+  ; Connect room0 to room1
+  lda #0
+  jsr room_connect
 
   rts
 
@@ -599,6 +583,92 @@ draw_room_row
   rts
 
   ;; --------------------------------------------------------------------------
+  ;; Connect room A to room A+1.
+  ;; --------------------------------------------------------------------------
+room_connect
+  tax
+
+  ; Setup (ptr) to point to room0.
+  lda #<room0
+  sta ptr
+  lda #>room0
+  sta ptr + 1
+
+  ; Advance to room{A}.
+  cpx #0
+  beq +
+- clc
+  lda ptr
+  adc #size(room_t)
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  dex
+  bne -
+
+  ; Pick a random spot on the right edge for a door.
+  ; X := y1 + 1 + rand() % (height - 2)
++ ldy #room_t.height
+  lda (ptr),y
+  tax
+  dex
+  dex
+  jsr rand
+  jsr mod
+  clc
+  ldy #room_t.y1
+  adc (ptr),y
+  adc #1
+  pha
+
+  ; Choose x2 for the x-coordinate.
+  ldy #room_t.x2
+  lda (ptr),y
+  tax
+
+  ; Place the tile in the map.
+  pla
+  tay
+  lda #tile_door
+  jsr tile_place
+
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Places tile A at column X and row Y in the map.
+  ;; --------------------------------------------------------------------------
+tile_place
+  pha
+
+  ; Make (ptr) point to the map.
+  lda #<map
+  sta ptr
+  lda #>map
+  sta ptr + 1
+  
+  ; Advance (ptr) to row Y.
+  cpy #0
+  beq +
+- clc
+  lda ptr
+  adc #map_width
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  dey
+  bne -
+
+  ; Place A at column X.
++ txa
+  tay
+  pla
+  sta (ptr),y
+
+  rts
+
+  ;; --------------------------------------------------------------------------
   ;; Draws a single map starting at column X.
   ;; --------------------------------------------------------------------------
 map_draw
@@ -740,7 +810,7 @@ status_print
   rts
 
 status_message
-  .text "L:1 H:12(12) S:16(16) G:20 A:5 E:1/0"
+  .text "Level:2  Hits:15(17)  Str:16(16)  Gold:93  Armor:5  Exp:2/15"
   .byte 0
 
   ;; --------------------------------------------------------------------------
