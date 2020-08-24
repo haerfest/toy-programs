@@ -24,15 +24,11 @@
   room_min_width  = 4
   room_min_height = 4
 
-  room_cell_width  = 26
-  room_cell_height = 10
+  map_width  = 80
+  map_height = 31
 
-  map_width  = room_cell_width  * 3
-  map_height = room_cell_height * 3
-
-  key_space = ' '
-  key_left  = 136
-  key_right = 137
+  room_cell_width  = map_width  / 3
+  room_cell_height = map_height / 3
 
   ;; --------------------------------------------------------------------------
   ;; Zero page workspace.
@@ -260,13 +256,12 @@ mod
   ;; --------------------------------------------------------------------------
 keyboard_handle
   jsr osrdch
-  bcc +
+  bcs +
+  rts
 
   ; Acknowldege escape condition (error).
-  lda #$7e
++ lda #$7e
   jmp osbyte
-
-+ rts
 
   ;; --------------------------------------------------------------------------
   ;; Clears the map by setting each tile to a space.
@@ -633,6 +628,41 @@ room_connect
   lda #tile_door
   jsr tile_place
 
+  ; Advance (ptr) one room to the right.
+  clc
+  lda ptr
+  adc #size(room_t)
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+
+  ; Pick a random spot on the left edge for a door.
+  ; X := y1 + 1 + rand() % (height - 2)
++ ldy #room_t.height
+  lda (ptr),y
+  tax
+  dex
+  dex
+  jsr rand
+  jsr mod
+  clc
+  ldy #room_t.y1
+  adc (ptr),y
+  adc #1
+  pha
+
+  ; Choose x1 for the x-coordinate.
+  ldy #room_t.x1
+  lda (ptr),y
+  tax
+
+  ; Place the tile in the map.
+  pla
+  tay
+  lda #tile_door
+  jsr tile_place
+
   rts
 
   ;; --------------------------------------------------------------------------
@@ -641,22 +671,22 @@ room_connect
 tile_place
   pha
 
-  ; Make (ptr) point to the map.
+  ; Make (ptr2) point to the map.
   lda #<map
-  sta ptr
+  sta ptr2
   lda #>map
-  sta ptr + 1
+  sta ptr2 + 1
   
-  ; Advance (ptr) to row Y.
+  ; Advance (ptr2) to row Y.
   cpy #0
   beq +
 - clc
-  lda ptr
+  lda ptr2
   adc #map_width
-  sta ptr
-  lda ptr + 1
+  sta ptr2
+  lda ptr2 + 1
   adc #0
-  sta ptr + 1
+  sta ptr2 + 1
   dey
   bne -
 
@@ -664,7 +694,7 @@ tile_place
 + txa
   tay
   pla
-  sta (ptr),y
+  sta (ptr2),y
 
   rts
 
@@ -810,7 +840,7 @@ status_print
   rts
 
 status_message
-  .text "Level:2  Hits:15(17)  Str:16(16)  Gold:93  Armor:5  Exp:2/15"
+  .text "Level:2   Hits:15(17)   Str:16(16)   Gold:93   Armor:5   Exp:2/15"
   .byte 0
 
   ;; --------------------------------------------------------------------------
