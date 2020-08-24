@@ -16,6 +16,7 @@
   tile_edge_h    = 229
   tile_edge_v    = 230
   tile_door      = 231
+  tile_passage   = 232
 
   screen_mode   = 0
   screen_width  = 80
@@ -25,7 +26,7 @@
   room_min_height = 4
 
   map_width  = 80
-  map_height = 31
+  map_height = 30
 
   room_cell_width  = map_width  / 3
   room_cell_height = map_height / 3
@@ -37,6 +38,10 @@
   ptr  = $71
   ptr2 = $73
   ptr3 = $75
+  x1   = $77
+  y1   = $78
+  x2   = $79
+  y2   = $80
 
   ;; --------------------------------------------------------------------------
   ;; Main program, entry point.
@@ -187,7 +192,19 @@ data_vdu
   .byte %10111101
   .byte %10111101
 
-  ; Colour yellow on blue.
+  ; Passage tile.
+  .byte 10
+  .byte 23, tile_passage
+  .byte %00110011
+  .byte %11001100
+  .byte %00110011
+  .byte %11001100
+  .byte %00110011
+  .byte %11001100
+  .byte %00110011
+  .byte %11001100
+
+; Colour yellow on blue.
   .byte 12
   .byte 19, 1, 3, 0, 0, 0
   .byte 19, 0, 4, 0, 0, 0
@@ -602,8 +619,8 @@ room_connect
   dex
   bne -
 
-  ; Pick a random spot on the right edge for a door.
-  ; X := y1 + 1 + rand() % (height - 2)
+  ; Pick a random spot on the right edge for a door:
+  ; y1 + 1 + rand() % (height - 2)
 + ldy #room_t.height
   lda (ptr),y
   tax
@@ -615,17 +632,17 @@ room_connect
   ldy #room_t.y1
   adc (ptr),y
   adc #1
-  pha
+  sta y1
 
   ; Choose x2 for the x-coordinate.
   ldy #room_t.x2
   lda (ptr),y
-  tax
+  sta x1
 
   ; Place the tile in the map.
-  pla
-  tay
   lda #tile_door
+  ldx x1
+  ldy y1
   jsr tile_place
 
   ; Advance (ptr) one room to the right.
@@ -637,8 +654,8 @@ room_connect
   adc #0
   sta ptr + 1
 
-  ; Pick a random spot on the left edge for a door.
-  ; X := y1 + 1 + rand() % (height - 2)
+  ; Pick a random spot on the left edge for a door:
+  ; y1 + 1 + rand() % (height - 2)
 + ldy #room_t.height
   lda (ptr),y
   tax
@@ -650,25 +667,85 @@ room_connect
   ldy #room_t.y1
   adc (ptr),y
   adc #1
-  pha
+  sta y2
 
   ; Choose x1 for the x-coordinate.
   ldy #room_t.x1
   lda (ptr),y
-  tax
+  sta x2
 
   ; Place the tile in the map.
-  pla
-  tay
   lda #tile_door
+  ldx x2
+  ldy y2
   jsr tile_place
 
+  ; The passage lies in between the doors.
+  inc x1
+  dec x2
+  jsr passage_generate
   rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Generates a random passage from (x1,y1) to (x2,y2). These are not door
+  ;; points, but the starting points of the passage, outside the doors.
+  ;; --------------------------------------------------------------------------
+passage_generate
+  ; Calculate a random turning point between x1 and x2:
+  ; x1 + rand() % (x2 - x1 + 1)
+  lda x2
+  sec
+  sbc x1
+  tax
+  inx
+  jsr rand
+  jsr mod
+  clc
+  adc x1
+  sta temp
+
+  ; Start at (x1,y1).
+  lda #tile_passage
+  ldx x1
+  ldy y1
+  jsr tile_place
+
+  ; Draw to (temp,y1).
+- cpx temp
+  beq +
+  inx
+  jsr tile_place
+  jmp -
+
+  ; Draw to (temp,y2).
++ nop
+- cpy y2
+  beq ++
+  bpl +
+  iny
+  iny
++ dey
+  jsr tile_place
+  jmp -
+
+  ; Draw to (x2,y2).
++ nop
+- cpx x2
+  beq +
+  inx
+  jsr tile_place
+  jmp -
+
++ rts
 
   ;; --------------------------------------------------------------------------
   ;; Places tile A at column X and row Y in the map.
   ;; --------------------------------------------------------------------------
 tile_place
+  pha
+  txa
+  pha
+  tya
   pha
 
   ; Make (ptr2) point to the map.
@@ -690,12 +767,21 @@ tile_place
   dey
   bne -
 
-  ; Place A at column X.
+  ; Place A at column X, fetching A off the stack.
 + txa
   tay
-  pla
+  tsx
+  inx
+  inx
+  inx
+  lda $0100,x
   sta (ptr2),y
 
+  pla
+  tay
+  pla
+  tax
+  pla
   rts
 
   ;; --------------------------------------------------------------------------
