@@ -319,12 +319,12 @@ map_clear
   ;; The type of a single room. The width and height include all edges.
   ;; --------------------------------------------------------------------------
 room_t .struct
-  x1     .byte 0
-  y1     .byte 0
-  x2     .byte 0
-  y2     .byte 0
-  width  .byte 0
-  height .byte 0
+  x1     .byte ?
+  y1     .byte ?
+  x2     .byte ?
+  y2     .byte ?
+  width  .byte ?
+  height .byte ?
 .ends
 
   ;; --------------------------------------------------------------------------
@@ -345,10 +345,8 @@ room9 .dstruct room_t
   ;; Generates a single random map.
   ;; --------------------------------------------------------------------------
 map_generate
-  lda #<room0
-  sta ptr
-  lda #>room0
-  sta ptr + 1
+  ldx #0
+  jsr room_load
 
 .for cell_y in 0, 1, 2
 .for cell_x in 0, 1, 2
@@ -393,14 +391,167 @@ map_generate
 .next
 .next
 
-  ; Connect room0 to room1
-  lda #0
-  jsr room_connect_right
+  jsr rooms_connect
+  rts
 
-  ; Connect room0 to room3.
+  ;; --------------------------------------------------------------------------
+  ;; Randomly connect all rooms.
+  ;; --------------------------------------------------------------------------
+rooms_connect
+  ; No rooms are connected yet.
   lda #0
-  jsr room_connect_down
+  ldx #0
+- sta rooms_connected,x
+  inx
+  cpx #9
+  bne -
 
+  ; Pick a random room to begin with.
+  jsr rand
+  ldx #9
+  jsr mod
+  pha
+
+  ; Counts the number of viable candidates we considered.
+  ldx #0
+
+  ; Pick a random, unconnected neighbour.
+- ldy #0
+
+  ; Make (ptr) point to room0_neighbors.
+  lda #<room0_neighbors
+  sta ptr
+  lda #>room0_neighbors
+  sta ptr + 1
+ 
+  ; Must be a neighbor.
+- lda (ptr),y
+  beq +
+
+  ; Must not be connected yet.
+  lda rooms_connected,y
+  bne +
+
+  ; Found a viable room.
+  inx
+
+  ; Randomly pick this one or not. For the first room
+  ; X=1 so the mod will return 0 there and we'll start
+  ; with that one.
+  jsr rand
+  jsr mod
+  bne +
+
+  ; Pick this one.
+  stx temp
+
+  ; Update (ptr) to the next room's neighbors.
++ lda ptr
+  clc
+  adc #9
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+
+  ; Try the next room.
+  iny
+  cpy #9
+  bne -
+
+  ; Did we consider any viable rooms?
+  cpx #0
+  bne +
+
+  ; No, try again starting with a new random room, not yet connected.
+  pla
+- ldx #9
+  jsr rand
+  jsr mod
+  tax
+  lda rooms_connected,x
+  bne -
+  pha
+  jmp ---
+
+  ; Yes, connect both rooms.
++ pla
+  ldx temp
+  jsr rooms_connect
+
+  
+  rts
+
+room0_neighbors
+  .byte 0, 1, 0
+  .byte 1, 0, 0
+  .byte 0, 0, 0
+room1_neighbors
+  .byte 1, 0, 1
+  .byte 0, 1, 0
+  .byte 0, 0, 0
+room2_neighbors
+  .byte 0, 1, 0
+  .byte 0, 0, 1
+  .byte 0, 0, 0
+room3_neighbors
+  .byte 1, 0, 0
+  .byte 0, 1, 0
+  .byte 1, 0, 0
+room4_neighbors
+  .byte 0, 1, 0
+  .byte 1, 0, 1
+  .byte 0, 1, 0
+room5_neighbors
+  .byte 0, 0, 1
+  .byte 0, 1, 0
+  .byte 0, 0, 1
+room6_neighbors
+  .byte 0, 0, 0
+  .byte 1, 0, 0
+  .byte 0, 1, 0
+room7_neighbors
+  .byte 0, 0, 0
+  .byte 0, 1, 0
+  .byte 1, 0, 1
+room8_neighbors
+  .byte 0, 0, 0
+  .byte 0, 0, 1
+  .byte 0, 1, 0
+
+rooms_connected
+  .byte 0 x 9
+
+  ;; --------------------------------------------------------------------------
+  ;; Set (ptr) to room{X}.
+  ;; --------------------------------------------------------------------------
+room_load
+  pha
+  txa
+  pha
+
+  ; Setup (ptr) to point to room0.
+  lda #<room0
+  sta ptr
+  lda #>room0
+  sta ptr + 1
+
+  ; Advance to room{A}.
+  cpx #0
+  beq +
+- clc
+  lda ptr
+  adc #size(room_t)
+  sta ptr
+  lda ptr + 1
+  adc #0
+  sta ptr + 1
+  dex
+  bne -
+
++ pla
+  tax
+  pla
   rts
 
   ;; --------------------------------------------------------------------------
@@ -463,7 +614,7 @@ room_generate
   sbc #1
   ldy #room_t.x2
   sta (ptr),y
-  
+
   rts
 
 room_tiles_row_top
@@ -599,29 +750,10 @@ room_row_draw
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; Connect room A to room A+1.
+  ;; Connect room X to room X+1.
   ;; --------------------------------------------------------------------------
 room_connect_right
-  tax
-
-  ; Setup (ptr) to point to room0.
-  lda #<room0
-  sta ptr
-  lda #>room0
-  sta ptr + 1
-
-  ; Advance to room{A}.
-  cpx #0
-  beq +
-- clc
-  lda ptr
-  adc #size(room_t)
-  sta ptr
-  lda ptr + 1
-  adc #0
-  sta ptr + 1
-  dex
-  bne -
+  jsr room_load
 
   ; Pick a random spot on the right edge for a door:
   ; y1 + 1 + rand() % (height - 2)
@@ -691,29 +823,10 @@ room_connect_right
   rts
 
   ;; --------------------------------------------------------------------------
-  ;; Connect room A to room A+3.
+  ;; Connect room X to room X+3.
   ;; --------------------------------------------------------------------------
 room_connect_down
-  tax
-
-  ; Setup (ptr) to point to room0.
-  lda #<room0
-  sta ptr
-  lda #>room0
-  sta ptr + 1
-
-  ; Advance to room{A}.
-  cpx #0
-  beq +
-- clc
-  lda ptr
-  adc #size(room_t)
-  sta ptr
-  lda ptr + 1
-  adc #0
-  sta ptr + 1
-  dex
-  bne -
+  jsr room_load
 
   ; Pick a random spot on the bottom edge for a door:
   ; x1 + 1 + rand() % (width - 2)
