@@ -98,34 +98,17 @@ variable seed
   -1 +loop
 ;
 
-\ Creates a player.
-: create-player
+\ Creates a new (hand for a) player.
+: hand
   create
     0 ,       \ Number of cards drawn.
     12 allot  \ The drawn cards, 12 cards will certainly pass 21.
-    dup
-    ,         \ Length of name.
-    0 do      \ Name.
-      dup i + c@ c,
-    loop
-    drop
 ;
 
-\ Returns a player's cards.
+\ Returns the address of the cards in a hand.
 : cards ( addr - addr ) 1 cells + ;
 
-\ Prints a player's name.
-: .name ( addr -- )
-  cards
-  12 +
-  dup
-  1 cells +
-  swap
-  @
-  type
-;
-
-\ Stores a card in a player's hand.
+\ Stores a card in a hand.
 : store-card ( u addr -- )
   tuck  ( addr u addr )
   dup   ( addr u addr addr )
@@ -139,18 +122,21 @@ variable seed
   +!
 ;
 
-\ Sets the top of the stack up for a do/loop over a player's cards.
+\ Returns the number of cards in a hand.
+: count ( addr -- ) @ ;
+
+\ Sets the top of the stack up for a do/loop over the cards in a hand.
 : each-card ( addr -- )
   dup   ( addr addr )
   cards ( addr c-addr )
   swap  ( c-addr addr )
-  @     ( c-addr count )
+  count ( c-addr count )
   over  ( c-addr count c-addr )
   +     ( c-addr c-addr+count )
   swap  ( c-addr+count c-addr )
 ;
 
-\ Returns a player's points. TODO: Deal with ace's dual values.
+\ Returns a hand's points. TODO: Deal with ace's dual values.
 : points ( addr -- u )
   0 swap
   each-card
@@ -159,10 +145,18 @@ variable seed
   loop
 ;
 
-\ Shows the hand of cards.
+\ Returns whether a player has blackjack (an ace and a ten-value card).
+: blackjack? ( addr -- f )
+  dup  count   2 =
+  swap points 21 =
+  and
+;
+
+\ Prints a hand's points.
+: .points ( addr -- ) points . ;
+
+\ Shows a hand of cards.
 : .hand ( addr -- )
-  dup
-  ." The " .name ." 's hand:" cr
   dup
   each-card
   do
@@ -170,11 +164,10 @@ variable seed
     i c@ .card
     cr
   loop
-  ." Points: " points . cr
 ;
 
-s" player" create-player player
-s" dealer" create-player dealer
+hand player
+hand dealer
 
 \ Resets the player's and banker's points.
 : reset-points ( -- )
@@ -202,32 +195,44 @@ init
 
   ." The dealer draws one card." cr
   draw-card dealer store-card
+
+  ." The dealer's hand (" dealer .points ." points):" cr
   dealer .hand
 
   begin
+    ." Your hand (" player .points ." points):" cr
     player .hand
 
-    true
+    true  \ Assume player is done.
     player points 21 < if
       ." Another card? "
       key cr
       [char] y =
       if
         draw-card player store-card
-        false nip
+        false nip  \ Player is not done.
       then
     then
   until
 
-  ." The " player .name space
-  player points 21 > if
-    ." busts."
+  true  \ Assume the dealer gets to play.
+  player blackjack? if
+    ." You have blackjack! You win this round." cr
+    false nip  \ Dealer does not get to play.
   else
     player points 21 = if
-      ." has twenty-one."
+      ." You have twenty-one." cr
     else
-      ." stands at " player points [char] . emit
+      player points 21 > if
+        ." You busted, the dealer wins this round." cr
+        false nip  \ Dealer does not get to play.
+      else
+        ." You stay at " player .points ." points." cr
+      then
     then
   then
-  cr
+
+  if
+    ." TODO: The dealer must play now." cr
+  then
 ;
