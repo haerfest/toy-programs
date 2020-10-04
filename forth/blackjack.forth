@@ -26,7 +26,7 @@
   dup 12 = if   \ Highest value of an ace is 11.
     11 nip
   else
-    dup 8 > if  \ Joker, queen and king are 10.
+    dup 8 > if  \ Jack, queen and king are 10.
       10 nip
     else
       2 +       \ Any other card's value is its rank + 2.
@@ -169,7 +169,7 @@ variable seed
 hand player
 hand dealer
 
-\ Resets the player's and banker's points.
+\ Resets the player's and dealer's points.
 : reset-points ( -- )
   0 player !
   0 dealer !
