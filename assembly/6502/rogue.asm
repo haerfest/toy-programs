@@ -51,6 +51,7 @@ main
   jsr status_print
 - jsr map_clear
   jsr map_generate
+  jsr rooms_connect  
   jsr map_draw
   jsr keyboard_handle
   jmp -
@@ -260,12 +261,15 @@ rand
   ;; Return A % X, both single-byte values.
   ;; --------------------------------------------------------------------------
 mod
-  stx temp
+  stx _divider
   sec
-- sbc temp
+- sbc _divider
   bcs -
-  adc temp
+  adc _divider
   rts
+
+_divider
+  .byte ?
 
   ;; --------------------------------------------------------------------------
   ;; Handles... the keyboard.
@@ -391,136 +395,223 @@ map_generate
 .next
 .next
 
-  jsr rooms_connect
   rts
 
   ;; --------------------------------------------------------------------------
   ;; Randomly connect all rooms.
   ;; --------------------------------------------------------------------------
 rooms_connect
-  ; No rooms are connected yet.
+  ; No rooms are connected or in the graph yet.
   lda #0
-  ldx #0
-- sta rooms_connected,x
+  tax
+- sta room0_connected,x
+  inx
+  cpx #9 * 9
+  bne -
+
+  tax
+- sta room_in_graph,x
   inx
   cpx #9
   bne -
 
   ; Pick a random room to begin with.
-  jsr rand
   ldx #9
+  jsr rand
   jsr mod
+  sta room_src
+
+  ; This room is now in the graph.
+  tax
+  lda #1
+  sta room_in_graph,x
+  sta room_count
+
+  ; Try to find a room to connect X with.
+- ldx room_src
+  jsr room_find_candidate_to_connect
+  bit room_dst
+  bmi +
+
+  ; Mark both rooms as connected.
+  lda #1
+  ldy room_dst
+  sta (ptr),y
+  ldx room_dst
+  jsr room_neighbours_load
+  ldy room_src
+  sta (ptr),y
+
+  ; Mark the destination room as part of the graph.
+  sta room_in_graph,x
+
+  ; Connect both neighbours.
+  lda room_src
+  jsr neighbours_connect
+
+  ; All rooms connected?
+  inc room_count
+  lda room_count
+  cmp #9
+  bne -
+
+  ; TODO Add some random passages.
+  rts
+
+  ; No viable neighbour found. Start again with a random room not
+  ; yet in the graph.
++ nop
+- ldx #9
+  jsr rand
+  jsr mod
+  tax
+  lda room_in_graph,x
+  beq -
+  stx room_src
+  jmp --
+  
+  rts
+
+room_src
+  .byte ?
+room_dst
+  .byte ?
+room_count
+  .byte ?
+
+  ;; --------------------------------------------------------------------------
+  ;; Set (ptr) to room{X}_neighbours.
+  ;; --------------------------------------------------------------------------
+room_neighbours_load
+  pha
+  txa
   pha
 
-  ; Counts the number of viable candidates we considered.
-  ldx #0
-
-  ; Pick a random, unconnected neighbour.
-- ldy #0
-
-  ; Make (ptr) point to room0_neighbors.
-  lda #<room0_neighbors
+  ; Make (ptr) point to the first room's neighbours map.
+  lda #<room0_neighbours
   sta ptr
-  lda #>room0_neighbors
+  lda #>room0_neighbours
   sta ptr + 1
- 
-  ; Must be a neighbor.
-- lda (ptr),y
+
+  ; Advance to room X.
+  cpx #0
   beq +
-
-  ; Must not be connected yet.
-  lda rooms_connected,y
-  bne +
-
-  ; Found a viable room.
-  inx
-
-  ; Randomly pick this one or not. For the first room
-  ; X=1 so the mod will return 0 there and we'll start
-  ; with that one.
-  jsr rand
-  jsr mod
-  bne +
-
-  ; Pick this one.
-  stx temp
-
-  ; Update (ptr) to the next room's neighbors.
-+ lda ptr
+- lda ptr
   clc
   adc #9
   sta ptr
   lda ptr + 1
   adc #0
   sta ptr + 1
+  dex
+  bne -
 
-  ; Try the next room.
-  iny
++ pla
+  tax
+  pla
+  rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Finds another room to connect room X with. Returns the other room's
+  ;; index in room_dst, or $80 if no room was found.
+  ;; --------------------------------------------------------------------------
+room_find_candidate_to_connect
+  jsr room_neighbours_load
+  
+  ; Set the high bit of room_dst to indicate we have not found
+  ; a room yet.
+  lda #$80
+  sta room_dst
+
+  ; Will be used for rand() % X to decide whether to pick a
+  ; room or not.
+  ldx #0
+
+  ; Iterate over all rooms.
+  ldy #0
+
+  ; Must be a neighbour.
+- lda (ptr),y
+  beq +
+
+  ; Must not be in the graph yet.
+  lda room_in_graph,y
+  bne +
+
+  ; Randomly pick this one or not.
+  inx
+  jsr rand
+  jsr mod
+  bne +
+
+  ; Remember this neighbour, clearing the high bit.
+  sty room_dst
+
+  ; Check next possible neighbour of room (ptr).
++ iny
   cpy #9
   bne -
 
-  ; Did we consider any viable rooms?
-  cpx #0
-  bne +
-
-  ; No, try again starting with a new random room, not yet connected.
-  pla
-- ldx #9
-  jsr rand
-  jsr mod
-  tax
-  lda rooms_connected,x
-  bne -
-  pha
-  jmp ---
-
-  ; Yes, connect both rooms.
-+ pla
-  ldx temp
-  jsr rooms_connect
-
-  
   rts
 
-room0_neighbors
+room0_neighbours
   .byte 0, 1, 0
   .byte 1, 0, 0
   .byte 0, 0, 0
-room1_neighbors
+room1_neighbours
   .byte 1, 0, 1
   .byte 0, 1, 0
   .byte 0, 0, 0
-room2_neighbors
+room2_neighbours
   .byte 0, 1, 0
   .byte 0, 0, 1
   .byte 0, 0, 0
-room3_neighbors
+room3_neighbours
   .byte 1, 0, 0
   .byte 0, 1, 0
   .byte 1, 0, 0
-room4_neighbors
+room4_neighbours
   .byte 0, 1, 0
   .byte 1, 0, 1
   .byte 0, 1, 0
-room5_neighbors
+room5_neighbours
   .byte 0, 0, 1
   .byte 0, 1, 0
   .byte 0, 0, 1
-room6_neighbors
+room6_neighbours
   .byte 0, 0, 0
   .byte 1, 0, 0
   .byte 0, 1, 0
-room7_neighbors
+room7_neighbours
   .byte 0, 0, 0
   .byte 0, 1, 0
   .byte 1, 0, 1
-room8_neighbors
+room8_neighbours
   .byte 0, 0, 0
   .byte 0, 0, 1
   .byte 0, 1, 0
 
-rooms_connected
-  .byte 0 x 9
+room0_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room1_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room2_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room3_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room4_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room5_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room6_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room7_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+room8_connected
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+room_in_graph
+  .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
 
   ;; --------------------------------------------------------------------------
   ;; Set (ptr) to room{X}.
@@ -748,6 +839,35 @@ room_row_draw
   sta ptr2 + 1
 
   rts
+
+  ;; --------------------------------------------------------------------------
+  ;; Connects neighbours in room_src and room_dst.
+  ;; --------------------------------------------------------------------------
+neighbours_connect
+  ; Which direction to connect both neighbours?
+  sec
+  lda room_dst
+  sbc room_src
+
+  ; Assume the first room is the source room. 
+  ldx room_src
+
+  cmp #1
+  bne +
+  jmp room_connect_right
+
++ cmp #3
+  bne +
+  jmp room_connect_down
+
+  ; The earliest room is the destination room.
++ ldx room_dst
+
+  cmp #-1
+  bne +
+  jmp room_connect_right
+
++ jmp room_connect_down
 
   ;; --------------------------------------------------------------------------
   ;; Connect room X to room X+1.
