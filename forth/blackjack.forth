@@ -125,24 +125,99 @@ variable seed
 \ Returns the number of cards in a hand.
 : count ( addr -- ) @ ;
 
-\ Sets the top of the stack up for a do/loop over the cards in a hand.
+\ Sets the top of the stack up for a do/loop over the cards in a hand,
+\ starting with the card at addr and u cards remaining.
 : each-card ( addr -- )
-  dup   ( addr addr )
-  cards ( addr c-addr )
-  swap  ( c-addr addr )
-  count ( c-addr count )
-  over  ( c-addr count c-addr )
-  +     ( c-addr c-addr+count )
-  swap  ( c-addr+count c-addr )
+  dup count  ( addr count )
+  swap       ( count addr )
+  cell+      ( count c-addr )
+  swap       ( c-addr count )
+  over       ( c-addr count c-addr )
+  +          ( c-addr c-addr+count )
+  swap       ( c-addr+count c-addr )
+;
+
+\ Given two point counts u1 and u2, select the one closest to 21,
+\ but not going over.
+: best-points ( u1 u2 -- u3 )
+  over 21 <=  ( u1 u2 u1<=21 )
+  over 21 <=  ( u1 u2 u1<=21 u2<=21 )
+  and         ( u1 u2 f )
+  if
+    max       ( u3 )
+  else
+    min       ( u3 )
+  then
+;
+
+\ Given the address of a range of cards to consider, and the points
+\ u1 so far, examine each card in turn and calculate the total
+\ number of points. When encountering an ace, try both its values
+\ and figure out which gets us closest to twenty-one without going
+\ over.
+: (points)  ( high-addr low-addr u1 -- high-addr low-addr u2 )
+  -rot      ( u high-addr low-addr )
+  2dup      ( u high-addr low-addr high-addr low-addr )
+  =         ( u high-addr low-addr f )
+  if        ( u high-addr low-addr )
+    \ All cards added up, we're done.
+    rot     ( high-addr low-addr u )
+  else
+    \ At least one more card to add up.
+    rot           ( high-addr low-addr u )
+    swap          ( high-addr u low-addr )
+    dup           ( high-addr u low-addr low-addr )
+    c@ value      ( high-addr u low-addr value )
+    dup 11 < if   ( high-addr u low-addr value )
+      \ Not an ace, add up regularly.
+      rot         ( high-addr low-addr value u )
+      +           ( high-addr low-addr u+value )
+      swap        ( high-addr u+value low-addr )
+      dup         ( high-addr u+value low-addr low-addr )
+      >r          ( high-addr u+value low-addr )
+      1+          ( high-addr u+value low-addr+1 )
+      swap        ( high-addr low-addr+1 u+value )
+      recurse     ( high-addr low-addr+1 u' )
+      nip         ( high-addr u' )
+      r>          ( high-addr u' low-addr )
+      swap        ( high-addr low-addr u' )
+    else          ( high-addr u low-addr 11 )
+      \ An ace, try values 11 and 1.
+      drop        ( high-addr u low-addr )
+      dup         ( high-addr u low-addr low-addr )
+      >r          ( high-addr u low-addr )
+      1+          ( high-addr u low-addr+1 )
+      swap        ( high-addr low-addr+1 u )
+      dup         ( high-addr low-addr+1 u u )
+      >r          ( high-addr low-addr+1 u )
+      1+          ( high-addr low-addr+1 u+1 )
+      recurse     ( high-addr low-addr+1 u1 )
+      -rot        ( u1 high-addr low-addr+1 )
+      r>          ( u1 high-addr low-addr+1 u )
+      11 +        ( u1 high-addr low-addr+1 u+11 )
+      recurse     ( u1 high-addr low-addr+1 u11 )
+      >r          ( u1 high-addr low-addr+1 )
+      rot         ( high-addr low-addr+1 u1 )
+      r>          ( high-addr low-addr+1 u1 u11 )
+      best-points ( high-addr low-addr+1 u )
+      nip         ( high-addr u )
+      r>          ( high-addr u low-addr )
+      swap        ( high-addr low-addr u )
+    then
+  then
 ;
 
 \ Returns a hand's points. TODO: Deal with ace's dual values.
 : points ( addr -- u )
-  0 swap
-  each-card
-  do
-    i c@ value +
-  loop
+  dup count ( addr count )
+  swap      ( count addr )
+  cell+     ( count low-addr )
+  swap      ( low-addr count )
+  over      ( low-addr count low-addr )
+  +         ( low-addr high-addr )
+  swap 0    ( high-addr low-addr 0 )
+  (points)  ( high-addr low-addr u )
+  nip nip   ( u )
 ;
 
 \ Returns whether a player has blackjack (an ace and a ten-value card).
@@ -157,7 +232,6 @@ variable seed
 
 \ Shows a hand of cards.
 : .hand ( addr -- )
-  dup
   each-card
   do
     2 spaces
