@@ -93,6 +93,7 @@ variable seed
 
 \ Shuffles the deck of cards.
 : shuffle-deck ( -- )
+  ." Shuffling the deck..." cr
   1 51 do
     i dup 1+ choose swap-cards
   -1 +loop
@@ -279,7 +280,7 @@ hand dealer
   repeat
 
   \ Print the dealer's final points.
-  dealer busted?     if ." The dealer busted."         cr else
+  dealer busted?     if ." The dealer busts."          cr else
   dealer blackjack?  if ." The dealer has blackjack."  cr else
   dealer points 21 = if ." The dealer has twenty-one." cr else
                         ." The dealer stays at " dealer .points ." points." cr
@@ -314,7 +315,7 @@ hand dealer
   until
 
   \ Print the player's final points.
-  player busted?     if ." You busted."          cr else
+  player busted?     if ." You bust."            cr else
   player blackjack?  if ." You have blackjack."  cr else
   player points 21 = if ." You have twenty-one." cr else
                         ." You stay at " player .points ." points." cr
@@ -341,8 +342,7 @@ hand dealer
 ;
 
 \ Plays a game of blackjack.
-: blackjack ( -- )
-  cr
+: play-game ( -- )
   new-game
   deal-initial-cards
   player-plays
@@ -352,6 +352,17 @@ hand dealer
   then then
 
   evaluate-round
+;
+
+: blackjack ( -- )
+  cr
+  begin
+    play-game
+
+    cr
+    ." Another game? "
+    key cr [char] y = 0=
+  until
 ;
 
 \ Initializes the game.
