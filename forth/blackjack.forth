@@ -207,7 +207,7 @@ variable seed
   then
 ;
 
-\ Returns a hand's points. TODO: Deal with ace's dual values.
+\ Returns a hand's points.
 : points ( addr -- u )
   dup count ( addr count )
   swap      ( count addr )
@@ -227,6 +227,9 @@ variable seed
   and
 ;
 
+\ Returns whether a player busted, i.e. passed twenty-one.
+: busted? ( addr -- f ) points 21 > ;
+
 \ Prints a hand's points.
 : .points ( addr -- ) points . ;
 
@@ -243,26 +246,15 @@ variable seed
 hand player
 hand dealer
 
-\ Resets the player's and dealer's points.
-: reset-points ( -- )
+\ Prepares a new game.
+: new-game ( -- )
+  shuffle-deck
+  52 remaining !
   0 player !
   0 dealer !
 ;
 
-\ Initializes the game.
-: init ( -- )
-  here seed !
-  prepare-deck
-;
-
-init
-
-\ Plays a (simplified) game of blackjack.
-: blackjack ( -- )
-  cr
-  shuffle-deck
-  reset-points
-
+: deal-initial-cards ( -- )
   ." The dealer deals you the two top cards." cr
   draw-card player store-card
   draw-card player store-card
@@ -272,7 +264,39 @@ init
 
   ." The dealer's hand (" dealer .points ." points):" cr
   dealer .hand
+;
 
+\ Plays for the dealer.
+: dealer-plays ( -- )
+  \ The dealer must stay once at 17 or higher.
+  begin
+    ." The dealer's hand (" dealer .points ." points):" cr
+    dealer .hand
+    dealer points 17 <
+  while
+    ." The dealer draws a card." cr
+    draw-card dealer store-card
+  repeat
+
+  \ Print the dealer's final points.
+  dealer busted?     if ." The dealer busted."         cr else
+  dealer blackjack?  if ." The dealer has blackjack."  cr else
+  dealer points 21 = if ." The dealer has twenty-one." cr else
+                        ." The dealer stays at " dealer .points ." points." cr
+  then then then
+;
+
+\ Lets the dealer attempt to reach a stand-off.
+: dealer-try-stand-off ( -- )
+  ." The dealer is given the chance to reach a stand-off." cr
+  ." The dealer draws a card." cr
+  draw-card dealer store-card
+  ." The dealer's hand (" dealer .points ." points):" cr
+  dealer .hand
+;
+
+\ Let's the player play.
+: player-plays ( -- )
   begin
     ." Your hand (" player .points ." points):" cr
     player .hand
@@ -289,24 +313,51 @@ init
     then
   until
 
-  true  \ Assume the dealer gets to play.
-  player blackjack? if
-    ." You have blackjack! You win this round." cr
-    false nip  \ Dealer does not get to play.
-  else
-    player points 21 = if
-      ." You have twenty-one." cr
-    else
-      player points 21 > if
-        ." You busted, the dealer wins this round." cr
-        false nip  \ Dealer does not get to play.
-      else
-        ." You stay at " player .points ." points." cr
-      then
-    then
-  then
-
-  if
-    ." TODO: The dealer must play now." cr
-  then
+  \ Print the player's final points.
+  player busted?     if ." You busted."          cr else
+  player blackjack?  if ." You have blackjack."  cr else
+  player points 21 = if ." You have twenty-one." cr else
+                        ." You stay at " player .points ." points." cr
+  then then then
 ;
+
+\ Evaluates a finished round.
+: evaluate-round ( -- )
+  player busted?                          if ." The dealer wins this round." cr else
+  player blackjack? dealer blackjack? and if ." It's a stand-off."           cr else
+  player blackjack?                       if ." You win this round."         cr else
+  dealer busted?                          if ." You win this round."         cr else
+  player points dealer points =           if ." It's a push."                cr else
+  player points dealer points >           if ." You win this round."         cr else
+                                             ." The dealer wins this round." cr
+  then then then then then then
+;
+
+: ace-or-ten-value? ( addr -- )
+  points
+  dup  10 =
+  swap 11 =
+  or
+;
+
+\ Plays a game of blackjack.
+: blackjack ( -- )
+  cr
+  new-game
+  deal-initial-cards
+  player-plays
+
+  player blackjack? dealer ace-or-ten-value? and if dealer-try-stand-off else
+  player blackjack? player busted? or 0=         if dealer-plays
+  then then
+
+  evaluate-round
+;
+
+\ Initializes the game.
+: init-blackjack ( -- )
+  utime drop seed !
+  prepare-deck
+;
+
+init-blackjack
