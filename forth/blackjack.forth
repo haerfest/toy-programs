@@ -247,6 +247,8 @@ variable seed
 hand player
 hand dealer
 
+variable chips
+
 \ Prepares a new game.
 : new-game ( -- )
   shuffle-deck
@@ -322,15 +324,16 @@ hand dealer
   then then then
 ;
 
-\ Evaluates a finished round.
-: evaluate-round ( -- )
-  player busted?                          if ." The dealer wins this round." cr else
-  player blackjack? dealer blackjack? and if ." It's a stand-off."           cr else
-  player blackjack?                       if ." You win this round."         cr else
-  dealer busted?                          if ." You win this round."         cr else
-  player points dealer points =           if ." It's a push."                cr else
-  player points dealer points >           if ." You win this round."         cr else
-                                             ." The dealer wins this round." cr
+\ Evaluates a finished round. The player's bet is on the stack. Returns
+\ what the player wins.
+: evaluate-round ( u -- u )
+  player busted?                          if ." The dealer wins this round." drop 0   cr else
+  player blackjack? dealer blackjack? and if ." It's a stand-off."                    cr else
+  player blackjack?                       if ." You win this round."         25 10 */ cr else
+  dealer busted?                          if ." You win this round."         2 *      cr else
+  player points dealer points =           if ." It's a push."                         cr else
+  player points dealer points >           if ." You win this round."         2 *      cr else
+                                             ." The dealer wins this round." drop 0   cr
   then then then then then then
 ;
 
@@ -342,7 +345,8 @@ hand dealer
 ;
 
 \ Plays a game of blackjack.
-: play-game ( -- )
+: play-game ( u -- )
+  chips @ over - chips !
   new-game
   deal-initial-cards
   player-plays
@@ -352,23 +356,57 @@ hand dealer
   then then
 
   evaluate-round
+  chips +!
+;
+
+\ Asks the user to enter a bet.
+: enter-bet ( -- false | u true )
+  cr
+  ." You have " chips ? ." chips. " 
+  chips @ if
+     begin
+       ." Your bet? (0 to quit) "
+       tib 3 accept cr  ( u )
+       dup if
+         >r 0. tib r> >number   ( d addr u )
+         if
+           \ Entered something invalid.
+           ." That is not a valid bet." cr
+           drop 2drop
+           false
+         else
+           2drop  \ Drop address and high byte of 0.
+           dup 0 chips @ 1+ within if
+             true
+           else  \ Entered something outside [0, chips] range.
+             ." You cannot bet that amount." cr
+             false nip
+           then
+         then
+       else
+         \ Nothing entered.
+         false nip
+       then
+     until
+  then
+
+  \ If the bet is positive, indicate by pushing true.
+  dup if true then
 ;
 
 : blackjack ( -- )
-  cr
   begin
+    enter-bet
+  while
     play-game
-
-    cr
-    ." Another game? "
-    key cr [char] y = 0=
-  until
+  repeat
 ;
 
 \ Initializes the game.
 : init-blackjack ( -- )
   utime drop seed !
   prepare-deck
+  100 chips !
 ;
 
 init-blackjack
