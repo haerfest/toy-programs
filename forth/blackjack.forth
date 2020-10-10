@@ -360,9 +360,9 @@ variable chips
 ;
 
 \ Asks the user to enter a bet.
-: enter-bet ( -- false | u true )
+: enter-bet ( -- 0 | false | u true )
   cr
-  ." You have " chips ? ." chips. " 
+  ." You have " chips ? ." chips left. " 
   chips @ if
      begin
        ." Your bet? (0 to quit) "
@@ -388,6 +388,9 @@ variable chips
          false nip
        then
      until
+  else
+    \ No more chips left.
+    false
   then
 
   \ If the bet is positive, indicate by pushing true.
