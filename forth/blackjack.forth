@@ -107,10 +107,10 @@ variable seed
 ;
 
 \ Returns the address of the cards in a hand.
-: cards ( addr - addr ) 1 cells + ;
+: cards ( hand - addr ) 1 cells + ;
 
 \ Stores a card in a hand.
-: store-card ( u addr -- )
+: store-card ( u hand -- )
   tuck  ( addr u addr )
   dup   ( addr u addr addr )
   cards ( addr u addr c-addr )
@@ -124,11 +124,11 @@ variable seed
 ;
 
 \ Returns the number of cards in a hand.
-: count ( addr -- ) @ ;
+: count ( hand -- ) @ ;
 
 \ Sets the top of the stack up for a do/loop over the cards in a hand,
 \ starting with the card at addr and u cards remaining.
-: each-card ( addr -- )
+: each-card ( hand -- high low )
   dup count  ( addr count )
   swap       ( count addr )
   cell+      ( count c-addr )
@@ -209,7 +209,7 @@ variable seed
 ;
 
 \ Returns a hand's points.
-: points ( addr -- u )
+: points ( hand -- u )
   dup count ( addr count )
   swap      ( count addr )
   cell+     ( count low-addr )
@@ -222,20 +222,20 @@ variable seed
 ;
 
 \ Returns whether a player has blackjack (an ace and a ten-value card).
-: blackjack? ( addr -- f )
+: blackjack? ( hand -- f )
   dup  count   2 =
   swap points 21 =
   and
 ;
 
 \ Returns whether a player busted, i.e. passed twenty-one.
-: busted? ( addr -- f ) points 21 > ;
+: busted? ( hand -- f ) points 21 > ;
 
 \ Prints a hand's points.
-: .points ( addr -- ) points . ;
+: .points ( hand -- ) points . ;
 
 \ Shows a hand of cards.
-: .hand ( addr -- )
+: .hand ( hand -- )
   each-card
   do
     2 spaces
@@ -245,15 +245,25 @@ variable seed
 ;
 
 hand player
+hand player-secondary
 hand dealer
 
+\ Whether the player plays a secondary hand.
+variable split?
+
+\ The player's chips.
 variable chips
+
+\ The player's current bet.
+variable bet
 
 \ Prepares a new game.
 : new-game ( -- )
   shuffle-deck
   52 remaining !
+  false split? !
   0 player !
+  0 player-secondary !
   0 dealer !
 ;
 
@@ -299,70 +309,103 @@ variable chips
 ;
 
 \ Let's the player play.
-: player-plays ( -- )
+: player-plays ( hand -- )
   begin
-    ." Your hand (" player .points ." points):" cr
-    player .hand
+    ." Your hand (" dup .points ." points):" cr
+    dup .hand
 
-    true  \ Assume player is done.
-    player points 21 < if
+    dup points 21 < if
       ." Another card? "
       key cr
       [char] y =
       if
-        draw-card player store-card
-        false nip  \ Player is not done.
+        draw-card over store-card
+        false      \ Player is not done.
+      else
+        true       \ Player does not want another card.
       then
+    else
+      true         \ Player is not offered another card.
     then
   until
 
   \ Print the player's final points.
-  player busted?     if ." You bust."            cr else
-  player blackjack?  if ." You have blackjack."  cr else
-  player points 21 = if ." You have twenty-one." cr else
-                        ." You stay at " player .points ." points." cr
-  then then then
+  dup busted?     if ." You bust."            cr else
+  dup blackjack?  if ." You have blackjack."  cr else
+  dup points 21 = if ." You have twenty-one." cr else
+                     ." You stay at " dup .points ." points." cr
+                  then then then
+  drop
 ;
 
-\ Evaluates a finished round. The player's bet is on the stack. Returns
-\ what the player wins.
-: evaluate-round ( u -- u )
-  player busted?                          if ." The dealer wins this round." drop 0   cr else
-  player blackjack? dealer blackjack? and if ." It's a stand-off."                    cr else
-  player blackjack?                       if ." You win this round."         25 10 */ cr else
-  dealer busted?                          if ." You win this round."         2 *      cr else
-  player points dealer points =           if ." It's a push."                         cr else
-  player points dealer points >           if ." You win this round."         2 *      cr else
-                                             ." The dealer wins this round." drop 0   cr
-  then then then then then then
+\ Evaluates a finished round based on the player's bet. Returns the chips that
+\ are returned to the player.
+: evaluate-round ( -- u )
+  player busted?                          if ." The dealer wins this round." cr 0              else
+  player blackjack? dealer blackjack? and if ." It's a stand-off."           cr bet @          else
+  player blackjack?                       if ." You win this round."         cr bet @ 25 10 */ else
+  dealer busted?                          if ." You win this round."         cr bet @ 2 *      else
+  player points dealer points =           if ." It's a push."                cr bet @          else
+  player points dealer points >           if ." You win this round."         cr bet @ 2 *      else
+                                             ." The dealer wins this round." cr 0
+                                          then then then then then then
 ;
 
-: ace-or-ten-value? ( addr -- )
+: ace-or-ten-value? ( hand -- f )
   points
   dup  10 =
   swap 11 =
   or
 ;
 
+\ Returns whether a player has two cards of equal rank.
+: two-equal-rank-cards? ( hand -- f )
+  dup count 2 = if
+    cards dup c@ rank
+    swap  1+  c@ rank
+    =
+  else
+    false nip
+  then
+;
+
+\ Offers the player the option to split has hand.
+: offer-player-split ( -- )
+  ." I would offer you to split your hand if that were implemented." cr
+  false split? !
+;
+
 \ Plays a game of blackjack.
-: play-game ( u -- )
-  chips @ over - chips !
+: play-game ( -- )
+  chips @ bet @ - chips !
   new-game
   deal-initial-cards
-  player-plays
+  player two-equal-rank-cards? if
+    offer-player-split
+  then
+  player player-plays
+  split? @ if
+    ." Switching to your secondary hand." cr
+    player-secondary player-plays
+
+    \ Ensure we end up with the best hand in 'player'.
+    player-secondary busted? 0=
+    player-secondary points player points > and if
+      player-secondary player 1 cells 12 + move
+    then
+  then
 
   player blackjack? dealer ace-or-ten-value? and if dealer-try-stand-off else
   player blackjack? player busted? or 0=         if dealer-plays
-  then then
+                                                 then then
 
-  evaluate-round
-  chips +!
+  evaluate-round chips +!
 ;
 
-\ Asks the user to enter a bet.
-: enter-bet ( -- 0 | false | u true )
-  cr
-  ." You have " chips ? ." chips left. " 
+\ Asks the user to enter a bet and stores it in BET.
+: enter-bet ( -- )
+  0 bet !
+  cr ." You have " chips ? ." chips. " 
   chips @ if
      begin
        ." Your bet? (0 to quit) "
@@ -377,6 +420,7 @@ variable chips
          else
            2drop  \ Drop address and high byte of 0.
            dup 0 chips @ 1+ within if
+             bet !
              true
            else  \ Entered something outside [0, chips] range.
              ." You cannot bet that amount." cr
@@ -388,21 +432,17 @@ variable chips
          false nip
        then
      until
-  else
-    \ No more chips left.
-    false
   then
-
-  \ If the bet is positive, indicate by pushing true.
-  dup if true then
 ;
 
 : blackjack ( -- )
   begin
     enter-bet
+    bet @
   while
     play-game
   repeat
+  ." Thank you for playing blackjack, please come again." cr
 ;
 
 \ Initializes the game.
